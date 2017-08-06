@@ -2,4 +2,5 @@
 
 (packages->manifest
  (map (compose list specification->package+output)
-      (list "snakemake")))
+      (list "snakemake"
+            "wget")))
