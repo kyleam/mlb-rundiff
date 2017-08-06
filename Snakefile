@@ -8,3 +8,8 @@ rule download_column_header:
     shell: "cd data && "
            "wget https://raw.githubusercontent.com/"
            "maxtoki/baseball_R/master/data/game_log_header.csv"
+
+rule download_:
+    output: "data/{name}.zip"
+    shell: "cd data && "
+           "wget http://www.retrosheet.org/gamelogs/{wildcards.name}.zip"
