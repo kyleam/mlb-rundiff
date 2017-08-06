@@ -2,5 +2,8 @@
 
 (packages->manifest
  (map (compose list specification->package+output)
-      (list "snakemake"
+      (list "coreutils"
+            "dos2unix"
+            "snakemake"
+            "unzip"
             "wget")))
