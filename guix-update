@@ -1,0 +1,9 @@
+#!/usr/bin/sh
+
+if [ -d .guix/packages ]; then
+    GUIX_PACKAGE_PATH=$PWD/.guix/packages
+else
+    unset GUIX_PACKAGE_PATH
+fi
+
+guix package --profile=$PWD/.guix/profile --manifest=.guix/manifest.scm
