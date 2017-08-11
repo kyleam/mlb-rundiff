@@ -1,3 +1,4 @@
 /.snakemake
 /.guix/profile*
+
 /data/game-log-*.txt
