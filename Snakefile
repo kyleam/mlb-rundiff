@@ -34,13 +34,13 @@ rule unzip_gl2010_16:
 
 rule convert_and_rename_log_:
     input: "data/GL{year}.TXT"
-    output: "data/game-log-{year}.txt"
+    output: "data/game-log-{year}.csv"
     shell: "dos2unix -n {input} {output}"
 
 
 ### Calculation of lag
 
 rule lag_:
-    input: "lag/lag.py", "data/game-log-{year}.txt"
+    input: "lag/lag.py", "data/game-log-{year}.csv"
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"

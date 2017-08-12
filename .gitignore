@@ -3,5 +3,7 @@
 /.cache
 __pycache__
 
-/data/game-log-*.txt
-/lag/[0-9]*.csv
+*.dat
+*.csv
+
+!/data/game_log_header.csv
