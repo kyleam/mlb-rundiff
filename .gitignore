@@ -2,6 +2,7 @@
 /.guix/profile*
 /.cache
 __pycache__
+.Rhistory
 
 *.dat
 *.csv
