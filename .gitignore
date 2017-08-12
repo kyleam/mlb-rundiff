@@ -1,4 +1,7 @@
 /.snakemake
 /.guix/profile*
+/.cache
+__pycache__
 
 /data/game-log-*.txt
+/lag/[0-9]*.csv
