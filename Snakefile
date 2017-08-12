@@ -44,3 +44,9 @@ rule lag_:
     input: "lag/lag.py", "data/game-log-{year}.csv"
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"
+
+rule lag_combine:
+    input: expand("lag/{year}.csv", year=range(1992, 2012))
+    output: "lag/lag-combined-1992_2011.csv"
+    shell: "head -n1  {input[0]} > {output} &&"
+           "for f in {input}; do sed 1d $f >> {output}; done"

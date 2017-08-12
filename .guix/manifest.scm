@@ -8,6 +8,7 @@
             "python-docopt"
             "python-pytest"
             "python-wrapper"
+            "sed"
             "snakemake"
             "unzip"
             "wget")))
