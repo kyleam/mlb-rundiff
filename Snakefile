@@ -53,6 +53,32 @@ rule lag_combine:
     shell: "head -n1  {input[0]} > {output} &&"
            "for f in {input}; do sed 1d $f >> {output}; done"
 
+rule lag_download_song2017how_supp_table_:
+    output: "lag/pnas.1608847114.st{id,(01|02)}.docx"
+    shell: "cd lag && "
+           "wget http://www.pnas.org/content/suppl/2017/01/18/"
+           "1608847114.DCSupplemental/pnas.1608847114.st{wildcards.id}.docx"
+
+rule lag_convert_song2017how_table_s1_to_md:
+    input: "lag/pnas.1608847114.st01.docx"
+    output: "rmd/_song2017how-table-s1.md"
+    shell: "pandoc -f docx -t markdown {input} |"
+           "sed 's/West    /**West**/' | sed 's/East    /**East**/' | "
+           "awk '/^$/ {{exit}} {{print}}' > {output}"
+
+rule lag_convert_song2017how_table_s2_to_text:
+    input: "lag/pnas.1608847114.st02.docx"
+    output: temp("lag/song2017how-table-s2.dat")
+    shell: "pandoc -f docx -t plain {input} > {output}"
+
+rule lag_convert_song2017how_table_s2_to_csv:
+    input: "lag/song2017how-table-s2.dat"
+    output: "lag/song2017how-table-s2.csv"
+    shell: "printf 'date,away,home,away_lag,home_lag\n' > {output}.tmp && "
+           "awk '/^ +[0-9]/ {{print}}' {input} | "
+           "sed 's/^ \+//g' | sed 's/ \+/,/g' >> {output}.tmp && "
+           "mv {output}.tmp {output}"
+
 
 ### Rmarkdown
 

@@ -4,6 +4,7 @@
  (map (compose list specification->package+output)
       (list "coreutils"
             "dos2unix"
+            "gawk"
             "python"
             "python-docopt"
             "python-pytest"

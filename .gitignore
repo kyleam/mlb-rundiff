@@ -11,3 +11,4 @@ __pycache__
 *.csv
 
 !/gamelogs/game_log_header.csv
+/rmd/_song2017how-table-s1.md
