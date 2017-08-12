@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+
+./guix-cmd py.test
