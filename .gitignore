@@ -6,4 +6,4 @@ __pycache__
 *.dat
 *.csv
 
-!/data/game_log_header.csv
+!/gamelogs/game_log_header.csv
