@@ -4,8 +4,9 @@
 usage: calculate_lag.py [FILE ...]
        calculate_lag.py [-h | --help]
 
-FILE should be the name of an uncompressed retrolog file for a single
-year.  If FILE is not specified, stdin is consumed instead.
+FILE should be the name of an uncompressed retrosheet game log file
+for a single year.  If FILE is not specified, stdin is consumed
+instead.
 """
 
 from collections import namedtuple
@@ -18,7 +19,7 @@ Game = namedtuple("Game",
 
 
 def parse_log(rows):
-    """Parse retrolog rows, yielding `lag.Game` namedtuples.
+    """Parse retrosheet game log rows, yielding `lag.Game` namedtuples.
     """
     for row in rows:
         yield Game(date=datetime.strptime(row[0], "%Y%m%d"),
