@@ -1,6 +1,9 @@
 /.snakemake
 /.guix/profile*
 /.cache
+/site
+/rmd/*_files
+/rmd/*_cache
 __pycache__
 .Rhistory
 

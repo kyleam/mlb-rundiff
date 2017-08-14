@@ -1,0 +1,17 @@
+body {
+    font-size: 18px;
+}
+
+pre .keyword {
+    color: #ff3030;
+    font-weight: bold;
+}
+
+pre .string {
+    color: #ba2727;
+}
+
+
+pre .number {
+    color: #990073;
+}

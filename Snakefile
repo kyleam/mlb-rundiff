@@ -1,3 +1,4 @@
+from glob import glob
 
 
 ### Data download
@@ -51,3 +52,16 @@ rule lag_combine:
     output: "lag/lag-combined-1992_2011.csv"
     shell: "head -n1  {input[0]} > {output} &&"
            "for f in {input}; do sed 1d $f >> {output}; done"
+
+
+### Rmarkdown
+
+rmd_site_input = []
+
+rule rmd_render_site:
+    input: "rmd/_site.yml", "rmd/styles.css", "rmd/setup.R",
+           rmd_site_input, glob("rmd/*.Rmd"), glob("rmd/*.md")
+    output: "site/index.html"
+    shell: "cd rmd && "
+           "Rscript --vanilla --slave -e "
+           "'require(rmarkdown); rmarkdown::render_site()'"

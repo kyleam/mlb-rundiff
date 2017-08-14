@@ -1,0 +1,10 @@
+name: "mlb-jet-lag"
+output_dir: "../site"
+output:
+  html_document:
+    theme: cosmo
+    highlight: default
+    css: styles.css
+    toc: true
+    # toc_float: true
+exclude: ["*~"]
