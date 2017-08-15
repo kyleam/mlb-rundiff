@@ -41,7 +41,7 @@ rule gamelogs_convert_and_rename_:
 
 ### Calculation of lag
 
-rule lag_:
+rule lag_calculate:
     input: "lag/lag.py", "gamelogs/{year}.csv"
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"
