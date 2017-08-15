@@ -82,7 +82,12 @@ rule lag_convert_song2017how_table_s2_to_csv:
 
 ### Rmarkdown
 
-rmd_site_input = []
+rmd_site_input = [
+    "lag/2011.csv",
+    "lag/lag-combined-1992_2011.csv",
+    "lag/song2017how-table-s2.csv",
+    "rmd/_song2017how-table-s1.md",
+]
 
 rule rmd_render_site:
     input: "rmd/_site.yml", "rmd/styles.css", "rmd/setup.R",

@@ -1,0 +1,310 @@
+---
+title: "Jet lag calculation checks"
+---
+
+```{r setup, include = FALSE}
+source("setup.R")
+
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(lubridate)
+library(readr)
+library(stringr)
+library(tidyr)
+
+theme_set(theme_minimal())
+```
+
+Song, Severini, and Allada ("SSA") [estimated the jet lag] of teams
+using [Retrosheet] game logs for MLB games from 1992 through 2011.
+Starting from the game logs and working from their criteria, I've
+attempted to generate the same jet lag data set.  To convince myself
+that I've more or less done so, I'll (1) make a few summary plots to
+see if things look reasonable and (2) crosscheck my overall numbers
+with the information available in SSA's supplemental tables.
+
+[estimated the jet lag]: http://dx.doi.org/10.1073/pnas.1608847114
+[Retrosheet]: http://www.retrosheet.org/gamelogs/index.html
+
+## A few sanity checks
+
+### Distribution of games across teams each season
+
+The file "lag-combined-1992_2011.csv" should represent every game
+between 1992 and 2011 with two lines, one for each team.
+
+```{r lag, cache.extra = file.info("../lag/lag-combined-1992_2011.csv")}
+(lag <- read_csv("../lag/lag-combined-1992_2011.csv") %>%
+     mutate(date = ymd(date),
+            year = year(date),
+            game_tz = factor(game_tz,
+                             levels = c("ET", "CT", "MT", "PT"))))
+```
+
+Let's tally the number games per team in each season.
+
+```{r game_plot, dependson = "lag", fig.asp = 0.8}
+lag %>%
+    group_by(year, team) %>%
+    summarise(games = n()) %>%
+    mutate(normal_season = abs(games - 162) < 4) %>%
+    ggplot(aes(year, fct_rev(team))) +
+    geom_point(aes(color = normal_season, size = games), shape = 21) +
+    ylab("team") +
+    scale_size(range = c(1, 3.5)) +
+    scale_color_manual(values = c("#000000", "#a9a9a9"), guide = FALSE) +
+    theme(panel.grid = element_blank())
+```
+
+Nothing looks off here after accounting for a few historical events.
+Most years are within 3 games of 162 (gray), with the exception of the
+1994 and 1995 seasons.  A [strike] disrupted play during these two
+years.  In addition to the 1994 and 1995 columns, the other thing that
+stands out in the plot above is the presence of incomplete rows.  Some
+of these represent births (ARI, COL, FLO, TBA), while the remaining
+ones can be paired together to reveal reincarnations (CAL &#8594; ANA,
+MON &#8594; WAS).
+
+[strike]: https://en.wikipedia.org/wiki/1994%E2%80%9395_Major_League_Baseball_strike
+
+### Do the lag values look reasonable?
+
+The values of interest in this data set are the lag values.  To make
+it easier to visualize these, I'm going to look at the lags of four
+teams---one for each time zone---in a single season.
+
+```{r lag2011, dependson = "lag"}
+selteams <- c("NYA", "SLN", "COL", "SEA")
+
+lag2011 <- lag  %>%
+    filter(year == "2011", team %in% selteams) %>%
+    mutate(team = factor(team, levels = selteams))
+```
+
+Here are the lags for these teams across the 2011 season.
+
+```{r lag-plot, dependson = "lag2011", out.width = "95%", fig.width = 8.14}
+lag2011 %>%
+    ggplot(aes(date, lag)) +
+    geom_hline(yintercept = 0, color = "red", alpha = 0.2, size = 1.25) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 0.7) +
+    scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+    scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
+    theme(panel.grid.minor.y = element_blank(),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.x = element_blank()) +
+    facet_wrap(~ team, ncol = 1)
+```
+
+This looks like I'd expect:
+
+  * A team spends most of their time at a lag of zero.
+
+  * A lag never goes over a magnitude of three, which is good since
+    that should be impossible because ET is coded as 0 and PT at the
+    other end is coded as 3.
+
+  * Lags decrease by one with consecutive games.
+
+To assess the time zone shifts in more detail, we can color the points
+by time zone and add a grid to more clearly mark individual days.
+
+```{r lag-plot-color, dependson = "lag2011", out.width = "95%", fig.width = 8.14}
+colors <- c("#00688b", "#8b0000", "#9400d3", "#2e8b57")
+
+## Create data frame for labeling facets.
+zones <- data.frame(date = rep(ymd("20110401"), 4),
+                    lag = rep(2.3, 4),
+                    team = levels(lag2011$team),
+                    game_tz = levels(lag2011$game_tz),
+                    label = levels(lag2011$game_tz))
+
+lag2011 %>%
+    ggplot(aes(date, lag)) +
+    geom_line(alpha = 0.6) +
+    geom_point(aes(color = game_tz), size = 0.7) +
+    geom_label(data = zones, aes(label = label, color = game_tz),
+               size = 3, hjust = "right") +
+    scale_x_date(date_breaks = "1 month",
+                 date_minor_breaks = "1 day",
+                 date_labels = "%b") +
+    scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
+    scale_color_manual(values = colors) +
+    theme(panel.grid.minor.y = element_blank(),
+          legend.position = "none") +
+    facet_wrap(~ team, ncol = 1)
+```
+
+Again, this looks reasonable.  All the time zone shifts seem to match
+expectations based on the time zone transitions and the number of off
+days.
+
+One shift that seems suspicious is the last upward peak in Seattle's
+schedule: the +3 peak is caused by a move the eastern time, but then
+Seattle's very next game is in central time.  But, indeed, it looks
+like Seattle played [game number 153] against Cleveland and the next
+day faced off against the Twins in Minnesota.
+
+[game number 153]: https://www.baseball-reference.com/teams/SEA/2011-schedule-scores.shtml
+
+## Comparison with SSA's tables
+
+As far as I can tell, SSA did not publish their day-by-day lag
+calculations or the code they used to generated these.  Using their
+two supplemental tables, however, I can gain some idea of whether my
+generated data set matches up.
+
+### SSA's Table S1
+
+Here's their Table S1:
+
+```{r, echo = FALSE, results = "asis", cache = FALSE}
+writeLines(readLines("_song2017how-table-s1.md"))
+```
+
+To make it easier to produce these tallies, I'll reformat the `lag`
+data frame.
+
+```{r lag_tally, dependson = "lag"}
+lag_tally <- lag %>%
+    mutate(date = ymd(date)) %>%
+    separate(matchup, sep = "@", into = c("away_team", "home_team"),
+             remove = FALSE) %>%
+    mutate(field = factor(ifelse(team == home_team, "home", "away"),
+                          levels = c("home", "away")),
+           direction = factor(case_when(lag > 0 ~ "to_east",
+                                        lag < 0 ~ "to_west",
+                                        TRUE ~ "none"),
+                              levels = c("none", "to_west", "to_east"))) %>%
+    select(date, team, field, direction, everything()) %>%
+    select(-home_team, -away_team)
+```
+
+First, let's focus on the "West" and "East" rows.
+
+```{r, dependson = "lag_tally"}
+lag_tally %>%
+    group_by(field, direction) %>%
+    summarise(n=n()) %>%
+    spread(field, n)
+```
+
+Each count from my generated data set is within three of the
+corresponding reported value.  Examining only these bulk numbers, it's
+hard to guess what might be causing these discrepancies, but things
+look close enough that I'm not too worried about it.
+
+When these lags are split up by their magnitude, the counts for these
+groups are also close if not identical to what's reported in Table S1.
+
+```{r, dependson = "lag_tally"}
+lag_tally %>%
+    group_by(field, direction, abs(lag)) %>%
+    filter(direction != "none") %>%
+    summarise(n=n()) %>%
+    spread(field, n)
+```
+
+### SSA's Table S2
+
+I'll need to do a little more work to compare my lag data set with
+SSA's Table S2.  With the help of pandoc, I've converted their docx
+table into a more useful format.
+
+```{r s2_wide, cache.extra = file.info("../lag/song2017how-table-s2.csv")}
+(s2_wide <- read_csv("../lag/song2017how-table-s2.csv") %>%
+    mutate(date = ymd(date)))
+
+```
+
+Notice that there are many fewer rows in this data frame than in
+`lag`, which has `r formatC(nrow(lag), format = "d", big.mark = ",")`
+rows.  One reason for this is because now each team of a game is
+represented on the same line.  Another reason is that `s2_wide` only
+includes games where at least one team had a lag magnitude at or above
+two.
+
+```{r, dependson = "s2_wide"}
+s2_wide %>%
+    filter(abs(away_lag) < 2 & abs(home_lag) < 2)
+```
+
+I want to compare the two data sets with a join, so I need to bring
+their representations a bit closer.  `s2_wide` doesn't include double
+header information, so we can't form a unique row key.  Instead, I'll
+filter out double header rows from both data sets.  (This shouldn't
+matter because the lags shouldn't change across two games on the same
+day.)
+
+```{r s2_cmp, dependson = "s2_wide"}
+(s2_cmp <- s2_wide %>%
+    mutate(matchup = paste0(away, "@", home)) %>%
+    gather(key = "type_team", value = "team", away, home) %>%
+    gather(key = "type_lag", value = "lag", away_lag, home_lag) %>%
+    arrange(date, matchup) %>%
+    mutate(type_lag = str_replace(type_lag, "_lag", "")) %>%
+    filter(type_team == type_lag) %>%
+    select(date, team, lag, matchup))
+```
+
+```{r lag_cmp, dependson = "lag"}
+lag_cmp <- lag %>%
+    filter(dbl_header < 2) %>%
+    mutate(team = case_when(team == "CAL" ~ "ANA",
+                            team == "MON" ~ "WAS",
+                            TRUE ~ team),
+            matchup = str_replace(matchup, "CAL", "ANA"),
+           matchup = str_replace(matchup, "MON", "WAS"))
+```
+
+Now the two tables can be joined.
+
+```{r full, dependson = c("lag_cmp", "s2_cmp")}
+full <- full_join(lag_cmp, s2_cmp,
+                  suffix = c("", ".s2"),
+                  by = c("date" = "date",
+                         "team" = "team",
+                         "matchup" = "matchup"))
+```
+All the games in Table S2 appear to be in my generated table.
+
+```{r, dependson = "full"}
+filter(full, is.na(lag))
+```
+
+On the other hand, when I subset my generated data set based on Table
+S2's criteria, I find eight rows (four games) that aren't in Table S2.
+
+```{r, dependson = "full"}
+full %>%
+    filter(is.na(lag.s2)) %>%
+    group_by(date, matchup, dbl_header) %>%
+    filter(max(abs(lag)) > 1) %>%
+    ungroup()
+```
+
+Inspecting the game logs, all these lag values look correct.  I also
+looked at the schedules on [baseball-reference.com].  The first two
+games (PIT&#64;OAK and SEA&#64;MIL) seem to match up.  On the other
+hand, the Retrosheet game logs and baseball-reference.com don't agree
+on the games that occurred *before* the two ATL&#64;SEA games.
+Retrosheet records the Mariners as the visiting team in the previous
+games against the Marlins, explaining the calculated lags.  Instead,
+baseball-reference.com [reports] that the Marlins were the visiting
+team, and helpfully notes that the "game was moved from Miami to
+Seattle due to a U2 concert."  OK, I'll have to add a processing step
+to adjust for that.
+
+[baseball-reference.com]: https://www.baseball-reference.com/
+[reports]: https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml
+
+By and large, however, it seems like my generated data set has lag
+values that are consistent with SSA's data set.
+
+------------------------------------------------------------------------
+
+```{r session_info}
+devtools::session_info()
+```
