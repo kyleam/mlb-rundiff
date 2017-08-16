@@ -294,14 +294,18 @@ Retrosheet records the Mariners as the visiting team in the previous
 games against the Marlins, explaining the calculated lags.  Instead,
 baseball-reference.com [reports] that the Marlins were the visiting
 team, and helpfully notes that the "game was moved from Miami to
-Seattle due to a U2 concert."  OK, I'll have to add a processing step
-to adjust for that.
+Seattle due to a U2 concert."  Looking at the Restrosheet data for
+this series more closely, I see that the "ParkID" column is "SEA03",
+despite the Mariners begin listed as the visiting team. Keeping the
+home/visitor information the same makes sense because the game was
+played as if the Marlins were the home team.
 
 [baseball-reference.com]: https://www.baseball-reference.com/
 [reports]: https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml
 
-By and large, however, it seems like my generated data set has lag
-values that are consistent with SSA's data set.
+OK, I'll have to add a processing step to adjust for that.  But By and
+large, it seems like my generated data set has lag values that are
+consistent with SSA's data set.
 
 ------------------------------------------------------------------------
 
