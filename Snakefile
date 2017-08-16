@@ -59,6 +59,12 @@ rule lag_sort_combined:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
 
+rule lag_thanks_u2:
+    input: "lag/thanks-u2.R", "lag/lag-combined-sorted-1992_2011.csv"
+    output: "lag/lag-combined-u2-1992_2011.csv"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla ./$(basename {input[0]})"
+
 rule lag_download_song2017how_supp_table_:
     output: "lag/pnas.1608847114.st{id,(01|02)}.docx"
     shell: "cd lag && "
