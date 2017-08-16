@@ -39,6 +39,11 @@ rule gamelogs_convert_and_rename_:
     output: "gamelogs/{year}.csv"
     shell: "dos2unix -n {input} {output}"
 
+rule gamelogs_combine_years:
+    input: expand("gamelogs/{year}.csv", year=range(1992, 2012))
+    output: "gamelogs/1992_2011.csv"
+    shell: "cat {input} > {output}"
+
 
 ### Calculation of lag
 
@@ -62,6 +67,15 @@ rule lag_sort_combined:
 rule lag_thanks_u2:
     input: "lag/thanks-u2.R", "lag/lag-combined-sorted-1992_2011.csv"
     output: "lag/lag-combined-u2-1992_2011.csv"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla ./$(basename {input[0]})"
+
+rule lag_join_log_and_lag:
+    input: "lag/join-log-and-lag.R",
+           "lag/lag-combined-u2-1992_2011.csv",
+           "gamelogs/game_log_header.csv",
+           "gamelogs/1992_2011.csv"
+    output: "lag/log-with-lags.csv"
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
 
