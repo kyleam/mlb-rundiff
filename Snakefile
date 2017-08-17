@@ -79,6 +79,13 @@ rule lag_join_log_and_lag:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
 
+rule lag_clean_log_with_lags:
+    input: "lag/clean-log-with-lags.R",
+           "lag/log-with-lags.csv"
+    output: "lag/log-with-lags-cleaned.csv"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla ./$(basename {input[0]})"
+
 rule lag_download_song2017how_supp_table_:
     output: "lag/pnas.1608847114.st{id,(01|02)}.docx"
     shell: "cd lag && "
