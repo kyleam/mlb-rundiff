@@ -2,9 +2,15 @@
 
 (packages->manifest
  (map (compose list specification->package+output)
-      (list "coreutils"
+      (list "bash"                      ; for rstan
+            "binutils"                  ; for rstan
+            "coreutils"
             "dos2unix"
             "gawk"
+            "gcc"                       ; for rstan
+            "gcc-toolchain"             ; for rstan
+            "linux-libre-headers"       ; for rstan
+            "make"                      ; for rstan
             "python"
             "python-docopt"
             "python-pytest"
@@ -18,6 +24,7 @@
             "r-knitr"
             "r-readr"
             "r-rmarkdown"
+            "r-rstan"
             "r-tidyr"
             "sed"
             "snakemake"
