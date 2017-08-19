@@ -9,5 +9,9 @@ __pycache__
 
 *.dat
 *.csv
+*.data.R
+*.params.R
+*.info.R
+*.rds
 
 /rmd/_song2017how-table-s1.md
