@@ -8,12 +8,6 @@ rule gamelogs_download_column_info:
     shell: "cd gamelogs && "
            "wget http://www.retrosheet.org/gamelogs/glfields.txt"
 
-rule gamelogs_download_column_header:
-    output: "gamelogs/game_log_header.csv"
-    shell: "cd gamelogs && "
-           "wget https://raw.githubusercontent.com/"
-           "maxtoki/baseball_R/master/data/game_log_header.csv"
-
 rule gamelogs_download_:
     output: "gamelogs/{name}.zip"
     shell: "cd gamelogs && "
@@ -73,7 +67,7 @@ rule lag_thanks_u2:
 rule lag_join_log_and_lag:
     input: "lag/join-log-and-lag.R",
            "lag/lag-combined-u2-1992_2011.csv",
-           "gamelogs/game_log_header.csv",
+           "gamelogs/game-log-header.txt",
            "gamelogs/1992_2011.csv"
     output: "lag/log-with-lags.csv"
     shell: "cd $(dirname {input[0]}) && "

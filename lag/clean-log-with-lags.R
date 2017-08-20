@@ -21,16 +21,16 @@ gl <- read_csv("log-with-lags.csv")
 ## filter(gl, !is.na(CompletionInfo))
 
 gl %>%
-    filter(is.na(CompletionInfo)) %>%
-    select(-starts_with("Umpire"),
-           -contains("Batting"),
-           -ends_with("Name"),
-           -ends_with("ID", ignore.case = FALSE),
-           -ends_with("TeamGameNumber"),
-           -ends_with("TeamLeague"),
-           -ends_with("Pitchers"),
-           -Attendence, -DayOfWeek) %>%
-    mutate_at(c("home", "away"),
+    filter(is.na(completion_info)) %>%
+    select(-starts_with("umpire"),
+           -contains("batting"),
+           -ends_with("name"),
+           -ends_with("_id"),
+           -ends_with("team_game_number"),
+           -ends_with("team_league"),
+           -ends_with("_pitchers"),
+           -attendence, -day_of_week) %>%
+    mutate_at(c("home_team", "away_team"),
               function (team)
                   case_when(team == "CAL" ~ "ANA",
                             team == "MON" ~ "WAS",
