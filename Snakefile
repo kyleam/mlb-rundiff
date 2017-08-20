@@ -107,6 +107,27 @@ rule lag_convert_song2017how_table_s2_to_csv:
            "mv {output}.tmp {output}"
 
 
+### Models
+
+rule models_dump_data_:
+    input: "models/dump-scorediff-oneseason-2011-data.R",
+           "lag/log-with-lags-cleaned.csv"
+    output: "models/scorediff-oneseason-2011.data.R",
+            "models/scorediff-oneseason-2011.info.R"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
+rule models_sample_scorediff_oneseason_2011:
+    input: "models/sample-scorediff-oneseason-2011.R",
+           "models/scorediff-oneseason.stan",
+           "models/scorediff-oneseason-2011.data.R"
+    output:
+        expand("models/scorediff-oneseason-2011-samples_{chain}.csv",
+               chain=range(1, 5))
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
+
 ### Rmarkdown
 
 rmd_site_input = [
