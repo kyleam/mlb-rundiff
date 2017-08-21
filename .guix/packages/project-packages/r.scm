@@ -1,6 +1,7 @@
 
 (define-module (project-packages r)
   #:use-module (gnu packages cran)
+  #:use-module (gnu packages haskell)
   #:use-module (gnu packages statistics)
   #:use-module (guix packages)
   #:use-module (guix download)
@@ -120,4 +121,33 @@ maximum likelihood estimation via optimization.  In all three cases,
 automatic differentiation is used to quickly and accurately evaluate
 gradients without burdening the user with the need to derive the
 partial derivatives.")
+    (license license:gpl3+)))
+
+(define-public r-bayesplot
+  (package
+    (name "r-bayesplot")
+    (version "1.3.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (cran-uri "bayesplot" version))
+       (sha256
+        (base32
+         "0n07ii605dskf0x9bms7krx1akjghb4bmq76zm39sc1lshyxinrr"))))
+    (build-system r-build-system)
+    (native-inputs
+     `(("ghc-pandoc" ,ghc-pandoc)))
+    (propagated-inputs
+     `(("r-dplyr" ,r-dplyr)
+       ("r-ggplot2" ,r-ggplot2)
+       ("r-reshape2" ,r-reshape2)))
+    (home-page "http://mc-stan.org/users/interfaces/bayesplot.html")
+    (synopsis "Plotting for Bayesian Models")
+    (description
+     "Plotting functions for posterior analysis, model checking, and
+MCMC diagnostics.  The package is designed not only to provide
+convenient functionality for users, but also a common set of functions
+that can be easily used by developers working on a variety of R
+packages for Bayesian modeling, particularly (but not exclusively)
+packages interfacing with 'Stan'.")
     (license license:gpl3+)))

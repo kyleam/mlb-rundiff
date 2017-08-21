@@ -16,6 +16,7 @@
             "python-pytest"
             "python-wrapper"
             "r"
+            "r-bayesplot"
             "r-devtools"
             "r-dplyr"
             "r-forcats"
