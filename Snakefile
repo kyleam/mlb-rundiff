@@ -133,7 +133,13 @@ rule models_sample_scorediff_oneseason_2011:
 rmd_site_input = [
     "lag/2011.csv",
     "lag/lag-combined-1992_2011.csv",
+    "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
+    "models/scorediff-oneseason-2011-samples_1.csv",
+    "models/scorediff-oneseason-2011-samples_2.csv",
+    "models/scorediff-oneseason-2011-samples_3.csv",
+    "models/scorediff-oneseason-2011-samples_4.csv",
+    "models/scorediff-oneseason.stan",
     "rmd/_song2017how-table-s1.md",
 ]
 
