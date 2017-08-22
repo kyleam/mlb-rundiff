@@ -309,6 +309,14 @@ consistent with SSA's data set.
 
 ------------------------------------------------------------------------
 
-```{r session_info}
-devtools::session_info()
+```{r session_info, include = FALSE}
+## Put sink call in a single expression so that it works with knitr.
+## https://groups.google.com/forum/#!topic/knitr/TCz9vNLlslY
+{
+    sink("lag-calculation-checks-session-info.txt")
+    print(devtools::session_info())
+    sink()
+}
 ```
+
+[R session info](./lag-calculation-checks-session-info.txt)
