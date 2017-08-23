@@ -293,14 +293,6 @@ In order to do that, here are the next steps I'm considering:
 
 ------------------------------------------------------------------------
 
-```{r session_info, include = FALSE}
-## Put sink call in a single expression so that it works with knitr.
-## https://groups.google.com/forum/#!topic/knitr/TCz9vNLlslY
-{
-    sink("scorediff-oneseason-2011-session-info.txt")
-    print(devtools::session_info())
-    sink()
-}
+```{r session_info, echo = FALSE, results = "asis"}
+source("session-info.R")
 ```
-
-[R session info](./scorediff-oneseason-2011-session-info.txt)
