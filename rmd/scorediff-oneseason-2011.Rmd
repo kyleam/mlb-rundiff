@@ -83,6 +83,7 @@ autocorrelation than the ability parameters do, with $\sigma_a$
 showing the highest.
 
 ```{r acf_plot_sigma, dependson = "samps"}
+color_scheme_set("darkgray")
 mcmc_acf(samps, regex_pars = "sigma") +
     theme(panel.grid = element_blank())
 ```
@@ -95,6 +96,7 @@ mcmc_acf(samps, pars = paste0("a[", 1:6, "]")) +
 The traces look OK
 
 ```{r sigma_trace_plots, dependson = "samps", fig.asp = 0.35}
+color_scheme_set("mix-darkgray-purple")
 mcmc_trace(samps, regex_pars = "sigma") +
     theme(panel.grid = element_blank())
 ```

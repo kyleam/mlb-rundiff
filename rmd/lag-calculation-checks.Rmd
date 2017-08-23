@@ -87,7 +87,7 @@ Here are the lags for these teams across the 2011 season.
 ```{r lag-plot, dependson = "lag2011", out.width = "95%", fig.width = 8.14}
 lag2011 %>%
     ggplot(aes(date, lag)) +
-    geom_hline(yintercept = 0, color = "red", alpha = 0.2, size = 1.25) +
+    geom_hline(yintercept = 0, color = "#e5cce5", size = 1.25) +
     geom_line(alpha = 0.6) +
     geom_point(size = 0.7) +
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +

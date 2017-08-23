@@ -13,16 +13,25 @@ a:visited {
 }
 
 a:hover {
-    color: #660066
+    color: #660066;
 }
 
 a:active {
-    color: #660066
+    color: #660066;
 }
 
 pre .operator {
-    color: #0d0d0d;
+    color: #000;
     font-weight: bold;
+}
+
+pre .keyword {
+    color: #000;
+    font-weight: normal;
+}
+
+pre .identifier {
+    color: #333;
 }
 
 pre .paren {
@@ -30,7 +39,7 @@ pre .paren {
 }
 
 pre .literal {
-    color: #660066;
+    color: #400040;
 }
 
 pre .number {
@@ -39,18 +48,9 @@ pre .number {
 
 pre .comment {
     color: #998;
-    font-style: italic
-}
-
-pre .keyword {
-    color: #660066;
-    font-weight: bold
-}
-
-pre .identifier {
-    color: #333;
+    font-style: normal;
 }
 
 pre .string {
-    color: #a64ca6;
+    color: #660066;
 }
