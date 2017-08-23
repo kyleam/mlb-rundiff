@@ -2,9 +2,9 @@
 library(dplyr)
 library(readr)
 
-gl <- read_csv("../lag/log-with-lags-cleaned.csv")
+glog <- read_csv("../lag/log-with-lags-cleaned.csv")
 
-season <- gl %>%
+season <- glog %>%
     filter(lubridate::year(date) == 2011) %>%
     mutate(home_team = factor(home_team),
            away_team = factor(away_team, levels = levels(home_team)))

@@ -13,18 +13,18 @@ lag_wide <- lag %>%
     spread(lag_type, lag)
 
 cnames <- scan("../gamelogs/game-log-header.txt", character(), quiet = TRUE)
-gl <- read_csv("../gamelogs/1992_2011.csv", col_names = cnames) %>%
+glog <- read_csv("../gamelogs/1992_2011.csv", col_names = cnames) %>%
     mutate(date = ymd(date))
 
-stopifnot(nrow(gl) == nrow(lag_wide))
+stopifnot(nrow(glog) == nrow(lag_wide))
 
 ## The entries don't match up for a SEA/FLO series that was played at
 ## SEA with FLO as the home team.  Drop the series (at least for now)
 ## because I'm not sure how it should be treated in the model.
 ##
-## anti_join(lag_wide, gl,
+## anti_join(lag_wide, glog,
 ##           by = c("date", "away_team", "home_team", "dbl_header"))
 
-inner_join(lag_wide, gl,
+inner_join(lag_wide, glog,
            by = c("date", "away_team", "home_team", "dbl_header")) %>%
     write_csv("log-with-lags.csv")

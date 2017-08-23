@@ -9,7 +9,7 @@
 library(dplyr)
 library(readr)
 
-gl <- read_csv("log-with-lags.csv")
+glog <- read_csv("log-with-lags.csv")
 
 ## There are 25 games that were completed at a later date.  I'm not
 ## sure how to treat the lags in these cases because the game is split
@@ -18,9 +18,9 @@ gl <- read_csv("log-with-lags.csv")
 ## counted as a day off.  The lag calculation should at least account
 ## for the latter issue.  Drop them for now.
 ##
-## filter(gl, !is.na(CompletionInfo))
+## filter(glog, !is.na(CompletionInfo))
 
-gl %>%
+glog %>%
     filter(is.na(completion_info)) %>%
     select(-starts_with("umpire"),
            -contains("batting"),

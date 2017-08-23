@@ -112,12 +112,12 @@ mcmc_trace(samps, regex_pars = "^a", facet_args = list(ncol = 5)) +
 The order of team ability estimates should largely follow the final
 rankings for the 2011 season.
 
-```{r gl, cache.extra = file.info("lag/log-with-lags-cleaned.csv")}
-gl <- read_csv("../lag/log-with-lags-cleaned.csv")
+```{r glog, cache.extra = file.info("lag/log-with-lags-cleaned.csv")}
+glog <- read_csv("../lag/log-with-lags-cleaned.csv")
 ```
 
-```{r team_rank, dependson = "gl"}
-(team_rank <- gl %>%
+```{r team_rank, dependson = "glog"}
+(team_rank <- glog %>%
     filter(lubridate::year(date) == 2011) %>%
     mutate(home_win = home_runs_scored > away_runs_scored) %>%
     gather(team_type, team, away_team:home_team) %>%
@@ -219,7 +219,7 @@ match-ups.  This requires a little bit of work because the simulations
 put the team with the better record as the "home" team.
 
 ```{r observed, dependson = c("team_names", "scorediff_sim", "result")}
-observed <- gl %>%
+observed <- glog %>%
     filter(lubridate::year(date) == 2011,
            home_team %in% team_names,
            away_team %in% team_names) %>%
