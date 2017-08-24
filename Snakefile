@@ -117,6 +117,15 @@ rule models_dump_scorediff_oneseason_2011_data:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
+rule models_dump_scorediff_split_2011_data:
+    input: "models/dump-scorediff-split_2011-data.R",
+           "lib/utils.R",
+           "lag/log-with-lags-cleaned.csv"
+    output: "models/scorediff-split_2011.data.R",
+            "models/scorediff-split_2011.info.R"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
            "models/{model}.stan",
