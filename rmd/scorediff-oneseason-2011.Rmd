@@ -60,16 +60,19 @@ few diagnostic plots using the [bayesplot] package.
 fit <- read_stan_csv(paste0("../models/scorediff-oneseason-2011-samples_", 1:4, ".csv"))
 ```
 
-The R-hats and effective sample sizes look OK.  Both sets of
-statistics look better for the ability parameters than they do for the
-variance parameters (the two outliers in each plot).
+The R-hats and effective sample sizes look OK, though the effective
+sample size for $\sigma_a$ is relatively low.
 
-```{r rhat_plot, dependson = "fit", out.width = "50%", fig.width = 4.28, fig.align = "default"}
-mcmc_rhat_hist(rhat(fit)) +
+```{r selpars, dependson = "fit"}
+selpars <- c("sigma_a", "sigma_y", grep("^a", names(fit), value = TRUE))
+```
+
+```{r nr_plot, dependson = c("fit", "selpars"), out.width = "50%", fig.width = 4.28, fig.align = "default"}
+mcmc_neff(neff_ratio(fit, pars = selpars)) +
     theme(panel.grid = element_blank(),
           legend.position = "left")
 
-mcmc_neff_hist(neff_ratio(fit)) +
+mcmc_rhat(rhat(fit, pars = selpars)) +
     theme(panel.grid = element_blank())
 ```
 
@@ -77,10 +80,9 @@ mcmc_neff_hist(neff_ratio(fit)) +
 samps <- extract(fit, permuted = FALSE)
 ```
 
-The autocorrelation across iterations looks OK.  As expected from the
-effective sample size ratios, the variance parameters show higher
-autocorrelation than the ability parameters do, with $\sigma_a$
-showing the highest.
+The autocorrelation across iterations looks OK.  As expected from its
+lower effective sample size ratio, $\sigma_a$ shows a higher
+autocorrelation than other parameters do.
 
 ```{r acf_plot_sigma, dependson = "samps"}
 color_scheme_set("darkgray")
