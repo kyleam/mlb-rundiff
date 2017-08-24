@@ -117,17 +117,12 @@ glog <- read_csv("../lag/log-with-lags-cleaned.csv")
 ```
 
 ```{r team_rank, dependson = "glog"}
+source("../lib/utils.R")  # for count_wins
+
 (team_rank <- glog %>%
      filter(lubridate::year(date) == 2011) %>%
-     mutate(home_win = home_runs_scored > away_runs_scored) %>%
-     gather(team_type, team, away_team:home_team) %>%
-     mutate(win = case_when(home_win & team_type == "home_team"  ~ TRUE,
-                            home_win ~ FALSE,
-                            team_type == "away_team" ~ TRUE,
-                            TRUE ~ FALSE)) %>%
-     group_by(team) %>%
-     summarise(n_wins = sum(win), n_games = n(),
-               win_perc = n_wins / n_games) %>%
+     count_wins() %>%
+     mutate(win_perc = n_wins / n_games) %>%
      arrange(desc(win_perc)))
 
 team_names <- levels(factor(team_rank$team))
