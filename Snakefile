@@ -109,7 +109,7 @@ rule lag_convert_song2017how_table_s2_to_csv:
 
 ### Models
 
-rule models_dump_data_:
+rule models_dump_scorediff_oneseason_2011_data:
     input: "models/dump-scorediff-oneseason-2011-data.R",
            "lag/log-with-lags-cleaned.csv"
     output: "models/scorediff-oneseason-2011.data.R",
