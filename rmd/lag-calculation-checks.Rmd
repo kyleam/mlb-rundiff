@@ -303,7 +303,7 @@ played as if the Marlins were the home team.
 [baseball-reference.com]: https://www.baseball-reference.com/
 [reports]: https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml
 
-OK, I'll have to add a processing step to adjust for that.  But By and
+OK, I'll have to add a processing step to adjust for that.  But by and
 large, it seems like my generated data set has lag values that are
 consistent with SSA's data set.
 
