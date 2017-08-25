@@ -86,8 +86,11 @@ The autocorrelation across iterations looks OK.  As expected from its
 lower effective sample size ratio, $\sigma_a$ shows a higher
 autocorrelation than other parameters do.
 
-```{r acf_plot_sigma, dependson = "samps_flat"}
+```{r, include = FALSE}
 color_scheme_set("darkgray")
+```
+
+```{r acf_plot_sigma, dependson = "samps_flat"}
 mcmc_acf(samps_flat, regex_pars = "sigma") +
     theme(panel.grid = element_blank())
 ```
@@ -99,9 +102,11 @@ mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]")) +
 
 The traces look OK
 
+
 ```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
 color_scheme_set("mix-darkgray-purple")
 mcmc_trace(samps_flat, regex_pars = "sigma") +
+
     theme(panel.grid = element_blank())
 ```
 
