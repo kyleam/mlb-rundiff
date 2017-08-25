@@ -21,8 +21,8 @@ dat$df <- 7
 
 rstan::stan_rdump(c("n_games", "n_teams", "home", "away", "score_diff", "df"),
                   envir = list2env(dat),
-                  file = "scorediff-oneseason-2011.data.R")
+                  file = "scorediff-oneseason_2011.data.R")
 
 team_names <- levels(season$home_team)
 dump(c("team_names"),
-     file = "scorediff-oneseason-2011.info.R")
+     file = "scorediff-oneseason_2011.info.R")

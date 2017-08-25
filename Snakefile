@@ -110,18 +110,18 @@ rule lag_convert_song2017how_table_s2_to_csv:
 ### Models
 
 rule models_dump_scorediff_oneseason_2011_data:
-    input: "models/dump-scorediff-oneseason-2011-data.R",
+    input: "models/dump-scorediff-oneseason_2011-data.R",
            "lag/log-with-lags-cleaned.csv"
-    output: "models/scorediff-oneseason-2011.data.R",
-            "models/scorediff-oneseason-2011.info.R"
+    output: "models/scorediff-oneseason_2011.data.R",
+            "models/scorediff-oneseason_2011.info.R"
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
 rule models_sample_scorediff_oneseason_2011:
-    input: "models/sample-scorediff-oneseason-2011.R",
+    input: "models/sample-scorediff-oneseason_2011.R",
            "models/scorediff-oneseason.stan",
-           "models/scorediff-oneseason-2011.data.R"
-    output: protected("models/scorediff-oneseason-2011-fit.rds")
+           "models/scorediff-oneseason_2011.data.R"
+    output: protected("models/scorediff-oneseason_2011-fit.rds")
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
@@ -133,7 +133,7 @@ rmd_site_input = [
     "lag/lag-combined-1992_2011.csv",
     "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
-    "models/scorediff-oneseason-2011-fit.rds",
+    "models/scorediff-oneseason_2011-fit.rds",
     "models/scorediff-oneseason.stan",
     "rmd/_song2017how-table-s1.md",
 ]

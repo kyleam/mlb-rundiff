@@ -56,8 +56,8 @@ few diagnostic plots using the [bayesplot] package.
 
 [bayesplot]: http://mc-stan.org/users/interfaces/bayesplot.html
 
-```{r fit, cache.extra = file.info("../models/scorediff-oneseason-2011-fit.rds")}
-fit <- readRDS("../models/scorediff-oneseason-2011-fit.rds")
+```{r fit, cache.extra = file.info("../models/scorediff-oneseason_2011-fit.rds")}
+fit <- readRDS("../models/scorediff-oneseason_2011-fit.rds")
 ```
 
 The R-hats and effective sample sizes look OK, though the effective
