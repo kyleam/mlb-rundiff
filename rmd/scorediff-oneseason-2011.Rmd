@@ -77,7 +77,7 @@ mcmc_rhat(rhat(fit, pars = selpars)) +
 ```
 
 ```{r samps, dependson = "fit"}
-samps <- extract(fit, permuted = FALSE)
+samps <- as.array(fit)
 ```
 
 The autocorrelation across iterations looks OK.  As expected from its
