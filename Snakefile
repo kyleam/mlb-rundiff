@@ -117,11 +117,11 @@ rule models_dump_scorediff_oneseason_2011_data:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
-rule models_sample_scorediff_oneseason_2011:
-    input: "models/sample-scorediff-oneseason_2011.R",
-           "models/scorediff-oneseason.stan",
-           "models/scorediff-oneseason_2011.data.R"
-    output: protected("models/scorediff-oneseason_2011-fit.rds")
+rule models_sample_:
+    input: "models/sample-{model}_{data}.R",
+           "models/{model}.stan",
+           "models/{model}_{data}.data.R"
+    output: protected("models/{model}_{data}-fit.rds")
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
