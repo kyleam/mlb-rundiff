@@ -76,35 +76,35 @@ mcmc_rhat(rhat(fit, pars = selpars)) +
     theme(panel.grid = element_blank())
 ```
 
-```{r samps, dependson = "fit"}
-samps <- as.array(fit)
+```{r samps_flat, dependson = "fit"}
+samps_flat <- as.array(fit)
 ```
 
 The autocorrelation across iterations looks OK.  As expected from its
 lower effective sample size ratio, $\sigma_a$ shows a higher
 autocorrelation than other parameters do.
 
-```{r acf_plot_sigma, dependson = "samps"}
+```{r acf_plot_sigma, dependson = "samps_flat"}
 color_scheme_set("darkgray")
-mcmc_acf(samps, regex_pars = "sigma") +
+mcmc_acf(samps_flat, regex_pars = "sigma") +
     theme(panel.grid = element_blank())
 ```
 
-```{r acf_plot_a, dependson = "samps", out.width = "95%", fig.width = 8.14}
-mcmc_acf(samps, pars = paste0("a[", 1:6, "]")) +
+```{r acf_plot_a, dependson = "samps_flat", out.width = "95%", fig.width = 8.14}
+mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]")) +
     theme(panel.grid = element_blank())
 ```
 
 The traces look OK
 
-```{r sigma_trace_plots, dependson = "samps", fig.asp = 0.35}
+```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
 color_scheme_set("mix-darkgray-purple")
-mcmc_trace(samps, regex_pars = "sigma") +
+mcmc_trace(samps_flat, regex_pars = "sigma") +
     theme(panel.grid = element_blank())
 ```
 
-```{r sigma_a_plots, dependson = "samps", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
-mcmc_trace(samps, regex_pars = "^a", facet_args = list(ncol = 5)) +
+```{r sigma_a_plots, dependson = "samps_flat", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
+mcmc_trace(samps_flat, regex_pars = "^a", facet_args = list(ncol = 5)) +
     theme(legend.position = "none", panel.grid = element_blank(),
           axis.text.x = element_blank())
 ```
@@ -131,15 +131,15 @@ team_names <- levels(factor(team_rank$team))
 ```
 
 To get the samples in a more convenient form, I'll re-extract the
-samples from the fit, this time with the default setting of `permuted
-= TRUE`.
+samples from the fit as a list rather than an array with flattened
+variables name.
 
-```{r psamps, dependson = "fit"}
-psamps <- rstan::extract(fit)
+```{r samps, dependson = "fit"}
+samps <- rstan::extract(fit)
 ```
 
-```{r avals, dependson = c("psamps", "team_rank")}
-avals <- apply(psamps$a, 2,
+```{r avals, dependson = c("samps", "team_rank")}
+avals <- apply(samps$a, 2,
                function (x) c(mean = mean(x),
                               quantile(x, probs = c(0.1, 0.25, 0.75, 0.9)))) %>%
     reshape2::melt(varnames = c("meas", "team_idx")) %>%
@@ -189,16 +189,16 @@ For each of these match-ups, I'll generate a score differential from
 samples for each iteration and then summarize the response across the
 iterations by constructing the 95% intervals for each match-up.
 
-```{r scorediff_sim, dependson = c("matchups", "psamps")}
+```{r scorediff_sim, dependson = c("matchups", "samps")}
 df <- 7
 
 n_games <- nrow(matchups)
-n_iter <- nrow(psamps$sigma_y)
+n_iter <- nrow(samps$sigma_y)
 scorediff_sim <- array(NA, c(n_iter, n_games))
 set.seed(16125)
 for (i in 1:n_iter){
-    scorediff_sim[i,] <- psamps$a[i, matchups$home] - psamps$a[i, matchups$away] +
-         rt(n_games, df) * psamps$sigma_y[i]
+    scorediff_sim[i,] <- samps$a[i, matchups$home] - samps$a[i, matchups$away] +
+         rt(n_games, df) * samps$sigma_y[i]
 }
 
 bounds <- apply(scorediff_sim, 2, function(x) quantile(x, c(0.025, 0.975)))
