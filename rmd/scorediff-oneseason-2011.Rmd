@@ -73,7 +73,9 @@ mcmc_neff(neff_ratio(fit, pars = selpars)) +
           legend.position = "left")
 
 mcmc_rhat(rhat(fit, pars = selpars)) +
-    theme(panel.grid = element_blank())
+    legend_text(hjust = 0) +
+    theme(panel.grid = element_blank(),
+          legend.text.align = 0)
 ```
 
 ```{r samps_flat, dependson = "fit"}
