@@ -51,9 +51,9 @@ lag %>%
     mutate(normal_season = abs(games - 162) < 4) %>%
     ggplot(aes(year, fct_rev(team))) +
     geom_point(aes(color = normal_season, size = games), shape = 21) +
-    ylab("team") +
+    ylab(NULL) +
     scale_size(range = c(1, 3.5)) +
-    scale_color_manual(values = c("#000000", "#a9a9a9"), guide = FALSE) +
+    scale_color_manual(values = c("black", "gray50"), guide = FALSE) +
     theme(panel.grid = element_blank())
 ```
 
