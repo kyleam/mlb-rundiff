@@ -18,3 +18,9 @@ count_wins <- function(log_df){
         group_by(team) %>%
         summarise(n_wins = sum(win), n_games = n())
 }
+
+source_as_list <- function(file){
+    source_env <- new.env()
+    source(file, source_env)
+    as.list(source_env)
+}
