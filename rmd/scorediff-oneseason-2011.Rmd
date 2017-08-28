@@ -100,19 +100,20 @@ mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]")) +
     theme(panel.grid = element_blank())
 ```
 
-The traces look OK
-
+The traces look OK.
 
 ```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
 color_scheme_set("mix-darkgray-purple")
 mcmc_trace(samps_flat, regex_pars = "sigma") +
-
-    theme(panel.grid = element_blank())
+    theme(panel.grid = element_blank(),
+          axis.line = element_line(color = "gray20"))
 ```
 
 ```{r sigma_a_plots, dependson = "samps_flat", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
 mcmc_trace(samps_flat, regex_pars = "^a", facet_args = list(ncol = 5)) +
-    theme(legend.position = "none", panel.grid = element_blank(),
+    theme(legend.position = "none",
+          panel.grid = element_blank(),
+          axis.line = element_line(color = "gray20"),
           axis.text.x = element_blank())
 ```
 
