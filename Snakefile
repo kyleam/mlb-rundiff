@@ -144,9 +144,16 @@ rmd_site_input = [
     "lag/song2017how-table-s2.csv",
     "models/scorediff-oneseason.stan",
     "models/scorediff-oneseason_2011-fit.rds",
+    "models/scorediff-split_2011-fit.rds",
     "rmd/_song2017how-table-s1.md",
     "rmd/plot-utils.R",
+    "rmd/scorediff-split.stan",
 ]
+
+rule rmd_copy_scorediff_split_model:
+    input: "models/scorediff-split.stan"
+    output: "rmd/scorediff-split.stan"
+    shell: "cp {input} {output}"
 
 rule rmd_render_site:
     input: "rmd/_site.yml", "rmd/styles.css", "rmd/setup.R",
