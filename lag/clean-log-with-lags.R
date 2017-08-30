@@ -26,7 +26,6 @@ glog %>%
            -contains("batting"),
            -ends_with("name"),
            -ends_with("_id"),
-           -ends_with("team_game_number"),
            -ends_with("team_league"),
            -ends_with("_pitchers"),
            -attendence, -day_of_week) %>%

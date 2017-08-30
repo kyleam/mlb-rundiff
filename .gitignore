@@ -16,3 +16,4 @@ __pycache__
 
 /rmd/_song2017how-table-s1.md
 /rmd/*-session-info.txt
+/rmd/*.stan

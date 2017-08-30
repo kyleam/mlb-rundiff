@@ -21,6 +21,7 @@
             "r-dplyr"
             "r-forcats"
             "r-ggplot2"
+            "r-hexbin"
             "r-knitr"
             "r-lubridate"
             "r-readr"

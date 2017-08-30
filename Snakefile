@@ -117,6 +117,15 @@ rule models_dump_scorediff_oneseason_2011_data:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
+rule models_dump_scorediff_split_2011_data:
+    input: "models/dump-scorediff-split_2011-data.R",
+           "lib/utils.R",
+           "lag/log-with-lags-cleaned.csv"
+    output: "models/scorediff-split_2011.data.R",
+            "models/scorediff-split_2011.info.R"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
            "models/{model}.stan",
@@ -135,9 +144,16 @@ rmd_site_input = [
     "lag/song2017how-table-s2.csv",
     "models/scorediff-oneseason.stan",
     "models/scorediff-oneseason_2011-fit.rds",
+    "models/scorediff-split_2011-fit.rds",
     "rmd/_song2017how-table-s1.md",
     "rmd/plot-utils.R",
+    "rmd/scorediff-split.stan",
 ]
+
+rule rmd_copy_scorediff_split_model:
+    input: "models/scorediff-split.stan"
+    output: "rmd/scorediff-split.stan"
+    shell: "cp {input} {output}"
 
 rule rmd_render_site:
     input: "rmd/_site.yml", "rmd/styles.css", "rmd/setup.R",
