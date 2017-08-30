@@ -133,8 +133,8 @@ rmd_site_input = [
     "lag/lag-combined-1992_2011.csv",
     "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
-    "models/scorediff-oneseason_2011-fit.rds",
     "models/scorediff-oneseason.stan",
+    "models/scorediff-oneseason_2011-fit.rds",
     "rmd/_song2017how-table-s1.md",
 ]
 
