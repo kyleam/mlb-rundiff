@@ -136,6 +136,7 @@ rmd_site_input = [
     "models/scorediff-oneseason.stan",
     "models/scorediff-oneseason_2011-fit.rds",
     "rmd/_song2017how-table-s1.md",
+    "rmd/plot-utils.R",
 ]
 
 rule rmd_render_site:

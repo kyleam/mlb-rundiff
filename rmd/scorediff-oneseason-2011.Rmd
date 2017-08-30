@@ -14,8 +14,12 @@ library(tidyr)
 
 library(rstan)
 library(bayesplot)
+
+source("plot-utils.R")
+
 color_scheme_set(c("purple"))
 theme_set(theme_minimal())
+theme_setup()
 ```
 
 ## Single-year estimation of team ability
@@ -105,16 +109,14 @@ The traces look OK.
 ```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
 color_scheme_set("mix-darkgray-purple")
 mcmc_trace(samps_flat, regex_pars = "sigma") +
-    theme(panel.grid = element_blank(),
-          axis.line = element_line(color = "gray20"))
+    theme_axis_line()
 ```
 
 ```{r sigma_a_plots, dependson = "samps_flat", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
 mcmc_trace(samps_flat, regex_pars = "^a", facet_args = list(ncol = 5)) +
     theme(legend.position = "none",
-          panel.grid = element_blank(),
-          axis.line = element_line(color = "gray20"),
-          axis.text.x = element_blank())
+          axis.text.x = element_blank()) +
+    theme_axis_line()
 ```
 
 ## Ability estimates
@@ -158,8 +160,8 @@ avals <- apply(samps$a, 2,
 
 ```{r avals_plot, dependson = "avals", out.width = "50%", fig.width = 4.28, fig.asp = 1.2}
 ggplot(avals, aes(x = fct_rev(team))) +
-    geom_hline(yintercept = 0, color = "gray90", size = 1) +
-    geom_linerange(aes(ymin = p10, ymax = p90), color = "gray30") +
+    geom_hline(yintercept = 0, color = tc$background_light, size = 1) +
+    geom_linerange(aes(ymin = p10, ymax = p90), color = tc$background_dark) +
     geom_linerange(aes(ymin = p25, ymax = p75), size = 0.75) +
     geom_point(aes(y = mean)) +
     labs(x = NULL,
@@ -248,11 +250,11 @@ during the 2011 season.
 result %>%
     filter(matchup %in% observed$matchup) %>%
     ggplot() +
-    geom_hline(yintercept = 0, color = "#e5cce5") +
+    geom_hline(yintercept = 0, color = tc$primary_light_dim) +
     geom_linerange(aes(x = fct_rev(matchup), ymin = lower, ymax = upper),
                    alpha = 0.8) +
     geom_point(aes(x = matchup, y = scorediff),
-               fill = NA, color = "gray30", shape = 21,
+               fill = NA, color = tc$background_dark, shape = 21,
                data = observed) +
     scale_y_continuous(limits = c(-13, 13),
                        minor_breaks = -13:13) +
