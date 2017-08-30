@@ -21,9 +21,13 @@ glog <- read_csv("log-with-lags.csv")
 glog %>%
     filter(is.na(completion_info) & game_id != "I") %>%
     select(-starts_with("umpire"),
+           -starts_with("home_manager"),
+           -starts_with("away_manager"),
+           -starts_with("winning_pitcher"),
+           -starts_with("losing_pitcher"),
+           -starts_with("saving_pitcher"),
+           -starts_with("game_winning"),
            -contains("batting"),
-           -ends_with("name"),
-           -ends_with("_id"),
            -ends_with("team_league"),
            -ends_with("_pitchers"),
            -attendence, -day_of_week) %>%
