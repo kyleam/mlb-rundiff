@@ -7,7 +7,14 @@ require(tidyr)
 ## The data frame log_df should have the columns "home_team",
 ## "away_team", "home_runs_scored", and "away_runs_scored".
 ##
-count_wins <- function(log_df){
+## The remaing arguments are variables to group by.  If not specified,
+## `team' will be used.
+count_wins <- function(log_df, ...){
+    groups <- quos(...)
+    if (length(groups) == 0){
+        groups <- quos(team)
+    }
+
     log_df %>%
         mutate(home_win = .data$home_runs_scored > .data$away_runs_scored) %>%
         gather(team_type, team, away_team, home_team) %>%
@@ -17,7 +24,7 @@ count_wins <- function(log_df){
                    .data$team_type == "away_team" ~ TRUE,
                    .data$team_type == "home_team"  ~ FALSE,
                    TRUE ~ NA)) %>%
-        group_by(team) %>%
+        group_by(!!!groups) %>%
         summarise(n_wins = sum(.data$win), n_games = n())
 }
 
