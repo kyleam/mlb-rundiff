@@ -177,21 +177,8 @@ info <- source_as_list("../models/scorediff-split_2011.info.R")
 ```
 
 ```{r avals_plot, dependson = c("samps", "info"), fig.asp = 1}
-n_periods <- 8
-n_teams <- 30
-
-sum_fn <- function(x){
-    probs <- c(0.1, 0.25, 0.75, 0.9)
-    qs <- quantile(x, probs = probs)
-    names(qs) <- paste0("p", probs * 100)
-    c(mean = mean(x), qs)
-}
-
-avals <- apply(samps$a, c(2, 3), sum_fn) %>%
-    reshape2::melt(varnames = c("meas", "period", "team_idx")) %>%
-    as_tibble() %>%
-    mutate(team = info$team_names[team_idx]) %>%
-    spread(meas, value)
+avals <- trace_intervals(samps$a, c("period", "team_idx")) %>%
+    mutate(team = info$team_names[team_idx])
 
 teams_ranked <- arrange(info$wins_2011, desc(n_wins))$team
 
@@ -254,15 +241,7 @@ observed <- tibble(score_diff = dat$score_diff[observed_idx],
                                         levels = 1:8),
                    matchup = factor(paste0(away_name, "@", home_name)))
 
-q95 <- function(x){
-    qs <- quantile(x, probs = c(0.025, 0.975))
-    names(qs) <- c("lower", "upper")
-    qs
-}
-
-ppc <- apply(samps$score_diff_new[,observed_idx], 2, q95) %>%
-    reshape2::melt(varnames = c("meas", "game")) %>%
-    spread(meas, value) %>%
+ppc <- trace_intervals(samps$score_diff_new[,observed_idx], "game") %>%
     mutate(home_name = observed$home_name,
            away_name = observed$away_name,
            home_period = factor(observed$home_period,
@@ -276,7 +255,7 @@ ppc <- apply(samps$score_diff_new[,observed_idx], 2, q95) %>%
 ```{r ppc_plot, dependson = "ppc", out.width = "50%", fig.width = 4.28, fig.asp = 1.2}
 ggplot(ppc, aes(x = home_period)) +
     geom_hline(yintercept = 0, color = tc$primary_light_dim) +
-    geom_linerange(aes(ymin = lower, ymax = upper),
+    geom_linerange(aes(ymin = p2.5, ymax = p97.5),
                    alpha = 0.8) +
     geom_point(aes(y = score_diff),
                fill = NA, color = tc$background_dark, shape = 21,
