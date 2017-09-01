@@ -31,7 +31,7 @@ parameters {
   vector[n_teams] mu_a;
 
   real<lower=0> tau;
-  vector<lower=0>[n_teams] sigma_a;
+  vector<lower=0>[n_teams] sigma_a_std;
 
   real b_home;
   real b_prev;
@@ -41,6 +41,10 @@ parameters {
 
 transformed parameters {
   vector[n_teams] a[n_periods];
+  vector<lower=0>[n_teams] sigma_a;
+
+  for (k in 1:n_teams)
+    sigma_a[k] = tau * sigma_a_std[k];
 
   for (j in 1:n_periods)
     a[j] = mu_a + sigma_a .* a_std[j];
@@ -52,7 +56,7 @@ model {
 
   tau ~ cauchy(0, 1);
 
-  sigma_a ~ normal(0, tau);
+  sigma_a_std ~ normal(0, 1);
   for (j in 1:n_periods)
     a_std[j] ~ normal(0, 1);
 
