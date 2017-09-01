@@ -139,6 +139,15 @@ rule models_dump_rundiff_pitch_2011_data:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
+rule models_dump_rundiff_park_2011_data:
+    input: "models/dump-rundiff-park_2011-data.R",
+           "lib/utils.R",
+           "lag/log-with-lags-cleaned.csv"
+    output: "models/rundiff-park_2011.data.R",
+            "models/rundiff-park_2011.info.R"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
            "models/{model}.stan",
