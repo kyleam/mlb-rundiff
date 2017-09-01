@@ -23,7 +23,7 @@ transformed parameters {
 
 model {
   eta_a ~ normal(0, 1);
-  sigma_y ~ normal(0, 7);
+  sigma_y ~ normal(0, 6);
   sigma_a ~ normal(0, 3);
 
   for (i in 1:n_games){
