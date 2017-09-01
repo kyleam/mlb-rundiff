@@ -31,9 +31,9 @@ dat <- season %>%
               team_away = as.integer(away_team),
               period_home = period_home,
               period_away = period_away,
-              score_diff = home_runs_scored - away_runs_scored) %>%
+              scorediff = home_runs_scored - away_runs_scored) %>%
     as.list()
-dat$n_games <- length(dat$score_diff)
+dat$n_games <- length(dat$scorediff)
 dat$n_teams <- n_distinct(dat$team_home)
 dat$n_periods <- max(dat$period_home)
 dat$prior_score <- prior_score$score

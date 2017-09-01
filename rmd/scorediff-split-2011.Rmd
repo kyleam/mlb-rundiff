@@ -51,7 +51,7 @@ effective sample sizes on the lower end.
 ```{r neff_plot, dependson = "fit", out.width = "50%", fig.width = 4.28}
 model_pars <- names(fit)
 selpars <- model_pars[!grepl("^eta", model_pars) &
-                      !grepl("score_diff_new", model_pars)]
+                      !grepl("scorediff_new", model_pars)]
 
 nrats <- neff_ratio(fit, pars = selpars)
 nrats[nrats < 0.5]
@@ -232,7 +232,7 @@ observed_idx <- which(paste0(info$team_names[dat$team_home],
                       %in%
                       paste0(matchups$home, matchups$away))
 
-observed <- tibble(score_diff = dat$score_diff[observed_idx],
+observed <- tibble(scorediff = dat$scorediff[observed_idx],
                    home_idx = dat$team_home[observed_idx],
                    home_name = info$team_names[home_idx],
                    away_idx = dat$team_away[observed_idx],
@@ -241,7 +241,7 @@ observed <- tibble(score_diff = dat$score_diff[observed_idx],
                                         levels = 1:8),
                    matchup = factor(paste0(away_name, "@", home_name)))
 
-ppc <- trace_intervals(samps$score_diff_new[,observed_idx], "game") %>%
+ppc <- trace_intervals(samps$scorediff_new[,observed_idx], "game") %>%
     mutate(home_name = observed$home_name,
            away_name = observed$away_name,
            home_period = factor(observed$home_period,
@@ -257,7 +257,7 @@ ggplot(ppc, aes(x = home_period)) +
     geom_hline(yintercept = 0, color = tc$primary_light_dim) +
     geom_linerange(aes(ymin = p2.5, ymax = p97.5),
                    alpha = 0.8) +
-    geom_point(aes(y = score_diff),
+    geom_point(aes(y = scorediff),
                fill = NA, color = tc$background_dark, shape = 21,
                data = observed) +
     scale_y_continuous(limits = c(-11, 11),

@@ -11,15 +11,15 @@ season <- glog %>%
 stopifnot(levels(season$home_team) == levels(season$away_team))
 
 dat <- season %>%
-    transmute(home = as.integer(home_team),
-              away = as.integer(away_team),
-              score_diff = home_runs_scored - away_runs_scored) %>%
+    transmute(team_home = as.integer(home_team),
+              team_away = as.integer(away_team),
+              scorediff = home_runs_scored - away_runs_scored) %>%
     as.list()
-dat$n_games <- length(dat$score_diff)
-dat$n_teams <- n_distinct(dat$home)
+dat$n_games <- length(dat$scorediff)
+dat$n_teams <- n_distinct(dat$team_home)
 dat$df <- 7
 
-rstan::stan_rdump(c("n_games", "n_teams", "home", "away", "score_diff", "df"),
+rstan::stan_rdump(names(dat),
                   envir = list2env(dat),
                   file = "scorediff-oneseason_2011.data.R")
 
