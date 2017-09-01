@@ -56,7 +56,7 @@ model {
   for (i in 1:n_periods)
     a_std[i] ~ normal(0, 1);
 
-  sigma_mu_a ~ cauchy(0, 1);
+  sigma_mu_a ~ normal(0, 1);
   mu_a ~ normal(prior_score * b_prev, sigma_mu_a);
 
   sigma_y ~ normal(0, 6);
