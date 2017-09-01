@@ -20,7 +20,7 @@ data {
   int<lower=1> period_away[n_games];
 
   row_vector[n_teams] prior_score;
-  vector[n_games] scorediff;
+  vector[n_games] rundiff;
 }
 
 parameters {
@@ -69,19 +69,19 @@ model {
       a_diff[i] = a[period_home[i], team_home[i]] -
         a[period_away[i], team_away[i]];
     }
-    scorediff ~ student_t(nu, a_diff + b_home, sigma_y);
+    rundiff ~ student_t(nu, a_diff + b_home, sigma_y);
   }
 }
 
 generated quantities {
-  vector[n_games] scorediff_new;
+  vector[n_games] rundiff_new;
 
   {
     vector[n_games] a_diff_new;
     for (i in 1:n_games){
       a_diff_new[i] = a[period_home[i], team_home[i]] -
         a[period_away[i], team_away[i]];
-      scorediff_new[i] = student_t_rng(nu, a_diff_new[i] + b_home, sigma_y);
+      rundiff_new[i] = student_t_rng(nu, a_diff_new[i] + b_home, sigma_y);
     }
   }
 }

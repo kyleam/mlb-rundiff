@@ -5,7 +5,7 @@ data {
   int<lower=1,upper=n_teams> team_home[n_games];
   int<lower=1,upper=n_teams> team_away[n_games];
 
-  vector[n_games] scorediff;
+  vector[n_games] rundiff;
 
   real df;
 }
@@ -27,5 +27,5 @@ model {
   sigma_a ~ normal(0, 3);
 
   for (i in 1:n_games)
-    scorediff[i] ~ student_t(df, a[team_home[i]] - a[team_away[i]], sigma_y);
+    rundiff[i] ~ student_t(df, a[team_home[i]] - a[team_away[i]], sigma_y);
 }

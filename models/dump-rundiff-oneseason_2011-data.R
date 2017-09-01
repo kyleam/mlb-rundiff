@@ -13,16 +13,16 @@ stopifnot(levels(season$home_team) == levels(season$away_team))
 dat <- season %>%
     transmute(team_home = as.integer(home_team),
               team_away = as.integer(away_team),
-              scorediff = home_runs_scored - away_runs_scored) %>%
+              rundiff = home_runs_scored - away_runs_scored) %>%
     as.list()
-dat$n_games <- length(dat$scorediff)
+dat$n_games <- length(dat$rundiff)
 dat$n_teams <- n_distinct(dat$team_home)
 dat$df <- 7
 
 rstan::stan_rdump(names(dat),
                   envir = list2env(dat),
-                  file = "scorediff-oneseason_2011.data.R")
+                  file = "rundiff-oneseason_2011.data.R")
 
 team_names <- levels(season$home_team)
 dump(c("team_names"),
-     file = "scorediff-oneseason_2011.info.R")
+     file = "rundiff-oneseason_2011.info.R")

@@ -40,8 +40,8 @@ for discrete data, but it may be good enough for my purposes.
 
 Below is a model that closely follows the World Cup model.
 
-```{r, cache.extra = file.info("../models/scorediff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
-writeLines(readLines("../models/scorediff-oneseason.stan"))
+```{r, cache.extra = file.info("../models/rundiff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
+writeLines(readLines("../models/rundiff-oneseason.stan"))
 ```
 
 There are two main differences from the World Cup model:
@@ -62,8 +62,8 @@ few diagnostic plots using the [bayesplot] package.
 
 [bayesplot]: http://mc-stan.org/users/interfaces/bayesplot.html
 
-```{r fit, cache.extra = file.info("../models/scorediff-oneseason_2011-fit.rds")}
-fit <- readRDS("../models/scorediff-oneseason_2011-fit.rds")
+```{r fit, cache.extra = file.info("../models/rundiff-oneseason_2011-fit.rds")}
+fit <- readRDS("../models/rundiff-oneseason_2011-fit.rds")
 ```
 
 The R-hats and effective sample sizes look OK, though the effective
@@ -194,19 +194,19 @@ For each of these match-ups, I'll generate a score differential from
 samples for each iteration and then summarize the response across the
 iterations by constructing the 95% intervals for each match-up.
 
-```{r scorediff_sim, dependson = c("matchups", "samps")}
+```{r rundiff_sim, dependson = c("matchups", "samps")}
 df <- 7
 
 n_games <- nrow(matchups)
 n_iter <- nrow(samps$sigma_y)
-scorediff_sim <- array(NA, c(n_iter, n_games))
+rundiff_sim <- array(NA, c(n_iter, n_games))
 set.seed(16125)
 for (i in 1:n_iter){
-    scorediff_sim[i,] <- samps$a[i, matchups$home] - samps$a[i, matchups$away] +
+    rundiff_sim[i,] <- samps$a[i, matchups$home] - samps$a[i, matchups$away] +
          rt(n_games, df) * samps$sigma_y[i]
 }
 
-result <- cbind(matchups, trace_intervals(scorediff_sim, "game_idx"))  %>%
+result <- cbind(matchups, trace_intervals(rundiff_sim, "game_idx"))  %>%
     as_tibble() %>%
     mutate(matchup = paste(home_name, "-", away_name),
            matchup = factor(matchup, levels = matchup))
@@ -216,7 +216,7 @@ I also have to pull together the observed run differentials for these
 match-ups.  This requires a little bit of work because the simulations
 put the team with the better record as the "home" team.
 
-```{r observed, dependson = c("team_names", "scorediff_sim", "result")}
+```{r observed, dependson = c("team_names", "rundiff_sim", "result")}
 observed <- glog %>%
     filter(lubridate::year(date) == 2011,
            home_team %in% team_names,
@@ -227,7 +227,7 @@ observed <- glog %>%
                             paste(away_team, "-", home_team),
                             paste(home_team, "-", away_team)),
            matchup = factor(matchup, levels = levels(result$matchup)),
-           scorediff = ifelse(flip,
+           rundiff = ifelse(flip,
                               away_runs_scored - home_runs_scored,
                               home_runs_scored - away_runs_scored)) %>%
     filter(!is.na(matchup))
@@ -244,7 +244,7 @@ result %>%
     geom_hline(yintercept = 0, color = tc$primary_light_dim) +
     geom_linerange(aes(x = fct_rev(matchup), ymin = p2.5, ymax = p97.5),
                    alpha = 0.8) +
-    geom_point(aes(x = matchup, y = scorediff),
+    geom_point(aes(x = matchup, y = rundiff),
                fill = NA, color = tc$background_dark, shape = 21,
                data = observed) +
     scale_y_continuous(limits = c(-13, 13),

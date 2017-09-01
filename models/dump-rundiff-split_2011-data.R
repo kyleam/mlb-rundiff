@@ -31,17 +31,17 @@ dat <- season %>%
               team_away = as.integer(away_team),
               period_home = period_home,
               period_away = period_away,
-              scorediff = home_runs_scored - away_runs_scored) %>%
+              rundiff = home_runs_scored - away_runs_scored) %>%
     as.list()
-dat$n_games <- length(dat$scorediff)
+dat$n_games <- length(dat$rundiff)
 dat$n_teams <- n_distinct(dat$team_home)
 dat$n_periods <- max(dat$period_home)
 dat$prior_score <- prior_score$score
 
 rstan::stan_rdump(names(dat), envir = list2env(dat),
-                  file = "scorediff-split_2011.data.R")
+                  file = "rundiff-split_2011.data.R")
 
 team_names <- levels(season$home_team)
 wins_2011 <- count_wins(filter(glog, year(date) == 2011))
 
-dump(c("team_names", "wins_2011"), file = "scorediff-split_2011.info.R")
+dump(c("team_names", "wins_2011"), file = "rundiff-split_2011.info.R")
