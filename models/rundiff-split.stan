@@ -42,8 +42,8 @@ parameters {
 transformed parameters {
   vector[n_teams] a[n_periods];
 
-  for (i in 1:n_periods)
-    a[i] = mu_a + sigma_a .* a_std[i];
+  for (j in 1:n_periods)
+    a[j] = mu_a + sigma_a .* a_std[j];
 }
 
 model {
@@ -53,8 +53,8 @@ model {
   tau ~ cauchy(0, 1);
 
   sigma_a ~ normal(0, tau);
-  for (i in 1:n_periods)
-    a_std[i] ~ normal(0, 1);
+  for (j in 1:n_periods)
+    a_std[j] ~ normal(0, 1);
 
   sigma_mu_a ~ normal(0, 1);
   mu_a ~ normal(prior_score * b_prev, sigma_mu_a);
