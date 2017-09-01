@@ -21,16 +21,14 @@ cut_periods <- function(x){
 season <- glog %>%
     filter(year(date) == 2011) %>%
     mutate(home_team = factor(home_team),
-           away_team = factor(away_team, levels = levels(home_team)),
-           period_home = cut_periods(home_team_game_number),
-           period_away = cut_periods(away_team_game_number))
+           away_team = factor(away_team, levels = levels(home_team)))
 stopifnot(levels(season$home_team) == levels(season$away_team))
 
 dat <- season %>%
     transmute(team_home = as.integer(home_team),
               team_away = as.integer(away_team),
-              period_home = period_home,
-              period_away = period_away,
+              period_home = cut_periods(home_team_game_number),
+              period_away = cut_periods(away_team_game_number),
               rundiff = home_runs_scored - away_runs_scored) %>%
     as.list()
 dat$n_games <- length(dat$rundiff)
