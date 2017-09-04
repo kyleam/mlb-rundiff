@@ -2,6 +2,10 @@ body {
     font-size: 18px;
 }
 
+.footnotes {
+    font-size: 16px;
+}
+
 a:link {
     color: #000;
     text-decoration: underline;
