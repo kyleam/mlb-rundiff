@@ -51,16 +51,16 @@ transformed parameters {
 }
 
 model {
-  b_home ~ normal(0, 1);
-  b_prev ~ normal(0, 1);
+  b_home ~ normal(0, 2);
+  b_prev ~ normal(0, 2);
 
-  tau ~ cauchy(0, 1);
+  tau ~ normal(0, 2);
 
   sigma_a_std ~ normal(0, 1);
   for (j in 1:n_periods)
     a_std[j] ~ normal(0, 1);
 
-  sigma_mu_a ~ normal(0, 1);
+  sigma_mu_a ~ normal(0, 2);
   mu_a ~ normal(prior_score * b_prev, sigma_mu_a);
 
   sigma_y ~ normal(0, 6);
