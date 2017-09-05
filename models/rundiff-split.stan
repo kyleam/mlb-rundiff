@@ -27,8 +27,8 @@ parameters {
   real<lower=0> sigma_y;
   real<lower=1> nu;
 
-  real<lower=0> sigma_mu_a;
-  vector[n_teams] mu_a;
+  real<lower=0> sigma_theta;
+  vector[n_teams] theta;
 
   real<lower=0> tau;
   vector<lower=0>[n_teams] sigma_a_std;
@@ -47,7 +47,7 @@ transformed parameters {
     sigma_a[k] = tau * sigma_a_std[k];
 
   for (j in 1:n_periods)
-    a[j] = mu_a + sigma_a .* a_std[j];
+    a[j] = theta + sigma_a .* a_std[j];
 }
 
 model {
@@ -60,8 +60,8 @@ model {
   for (j in 1:n_periods)
     a_std[j] ~ normal(0, 1);
 
-  sigma_mu_a ~ normal(0, 2);
-  mu_a ~ normal(prior_score * b_prev, sigma_mu_a);
+  sigma_theta ~ normal(0, 2);
+  theta ~ normal(prior_score * b_prev, sigma_theta);
 
   sigma_y ~ normal(0, 6);
   nu ~ gamma(2, 0.1);
