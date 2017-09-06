@@ -3,11 +3,9 @@
 (packages->manifest
  (map (compose list specification->package+output)
       (list "bash"                      ; for rstan
-            "binutils"                  ; for rstan
             "coreutils"
             "dos2unix"
             "gawk"
-            "gcc"                       ; for rstan
             "gcc-toolchain"             ; for rstan
             "linux-libre-headers"       ; for rstan
             "make"                      ; for rstan
