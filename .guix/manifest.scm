@@ -2,13 +2,9 @@
 
 (packages->manifest
  (map (compose list specification->package+output)
-      (list "bash"                      ; for rstan
-            "coreutils"
+      (list "coreutils"
             "dos2unix"
             "gawk"
-            "gcc-toolchain"             ; for rstan
-            "linux-libre-headers"       ; for rstan
-            "make"                      ; for rstan
             "python"
             "python-docopt"
             "python-pytest"
