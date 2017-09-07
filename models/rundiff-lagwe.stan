@@ -39,8 +39,7 @@ parameters {
   real<lower=0> sigma_theta;
   vector[n_teams] theta;
 
-  real<lower=0> tau_a;
-  vector<lower=0>[n_teams] sigma_a_std;
+  real<lower=0> sigma_a;
 
   real b_home;
   real b_prev;
@@ -57,17 +56,13 @@ parameters {
 transformed parameters {
   vector[n_teams] a[n_periods];
   vector[n_pitchers] gamm;
-  vector<lower=0>[n_teams] sigma_a;
   vector<lower=0>[n_parks] sigma_y;
-
-  for (k in 1:n_teams)
-    sigma_a[k] = tau_a * sigma_a_std[k];
 
   for (m in 1:n_parks)
     sigma_y[m] = mu_sigma_y + tau_y * sigma_y_std[m];
 
   for (j in 1:n_periods)
-    a[j] = theta + sigma_a .* a_std[j];
+    a[j] = theta + sigma_a * a_std[j];
 
   for (l in 1:n_pitchers)
     gamm[l] = sigma_gamm * gamm_std[l];
@@ -83,8 +78,7 @@ model {
   sigma_gamm ~ normal(0, 2);
   gamm_std ~ normal(0, 1);
 
-  tau_a ~ normal(0, 2);
-  sigma_a_std ~ normal(0, 1);
+  sigma_a ~ normal(0, 2);
 
   for (j in 1:n_periods)
     a_std[j] ~ normal(0, 1);
