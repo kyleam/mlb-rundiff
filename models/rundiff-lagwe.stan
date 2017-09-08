@@ -118,28 +118,3 @@ model {
     rundiff ~ student_t(nu, mu_home - mu_away, sy);
   }
 }
-
-generated quantities {
-  vector[n_games] rundiff_new;
-
-  {
-    vector[n_games] mu_home_new;
-    vector[n_games] mu_away_new;
-    vector[n_games] sy_new;
-    for (i in 1:n_games){
-      mu_home_new[i] = a[period_home[i], team_home[i]] +
-        gamm[pitcher_home[i]] +
-        b_towest * lag_towest_home[i] +
-        b_toeast * lag_toeast_home[i] +
-        b_home;
-      mu_away_new[i] = a[period_away[i], team_away[i]] +
-        gamm[pitcher_away[i]] +
-        b_towest * lag_towest_away[i] +
-        b_toeast * lag_toeast_away[i];
-      sy_new[i] = sigma_y[park[i]];
-
-      rundiff_new[i] = student_t_rng(nu, mu_home_new[i] - mu_away_new[i],
-                                     sy_new[i]);
-    }
-  }
-}
