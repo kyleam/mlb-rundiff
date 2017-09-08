@@ -148,14 +148,15 @@ rule models_dump_rundiff_park_2011_data:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
-rule models_dump_rundiff_lagwe_2011_data:
-    input: "models/dump-rundiff-lagwe_2011-data.R",
+rule models_dump_rundiff_year_range_data_:
+    input: "models/dump-rundiff-{name}-data-year-range.R",
            "lib/utils.R",
            "lag/log-with-lags-cleaned.csv"
-    output: "models/rundiff-lagwe_2011.data.R",
-            "models/rundiff-lagwe_2011.info.R"
+    output: "models/rundiff-{name}_{year1}-{year2}.data.R",
+            "models/rundiff-{name}_{year1}-{year2}.info.R"
     shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+           "Rscript --vanilla $(basename {input[0]}) "
+           "{wildcards.year1} {wildcards.year2}"
 
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
