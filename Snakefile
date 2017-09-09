@@ -13,6 +13,11 @@ rule gamelogs_download_park_codes:
     shell: "cd gamelogs && "
            "wget http://www.retrosheet.org/parkcode.txt"
 
+rule gamelogs_cut_park_codes:
+    input: "gamelogs/parkcode.txt"
+    output: "gamelogs/parkcode-cut.csv"
+    shell: "sed 1d {input} | cut -f1,2 -d, > {output}"
+
 rule gamelogs_download_:
     output: "gamelogs/{name}.zip"
     shell: "cd gamelogs && "
