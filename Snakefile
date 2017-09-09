@@ -8,6 +8,11 @@ rule gamelogs_download_column_info:
     shell: "cd gamelogs && "
            "wget http://www.retrosheet.org/gamelogs/glfields.txt"
 
+rule gamelogs_download_park_codes:
+    output: "gamelogs/parkcode.txt"
+    shell: "cd gamelogs && "
+           "wget http://www.retrosheet.org/parkcode.txt"
+
 rule gamelogs_download_:
     output: "gamelogs/{name}.zip"
     shell: "cd gamelogs && "
