@@ -1,16 +1,16 @@
 
 theme_colors <- function(){
     list(background_light = "gray92",
+         background = "gray60",
          background_dark = "gray30",
-         secondary = "gray10",
-         ## Purple colors are taken from bayesplot's "purple" color
-         ## scheme.
-         primary_light_dim = "#e5cce5",
-         primary_light = "#bf7fbf",
-         primary_dim = "#a64ca6",
-         primary = "#800080",
-         primary_dark_dim = "#660066",
-         primary_dark = "#400040")
+         primary = "#26a65b",
+         primary_dark = "#14572F",
+         primary_light = "#53B87D",
+         primary_lighter = "#bae2cb",
+         secondary = "#3f26a6",
+         secondary_dark = "#211457",
+         secondary_light = "#6753B8",
+         secondary_lighter = "#c2bae2")
 }
 
 theme_setup <- function(){
@@ -21,10 +21,6 @@ theme_setup <- function(){
                          list(fill = tc$background_light,
                               colour = tc$background_dark,
                               size = 0.3))
-    update_geom_defaults("point",
-                         list(colour = tc$secondary))
-    update_geom_defaults("line",
-                         list(colour = tc$secondary))
 }
 
 theme_axis_line <- function(){

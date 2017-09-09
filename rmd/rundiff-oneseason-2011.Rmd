@@ -17,7 +17,7 @@ library(bayesplot)
 
 source("plot-utils.R")
 
-color_scheme_set(c("purple"))
+color_scheme_set(c("green"))
 theme_set(theme_minimal())
 theme_setup()
 
@@ -109,7 +109,7 @@ mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]")) +
 The traces look OK.
 
 ```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
-color_scheme_set("mix-darkgray-purple")
+color_scheme_set("mix-darkgray-green")
 mcmc_trace(samps_flat, regex_pars = "sigma") +
     theme_axis_line()
 ```
@@ -241,7 +241,7 @@ during the 2011 season.
 result %>%
     filter(matchup %in% observed$matchup) %>%
     ggplot() +
-    geom_hline(yintercept = 0, color = tc$primary_light_dim) +
+    geom_hline(yintercept = 0, color = tc$primary_lighter) +
     geom_linerange(aes(x = fct_rev(matchup), ymin = p2.5, ymax = p97.5),
                    alpha = 0.8) +
     geom_point(aes(x = matchup, y = rundiff),

@@ -17,11 +17,11 @@ a:visited {
 }
 
 a:hover {
-    color: #660066;
+    color: #14572F;
 }
 
 a:active {
-    color: #660066;
+    color: #14572F;
 }
 
 pre .operator {
@@ -43,11 +43,12 @@ pre .paren {
 }
 
 pre .literal {
-    color: #400040;
+    color: #219451;
 }
 
 pre .number {
-    color: #400040;
+    color: #219451;
+
 }
 
 pre .comment {
@@ -56,5 +57,5 @@ pre .comment {
 }
 
 pre .string {
-    color: #660066;
+    color: #14572F;
 }
