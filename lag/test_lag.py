@@ -68,43 +68,51 @@ def test_game_lags():
                       visiting_team="SEA",
                       visiting_gamenum=1,
                       home_team="NYA",
-                      home_gamenum=1),
+                      home_gamenum=1,
+                      park="NYC16"),
              lag.Game(date=datetime.strptime("20000405", "%Y%m%d"),
                       dbl_header="0",
                       visiting_team="COL",
                       visiting_gamenum=1,
                       home_team="LAN",
-                      home_gamenum=1),
+                      home_gamenum=1,
+                      park = "LOS03"),
              lag.Game(date=datetime.strptime("20000406", "%Y%m%d"),
                       dbl_header="1",
-                      visiting_team="COL",
-                      visiting_gamenum=2,
-                      home_team="CIN",
-                      home_gamenum=1),
+                      ## Home and away are swapped with park.
+                      visiting_team="CIN",
+                      visiting_gamenum=1,
+                      home_team="COL",
+                      home_gamenum=2,
+                      park="CIN08"),
              lag.Game(date=datetime.strptime("20000406", "%Y%m%d"),
                       dbl_header="2",
                       visiting_team="COL",
                       visiting_gamenum=3,
                       home_team="CIN",
-                      home_gamenum=2),
+                      home_gamenum=2,
+                      park="CIN08"),
              lag.Game(date=datetime.strptime("20000406", "%Y%m%d"),
                       dbl_header="0",
                       visiting_team="SLN",
                       visiting_gamenum=1,
                       home_team="SEA",
-                      home_gamenum=2),
+                      home_gamenum=2,
+                      park="SEA03"),
              lag.Game(date=datetime.strptime("20000407", "%Y%m%d"),
                       dbl_header="0",
                       visiting_team="COL",
                       visiting_gamenum=4,
                       home_team="CIN",
-                      home_gamenum=3),
+                      home_gamenum=3,
+                      park="CIN08"),
              lag.Game(date=datetime.strptime("20000412", "%Y%m%d"),
                       dbl_header="0",
                       visiting_team="NYA",
                       visiting_gamenum=2,
                       home_team="SEA",
-                      home_gamenum=3)]
+                      home_gamenum=3,
+                      park="SEA03")]
 
     result = list(lag.game_lags(games))
 
@@ -114,9 +122,9 @@ def test_game_lags():
     for idx in range(0, 4):
         assert result[idx]["lag"] == 0
 
-    # COL came from LAN to CIN.
-    assert result[4]["lag"] == 0
-    assert result[5]["lag"] == 3
+    # COL came from LAN to CIN (but played game as home team).
+    assert result[4]["lag"] == 3
+    assert result[5]["lag"] == 0
     # Second game of double header should match the first.
     assert result[6]["lag"] == 0
     assert result[7]["lag"] == 3
