@@ -155,8 +155,8 @@ day faced off against the Twins in Minnesota.
 ## Comparison with SSA's tables
 
 As far as I can tell, SSA did not publish their day-by-day lag
-calculations or the code they used to generated these.  Using their
-two supplemental tables, however, I can gain some idea of whether my
+calculations or the code they used to generate these.  Using their two
+supplemental tables, however, I can gain some idea of whether my
 generated data set matches up.
 
 ### SSA's Table S1
