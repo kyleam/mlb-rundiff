@@ -189,8 +189,7 @@ First, let's focus on the "West" and "East" rows.
 
 ```{r, dependson = "lag_tally"}
 lag_tally %>%
-    group_by(field, direction) %>%
-    summarise(n = n()) %>%
+    count(field, direction) %>%
     spread(field, n)
 ```
 
@@ -204,9 +203,8 @@ groups are also close if not identical to what's reported in Table S1.
 
 ```{r, dependson = "lag_tally"}
 lag_tally %>%
-    group_by(field, direction, abs(lag)) %>%
     filter(direction != "none") %>%
-    summarise(n = n()) %>%
+    count(field, direction, abs(lag)) %>%
     spread(field, n)
 ```
 
