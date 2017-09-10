@@ -258,7 +258,7 @@ lag_cmp <- lag %>%
     mutate(team = case_when(team == "CAL" ~ "ANA",
                             team == "MON" ~ "WAS",
                             TRUE ~ team),
-            matchup = str_replace(matchup, "CAL", "ANA"),
+           matchup = str_replace(matchup, "CAL", "ANA"),
            matchup = str_replace(matchup, "MON", "WAS"))
 ```
 
