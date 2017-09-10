@@ -18,6 +18,18 @@ rule gamelogs_cut_park_codes:
     output: "gamelogs/parkcode-cut.csv"
     shell: "sed 1d {input} | cut -f1,2 -d, > {output}"
 
+rule gamelogs_download_person_id:
+    output: "gamelogs/retroID.htm"
+    shell: "cd gamelogs && "
+           "wget http://www.retrosheet.org/retroID.htm"
+
+rule gamelogs_extract_person_id:
+    input: "gamelogs/retroID.htm",
+    output: "gamelogs/person-ids.csv"
+    shell:  "echo 'last,first,id,debut' > {output} &&"
+            "awk 'f;/LAST,FIRST/{{f=1}}' {input} | "
+            "awk '/^$/ {{exit}} {{print}}' >> {output}"
+
 rule gamelogs_download_:
     output: "gamelogs/{name}.zip"
     shell: "cd gamelogs && "
