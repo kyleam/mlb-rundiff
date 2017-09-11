@@ -42,7 +42,7 @@ between 1992 and 2011 with two lines, one for each team.
      mutate(date = ymd(date),
             year = year(date),
             game_tz = factor(game_tz,
-                             levels = c("ET", "CT", "MT", "PT"))))
+                             levels = c("ET", "CT", "MT", "PT", "other"))))
 ```
 
 Let's tally the number games per team in each season.
@@ -118,11 +118,11 @@ by time zone and add a grid to more clearly mark individual days.
 colors <- c("#00688b", "#8b0000", "#9400d3", "#2e8b57")
 
 ## Create data frame for labeling facets.
-zones <- data.frame(date = rep(ymd("20110401"), 4),
-                    lag = rep(2.3, 4),
-                    team = levels(lag2011$team),
-                    game_tz = levels(lag2011$game_tz),
-                    label = levels(lag2011$game_tz))
+zones <- tibble(date = rep(ymd("20110401"), 4),
+                lag = rep(2.3, 4),
+                team = fct_inorder(levels(lag2011$team)),
+                game_tz = levels(droplevels(lag2011$game_tz)),
+                label = game_tz)
 
 lag2011 %>%
     ggplot(aes(date, lag)) +
@@ -171,21 +171,26 @@ To make it easier to produce these tallies, I'll reformat the `lag`
 data frame.
 
 ```{r lag_tally, dependson = "lag"}
-lag_tally <- lag %>%
-    mutate(date = ymd(date)) %>%
-    separate(matchup, sep = "@", into = c("away_team", "home_team"),
+reformat_lag <- function(data){
+    separate(data, .data$matchup,
+             sep = "@", into = c("away_team", "home_team"),
              remove = FALSE) %>%
-    mutate(field = factor(ifelse(team == home_team, "home", "away"),
-                          levels = c("home", "away")),
-           direction = factor(case_when(lag > 0 ~ "to_east",
-                                        lag < 0 ~ "to_west",
-                                        TRUE ~ "none"),
-                              levels = c("none", "to_west", "to_east"))) %>%
-    select(date, team, field, direction, everything()) %>%
-    select(-home_team, -away_team)
+        mutate(field = factor(ifelse(.data$team == .data$home_team,
+                                     "home",
+                                     "away"),
+                              levels = c("home", "away")),
+               direction = factor(case_when(.data$lag > 0 ~ "to_east",
+                                            .data$lag < 0 ~ "to_west",
+                                            TRUE ~ "none"),
+                                  levels = c("none", "to_west", "to_east"))) %>%
+        select(date, team, field, direction, everything()) %>%
+        select(-home_team, -away_team)
+}
+
+lag_tally <- reformat_lag(lag)
 ```
 
-First, let's focus on the "West" and "East" rows.
+First, let's focus on the "West" and "East" rows of Table S1.
 
 ```{r, dependson = "lag_tally"}
 lag_tally %>%
@@ -193,31 +198,80 @@ lag_tally %>%
     spread(field, n)
 ```
 
+Those tallies are similar enough that I don't think my lag
+calculations are entirely off base.  If I generate the lag values
+using the time zone of the home team rather the time zone of the park,
+I can get closer to the Table S1 tallies.
+
+```{r lag_ht, cache.extra = file.info("../lag/lag-combined-1992_2011-ht.csv")}
+lag_ht <- read_csv("../lag/lag-combined-1992_2011-ht.csv") %>%
+    mutate(date = ymd(date),
+           year = year(date),
+           game_tz = factor(game_tz,
+                            levels = c("ET", "CT", "MT", "PT", "other")))
+```
+
+```{r lag_ht_tally, dependson = c("lag_tally", "lag_ht")}
+lag_ht_tally <- reformat_lag(lag_ht)
+```
+
+```{r, dependson = "lag_ht_tally"}
+lag_ht_tally %>%
+    count(field, direction) %>%
+    spread(field, n)
+```
+
 Each count from my generated data set is within three of the
-corresponding reported value.  Examining only these bulk numbers, it's
-hard to guess what might be causing these discrepancies, but things
-look close enough that I'm not too worried about it.
+corresponding reported value.  When these lags are split up by their
+magnitude, the counts for these groups are also close if not identical
+to what's reported in Table S1.
 
-When these lags are split up by their magnitude, the counts for these
-groups are also close if not identical to what's reported in Table S1.
-
-```{r, dependson = "lag_tally"}
-lag_tally %>%
+```{r, dependson = "lag_ht_tally"}
+lag_ht_tally %>%
     filter(direction != "none") %>%
     count(field, direction, abs(lag)) %>%
     spread(field, n)
 ```
 
+So it seems that (1) I'm calculating my lags in a way that's similar
+to SSA's jet lag definition and (2) SSA based their time zone based on
+the recorded home team rather than the time zone of the park's
+location.  These usually but not always line up:
+
+```{r, dependson = c("lag_tally")}
+odd_parks <- filter(lag_tally, field == "home") %>%
+    ## Group parks for same team (e.g., ARL01, ARL02).
+    mutate(park_prefix = substring(park, 1, 3)) %>%
+    select(team, park_prefix) %>%
+    distinct() %>%
+    count(team) %>%
+    filter(n > 1) %>%
+    .$team
+
+filter(lag_tally, team %in% odd_parks & field == "home") %>%
+    select(team, park) %>%
+    arrange(team, park) %>%
+    distinct() %>%
+    as.data.frame()
+```
+
+Within this list, we can see games played in Disney's Wide World of
+Sports Complex, Hawaii, Japan, Puerto Rico, and Mexico.  There are
+also games at a usual MLB park where the home team doesn't match.  For
+example, the Marlins played as the home team in
+Seattle [because of a U2 concert][u2].
+
+[u2]: https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml
+
 ### SSA's Table S2
 
 I'll need to do a little more work to compare my lag data set with
-SSA's Table S2.  With the help of pandoc, I've converted their docx
+SSA's Table S2. With the help of pandoc, I've converted their docx
 table into a more useful format.
 
 ```{r s2_wide, cache.extra = file.info("../lag/song2017how-table-s2.csv")}
 (s2_wide <- read_csv("../lag/song2017how-table-s2.csv") %>%
     mutate(date = ymd(date)))
-
 ```
 
 Notice that there are many fewer rows in this data frame than in
@@ -251,62 +305,115 @@ day.)
 ```
 
 ```{r lag_cmp, dependson = "lag"}
-lag_cmp <- lag %>%
-    filter(dbl_header < 2) %>%
-    mutate(team = case_when(team == "CAL" ~ "ANA",
-                            team == "MON" ~ "WAS",
-                            TRUE ~ team),
-           matchup = str_replace(matchup, "CAL", "ANA"),
-           matchup = str_replace(matchup, "MON", "WAS"))
+prepare_cmp <- function(data){
+    filter(data, .data$dbl_header < 2) %>%
+        mutate(team = case_when(.data$team == "CAL" ~ "ANA",
+                                .data$team == "MON" ~ "WAS",
+                                TRUE ~ .data$team),
+               matchup = str_replace(.data$matchup, "CAL", "ANA"),
+               matchup = str_replace(matchup, "MON", "WAS"))
+}
+
+lag_cmp <- prepare_cmp(lag)
+lag_ht_cmp <- prepare_cmp(lag_ht)
 ```
 
-Now the two tables can be joined.
+Now the two tables can be joined (well, three tables because I'm using
+both the park-based and home-team-based lag values).
 
 ```{r full, dependson = c("lag_cmp", "s2_cmp")}
 full <- full_join(lag_cmp, s2_cmp,
-                  suffix = c("", ".s2"),
-                  by = c("date" = "date",
-                         "team" = "team",
-                         "matchup" = "matchup"))
+              suffix = c("", ".s2"),
+              by = c("date" = "date",
+                     "team" = "team",
+                     "matchup" = "matchup"))
+
+full_ht <- full_join(lag_ht_cmp, s2_cmp,
+                     suffix = c("", ".s2"),
+                     by = c("date" = "date",
+                            "team" = "team",
+                            "matchup" = "matchup"))
 ```
-All the games in Table S2 appear to be in my generated table.
+All the games in Table S2 appear to be in my generated tables.
 
 ```{r, dependson = "full"}
 filter(full, is.na(lag))
+filter(full_ht, is.na(lag))
+```
+
+A few of the lag values don't match up for the home-team-based lag
+values.
+
+```{r, dependson = "full"}
+filter(full_ht, lag != lag.s2) %>%
+    select(-dbl_header, -year)
+```
+
+Looking at the game logs as well as baseball-reference.com, my values
+seem right, so that probably indicates that I'm missing a few edge
+cases of the lag calculation rules.  One edge case that I think
+explains the first three of these is calculating the lag for a trip
+when the team starts off with a lag.  For example, for the April 18,
+2007, entry above, San Diego had a +1 lag when it [traveled][sdn] from
+Chicago back to San Diego, so they ended up at -1 in my calculations
+instead of -2.  I'm not sure what makes the most sense here, but these
+events are pretty rare because a team usually stays around for at last
+three days, which is enough to drop their lag back to zero.
+
+For most of the entries, though, I'm not spotting any obvious
+explanations.
+
+[sdn]: https://www.baseball-reference.com/teams/SDP/2007-schedule-scores.shtml
+
+When I consider the park-based lags instead, there are of course
+additional discrepancies.
+
+```{r, dependson = "full"}
+filter(full, lag != lag.s2) %>%
+    select(-dbl_header, -year) %>%
+    as.data.frame()
 ```
 
 On the other hand, when I subset my generated data set based on Table
-S2's criteria, I find eight rows (four games) that aren't in Table S2.
+S2's criteria, I find eight rows (four games) that aren't in Table S2
+if I use the home-team-based values.
+
+```{r, dependson = "full"}
+full_ht %>%
+    filter(is.na(lag.s2)) %>%
+    group_by(date, matchup, dbl_header) %>%
+    filter(max(abs(lag)) > 1) %>%
+    ungroup() %>%
+    select(-lag.s2, -dbl_header) %>%
+    as.data.frame()
+```
+
+The two ATL&#64;SEA games are the result of the U2 situation described
+above (which was the Mariner's previous series).  My guess is that,
+instead of using the park IDs to get the time zone, SSA are flagging
+these series as problematic and filtering them out.
+
+Here are the parked-based values that aren't in Table S2:
 
 ```{r, dependson = "full"}
 full %>%
     filter(is.na(lag.s2)) %>%
     group_by(date, matchup, dbl_header) %>%
     filter(max(abs(lag)) > 1) %>%
-    ungroup()
+    ungroup() %>%
+    select(-lag.s2, -dbl_header) %>%
+    as.data.frame()
 ```
 
-Inspecting the game logs, all these lag values look correct.  I also
-looked at the schedules on [baseball-reference.com].  The first two
-games (PIT&#64;OAK and SEA&#64;MIL) seem to match up.  On the other
-hand, the Retrosheet game logs and baseball-reference.com don't agree
-on the games that occurred *before* the two ATL&#64;SEA games.
-Retrosheet records the Mariners as the visiting team in the previous
-games against the Marlins, explaining the calculated lags.  Instead,
-baseball-reference.com [reports] that the Marlins were the visiting
-team, and helpfully notes that the "game was moved from Miami to
-Seattle due to a U2 concert."  Looking at the Restrosheet data for
-this series more closely, I see that the "ParkID" column is "SEA03",
-despite the Mariners begin listed as the visiting team. Keeping the
-home/visitor information the same makes sense because the game was
-played as if the Marlins were the home team.
+So, based on the comparisons with Table S1 and S2, I think
 
-[baseball-reference.com]: https://www.baseball-reference.com/
-[reports]: https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml
+  * my lag calculations pretty closely follow SSA's definition
+    because, using the home-team-based time zones, there is good,
+    though not perfect, agreement between the sets.
 
-OK, I'll have to add a processing step to adjust for that.  But by and
-large, it seems like my generated data set has lag values that are
-consistent with SSA's data set.
+  * SSA didn't use the park ID to determine the time zone.
+
+I will use my park-based lag calculations going forward.
 
 ------------------------------------------------------------------------
 
