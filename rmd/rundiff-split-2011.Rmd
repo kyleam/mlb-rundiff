@@ -40,7 +40,7 @@ with any other splits yet.
 
 ## Model diagnostics
 
-```{r fit, cache.extra = file.info("../models/rundiff-split_2011-fit.rds")}
+```{r fit, cache.extra = tools::md5sum("../models/rundiff-split_2011-fit.rds")}
 fit <- readRDS("../models/rundiff-split_2011-fit.rds")
 ```
 
@@ -171,7 +171,7 @@ theme_set(prev_theme)
 
 And here are the ability estimates for each team and period.
 
-```{r info, cache.extra = file.info("../models/rundiff-split_2011.info.R")}
+```{r info, cache.extra = tools::md5sum("../models/rundiff-split_2011.info.R")}
 source("../lib/utils.R")
 info <- source_as_list("../models/rundiff-split_2011.info.R")
 ```
@@ -210,7 +210,7 @@ a disproportionate number of close games).
 
 ## Posterior predictive check
 
-```{r dat, cache.extra = file.info("../models/rundiff-split_2011.data.R")}
+```{r dat, cache.extra = tools::md5sum("../models/rundiff-split_2011.data.R")}
 dat <- source_as_list("../models/rundiff-split_2011.data.R")
 ```
 

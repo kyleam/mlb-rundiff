@@ -40,7 +40,7 @@ for discrete data, but it may be good enough for my purposes.
 
 Below is a model that closely follows the World Cup model.
 
-```{r, cache.extra = file.info("../models/rundiff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
+```{r, cache.extra = tools::md5sum("../models/rundiff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
 writeLines(readLines("../models/rundiff-oneseason.stan"))
 ```
 
@@ -62,7 +62,7 @@ few diagnostic plots using the [bayesplot] package.
 
 [bayesplot]: http://mc-stan.org/users/interfaces/bayesplot.html
 
-```{r fit, cache.extra = file.info("../models/rundiff-oneseason_2011-fit.rds")}
+```{r fit, cache.extra = tools::md5sum("../models/rundiff-oneseason_2011-fit.rds")}
 fit <- readRDS("../models/rundiff-oneseason_2011-fit.rds")
 ```
 
@@ -126,7 +126,7 @@ mcmc_trace(samps_flat, regex_pars = "^a\\[", facet_args = list(ncol = 5)) +
 The order of team ability estimates should largely follow the final
 rankings for the 2011 season.
 
-```{r glog, cache.extra = file.info("lag/log-with-lags-cleaned.csv")}
+```{r glog, cache.extra = tools::md5sum("lag/log-with-lags-cleaned.csv")}
 glog <- read_csv("../lag/log-with-lags-cleaned.csv")
 ```
 
