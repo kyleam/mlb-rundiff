@@ -156,9 +156,8 @@ avals <- trace_intervals(samps$a, "team_idx") %>%
 ```{r avals_plot, dependson = "avals", out.width = "50%", fig.width = 4.28, fig.asp = 1.2}
 ggplot(avals, aes(x = fct_rev(team))) +
     geom_hline(yintercept = 0, color = tc$background_light, size = 1) +
-    geom_linerange(aes(ymin = p10, ymax = p90), color = tc$background_dark) +
-    geom_linerange(aes(ymin = p25, ymax = p75), size = 0.75) +
-    geom_point(aes(y = mean)) +
+    geom_pointrange(aes(y = mean, ymin = p10, ymax = p90)) +
+    geom_linerange(aes(ymin = p25, ymax = p75), size = 0.9) +
     labs(x = NULL,
          y = "mean ability (with 50% and 80% intervals)",
          title = "Team ability estimates for 2011 season",
