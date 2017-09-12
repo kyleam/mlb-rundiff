@@ -7,4 +7,6 @@ output:
     css: styles.css
     toc: true
     # toc_float: true
+    include:
+      after_body: footer.html
 exclude: ["*~"]

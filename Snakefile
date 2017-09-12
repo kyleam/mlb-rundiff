@@ -200,6 +200,7 @@ rmd_site_input = [
     "models/rundiff-oneseason_2011-fit.rds",
     "models/rundiff-split_2011-fit.rds",
     "rmd/_song2017how-table-s1.md",
+    "rmd/footer.html",
     "rmd/plot-utils.R",
     "rmd/rundiff-split.stan",
 ]
