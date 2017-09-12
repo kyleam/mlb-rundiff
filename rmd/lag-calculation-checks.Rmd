@@ -417,8 +417,6 @@ So, based on the comparisons with Table S1 and S2, I think
 
 I will use my park-based lag calculations going forward.
 
-------------------------------------------------------------------------
-
 ```{r session_info, echo = FALSE, results = "asis"}
 source("session-info.R")
 ```

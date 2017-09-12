@@ -5,4 +5,7 @@ sink(sessfile)
 print(devtools::session_info())
 sink()
 
-cat(paste0("[R session info](./", sessfile, ")\n"))
+cat('<div id="rsession">\n')
+cat("<hr>")
+cat(paste0('<a href="', sessfile, '"> R session info</a>\n'))
+cat("</div>\n")

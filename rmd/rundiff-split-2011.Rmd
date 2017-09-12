@@ -278,9 +278,6 @@ The interavls are still unimpressively large.  My next attempt to
 shrink them will be to incorporate information about the starting
 pitcher for each team.
 
-
-------------------------------------------------------------------------
-
 ```{r session_info, echo = FALSE, results = "asis"}
 source("session-info.R")
 ```

@@ -6,7 +6,7 @@ body {
     font-size: 16px;
 }
 
-#footer {
+#footer, #rsession {
     font-size: 14px;
     text-align: center;
     color: #696969;

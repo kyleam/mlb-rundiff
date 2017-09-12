@@ -291,8 +291,6 @@ In order to do that, here are the next steps I'm considering:
 [mk1]: http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/
 [mk2]: https://github.com/milkha/EPL
 
-------------------------------------------------------------------------
-
 ```{r session_info, echo = FALSE, results = "asis"}
 source("session-info.R")
 ```
