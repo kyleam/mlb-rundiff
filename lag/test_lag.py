@@ -32,15 +32,18 @@ def test_calculate_lag__vary_lag_prev():
     # ET -> PT
     assert lag.calculate_lag(0, 1, 0, 3) == -3
     assert lag.calculate_lag(1, 1, 0, 3) == -2
-    assert lag.calculate_lag(20, 1, 0, 3) == 17
     assert lag.calculate_lag(-1, 1, 0, 3) == -4
-    assert lag.calculate_lag(-20, 1, 0, 3) == -23
+
     # PT -> CT
     assert lag.calculate_lag(0, 1, 3, 1) == 2
     assert lag.calculate_lag(1, 1, 3, 1) == 3
-    assert lag.calculate_lag(20, 1, 3, 1) == 22
     assert lag.calculate_lag(-1, 1, 3, 1) == 1
-    assert lag.calculate_lag(-20, 1, 3, 1) == -18
+
+    # Unrealistic values are accepted for the previous lag.
+    assert lag.calculate_lag(100, 1, 0, 3) == 97
+    assert lag.calculate_lag(-100, 1, 0, 3) == -103
+    assert lag.calculate_lag(100, 1, 3, 1) == 102
+    assert lag.calculate_lag(-100, 1, 3, 1) == -98
 
 def test_calculate_lag__vary_days_delta():
     assert lag.calculate_lag(3, 3, 0, 0) == 0
