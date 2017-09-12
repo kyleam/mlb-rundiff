@@ -1,3 +1,16 @@
 #!/usr/bin/sh
 
 ./guix-cmd py.test
+
+## Check for runaway lag values.
+./guix-snakemake -j3 --quiet lag/lag-combined-1992_2011.csv
+lag_max=$(sed 1d lag/lag-combined-1992_2011.csv |
+              cut -d, -f4 |
+              sed "s/-//" |
+              sort -rn |
+              head -1)
+
+if [ "$lag_max" -gt 3 ]; then
+    echo "A lag magnitude of $lag_max should be impossible"
+    exit 1
+fi
