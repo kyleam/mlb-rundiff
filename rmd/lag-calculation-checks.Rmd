@@ -34,14 +34,16 @@ with the information available in SSA's supplemental tables.
 
 ### Distribution of games across teams each season
 
-The file "lag-combined-1992_2011.csv" should represent every game
-between 1992 and 2011 with two lines, one for each team.
+The file "lag-combined-1990_2016.csv" should represent every game
+between 1990 and 2016 with two lines, one for each team.  I'll filter
+to 1992 through 2011 to match the year range used by SSA.
 
-```{r lag, cache.extra = file.info("../lag/lag-combined-1992_2011.csv")}
-(lag <- read_csv("../lag/lag-combined-1992_2011.csv") %>%
+```{r lag, cache.extra = file.info("../lag/lag-combined-1990_2016.csv")}
+(lag <- read_csv("../lag/lag-combined-1990_2016.csv") %>%
      mutate(date = ymd(date),
-            year = year(date),
-            game_tz = factor(game_tz,
+            year = year(date)) %>%
+     filter(between(year, 1992, 2011)) %>%
+     mutate(game_tz = factor(game_tz,
                              levels = c("ET", "CT", "MT", "PT", "other"))))
 ```
 

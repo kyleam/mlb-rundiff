@@ -76,16 +76,17 @@ def calculate_lag(lag_prev, days_delta, tz_prev, tz):
         return lag_new + ndays
 
 ZONES = {"ANA01": 3, "ARL01": 1, "ARL02": 1, "ATL01": 0, "ATL02": 0,
-         "BAL12": 0, "BOS07": 0, "CHI11": 1, "CHI12": 1, "CIN08": 0,
-         "CIN09": 0, "CLE07": 0, "CLE08": 0, "DEN01": 2, "DEN02": 2,
-         "DET04": 0, "DET05": 0, "HON01": 6, "HOU02": 1, "HOU03": 1,
-         "KAN06": 1, "LAS01": 3, "LBV01": 0, "LOS03": 3, "MIA01": 0,
-         "MIL05": 1, "MIL06": 1, "MIN03": 1, "MIN04": 1, "MNT01": 1,
-         "MON02": 0, "NYC16": 0, "NYC17": 0, "NYC20": 0, "NYC21": 0,
-         "OAK01": 3, "PHI12": 0, "PHI13": 0, "PHO01": 3, "PIT07": 0,
-         "PIT08": 0, "SAN01": 3, "SAN02": 3, "SEA02": 3, "SEA03": 3,
-         "SFO02": 3, "SFO03": 3, "SJU01": 0, "STL09": 1, "STL10": 1,
-         "STP01": 0, "TOK01": 6, "TOR02": 0, "WAS10": 0, "WAS11": 0}
+         "BAL11": 0, "BAL12": 0, "BOS07": 0, "CHI10": 1, "CHI11": 1,
+         "CHI12": 1, "CIN08": 0, "CIN09": 0, "CLE07": 0, "CLE08": 0,
+         "DEN01": 2, "DEN02": 2, "DET04": 0, "DET05": 0, "HON01": 6,
+         "HOU02": 1, "HOU03": 1, "KAN06": 1, "LAS01": 3, "LBV01": 0,
+         "LOS03": 3, "MIA01": 0, "MIA02": 0, "MIL05": 1, "MIL06": 1,
+         "MIN03": 1, "MIN04": 1, "MNT01": 1, "MON02": 0, "NYC16": 0,
+         "NYC17": 0, "NYC20": 0, "NYC21": 0, "OAK01": 3, "PHI12": 0,
+         "PHI13": 0, "PHO01": 3, "PIT07": 0, "PIT08": 0, "SAN01": 3,
+         "SAN02": 3, "SEA02": 3, "SEA03": 3, "SFO02": 3, "SFO03": 3,
+         "SJU01": 0, "STL09": 1, "STL10": 1, "STP01": 0, "SYD01": 6,
+         "TOK01": 6, "TOR02": 0, "WAS10": 0, "WAS11": 0}
 
 _TEAM_ZONES = {"ANA": 3, "ARI": 3, "ATL": 0, "BAL": 0, "BOS": 0, "CAL": 3,
                "CHA": 1, "CHN": 1, "CIN": 0, "CLE": 0, "COL": 2, "DET": 0,

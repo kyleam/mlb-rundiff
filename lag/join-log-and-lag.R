@@ -5,7 +5,7 @@ library(lubridate)
 library(readr)
 library(tidyr)
 
-lag <- read_csv("lag-combined-1992_2011.csv") %>%
+lag <- read_csv("lag-combined-1990_2016.csv") %>%
     mutate(date = ymd(date))
 
 lag_wide <- lag %>%
@@ -15,7 +15,7 @@ lag_wide <- lag %>%
     spread(lag_type, lag)
 
 cnames <- scan("../gamelogs/game-log-header.txt", character(), quiet = TRUE)
-glog <- read_csv("../gamelogs/1992_2011.csv", col_names = cnames) %>%
+glog <- read_csv("../gamelogs/1990_2016.csv", col_names = cnames) %>%
     mutate(date = ymd(date))
 
 stopifnot(nrow(glog) == nrow(lag_wide))

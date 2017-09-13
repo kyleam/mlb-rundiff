@@ -34,8 +34,8 @@ rule gamelogs_convert_and_rename_:
     shell: "dos2unix -n {input} {output}"
 
 rule gamelogs_combine_years:
-    input: expand("gamelogs/{year}.csv", year=range(1992, 2012))
-    output: "gamelogs/1992_2011.csv"
+    input: expand("gamelogs/{year}.csv", year=range(1990, 2016))
+    output: "gamelogs/1990_2016.csv"
     shell: "cat {input} > {output}"
 
 
@@ -52,22 +52,22 @@ rule lag_calculate_with_ht:
     shell: "python {input[0]} --with-ht {input[1]} > {output}"
 
 rule lag_combine:
-    input: expand("lag/{year}{{kind}}.csv", year=range(1992, 2012))
-    output: "lag/lag-combined-1992_2011{kind,(|-ht)}.csv"
+    input: expand("lag/{year}{{kind}}.csv", year=range(1990, 2016))
+    output: "lag/lag-combined-1990_2016{kind,(|-ht)}.csv"
     shell: "head -n1  {input[0]} > {output} &&"
            "for f in {input}; do sed 1d $f >> {output}; done"
 
 rule lag_sort_combined:
-    input: "lag/sort-combined.R", "lag/lag-combined-1992_2011.csv"
-    output: "lag/lag-combined-sorted-1992_2011.csv"
+    input: "lag/sort-combined.R", "lag/lag-combined-1990_2016.csv"
+    output: "lag/lag-combined-sorted-1990_2016.csv"
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
 
 rule lag_join_log_and_lag:
     input: "lag/join-log-and-lag.R",
-           "lag/lag-combined-1992_2011.csv",
+           "lag/lag-combined-1990_2016.csv",
            "gamelogs/game-log-header.txt",
-           "gamelogs/1992_2011.csv"
+           "gamelogs/1990_2016.csv"
     output: "lag/log-with-lags.csv"
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
@@ -138,7 +138,7 @@ rule models_sample_:
 
 rmd_site_input = [
     "lag/2011.csv",
-    "lag/lag-combined-1992_2011.csv",
+    "lag/lag-combined-1990_2016.csv",
     "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
     "models/rundiff-oneseason.stan",
