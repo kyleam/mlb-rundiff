@@ -46,9 +46,14 @@ rule lag_calculate:
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"
 
+rule lag_calculate_with_ht:
+    input: "lag/lag.py", "gamelogs/{year}.csv"
+    output: "lag/{year}-ht.csv"
+    shell: "python {input[0]} --with-ht {input[1]} > {output}"
+
 rule lag_combine:
-    input: expand("lag/{year}.csv", year=range(1992, 2012))
-    output: "lag/lag-combined-1992_2011.csv"
+    input: expand("lag/{year}{{kind}}.csv", year=range(1992, 2012))
+    output: "lag/lag-combined-1992_2011{kind,(|-ht)}.csv"
     shell: "head -n1  {input[0]} > {output} &&"
            "for f in {input}; do sed 1d $f >> {output}; done"
 
@@ -58,15 +63,9 @@ rule lag_sort_combined:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla ./$(basename {input[0]})"
 
-rule lag_thanks_u2:
-    input: "lag/thanks-u2.R", "lag/lag-combined-sorted-1992_2011.csv"
-    output: "lag/lag-combined-u2-1992_2011.csv"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla ./$(basename {input[0]})"
-
 rule lag_join_log_and_lag:
     input: "lag/join-log-and-lag.R",
-           "lag/lag-combined-u2-1992_2011.csv",
+           "lag/lag-combined-1992_2011.csv",
            "gamelogs/game-log-header.txt",
            "gamelogs/1992_2011.csv"
     output: "lag/log-with-lags.csv"
