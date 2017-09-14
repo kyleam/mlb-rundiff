@@ -104,8 +104,8 @@ ggplot(tvals) +
     theme_void() +
     theme(legend.position = c(0.2, 0.5)) +
     scale_linetype_manual(values = c("dashed")) +
-    scale_color_manual(values = c(tc$primary_light, tc$primary,
-                                  tc$secondary_light, tc$secondary))
+    scale_color_manual(values = c(tc$primary, tc$secondary,
+                                  tc$primary_light, tc$secondary_light))
 ```
 
 Both $\nu$ and $\sigma_y$ influence the range of observed score
