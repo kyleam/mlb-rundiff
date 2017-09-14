@@ -135,6 +135,7 @@ data.frame(b_home = samps$b_home) %>%
     ggplot(aes(b_home)) +
     geom_vline(xintercept = 0, size = 0.8, color = tc$primary_lighter) +
     geom_histogram(bins = 40, size = 0.3) +
+    expand_limits(x = c(-0.3, 0.3)) +
     labs(x = expression(beta[home])) +
     theme_histogram()
 ```
