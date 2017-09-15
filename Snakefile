@@ -198,6 +198,14 @@ rule models_sim_rundiff_lagwe_1992_2011:
     shell: "cd $(dirname {input[0]}) && "
            "time Rscript --vanilla $(basename {input[0]})"
 
+rule models_sim_cov_rundiff_lagwe_1992_2011:
+    input: "models/sim-cov-rundiff-lagwe_1992-2011.R",
+           "models/rundiff-lagwe_1992-2011-sim.rds",
+           "models/rundiff-lagwe_1992-2011.data.R"
+    output: "models/rundiff-lagwe_1992-2011-sim-cov.dat"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]}) > $(basename {output})"
+
 
 ### Rmarkdown
 
