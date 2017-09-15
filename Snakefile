@@ -60,6 +60,14 @@ rule gamelogs_combine_years:
     output: "gamelogs/1990_2016.csv"
     shell: "cat {input} > {output}"
 
+rule gamelogs_pythagorean:
+    input: "gamelogs/pythagorean.R",
+           "gamelogs/1990_2016.csv",
+           "gamelogs/game-log-header.txt"
+    output: "gamelogs/wins-pythagorean.csv"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla ./$(basename {input[0]})"
+
 
 ### Calculation of lag
 
