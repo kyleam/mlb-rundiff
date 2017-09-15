@@ -188,6 +188,16 @@ rule models_sample_:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
+rule models_sim_rundiff_lagwe_1992_2011:
+    input: "models/sim-rundiff-lagwe_1992-2011.R",
+           "models/sim-rundiff-lagwe.R",
+           "models/rundiff-lagwe_1992-2011-fit.rds",
+           "models/rundiff-lagwe_1992-2011.info.R",
+           "models/rundiff-lagwe_1992-2011.data.R"
+    output: protected("models/rundiff-lagwe_1992-2011-sim.rds")
+    shell: "cd $(dirname {input[0]}) && "
+           "time Rscript --vanilla $(basename {input[0]})"
+
 
 ### Rmarkdown
 
