@@ -1,0 +1,1003 @@
+---
+title: "MLB run differentials and jet lag"
+---
+
+```{r setup, include = FALSE}
+source("setup.R")
+
+knitr::opts_chunk$set(include = FALSE,
+                      echo = FALSE)
+
+library(directlabels)
+library(dplyr)
+library(forcats)
+library(ggplot2)
+library(gridExtra)
+library(lubridate)
+library(readr)
+library(stringr)
+library(tidyr)
+
+library(rstan)
+
+source("plot-utils.R")
+tc <- theme_setup()
+
+source("../lib/utils.R")
+```
+
+Andrew Gelman [posted][agl] about [an analysis][ssa] of MLB game logs
+that looked at the association of jet lag with various performance
+metrics.  My goal here is to focus on a single metric---run
+differential---and reframe this problem in a way that's motivated by a
+[few][ags1] [earlier][ags2] [posts][ags3] by Gelman.
+
+First, here's a brief description of what Song, Severini, and Allada
+("SSA"), the authors of the jet lag analysis, did.  The association
+between jet lag and performance metrics has been analyzed using data
+from various sports[^idunno].  In terms of MLB data, there seem to be
+two relevant previous analyses: [one][rls] by Recht, Lew, and Schwartz
+and [another][wls] by Winter and friends.  In their 1995
+correspondence with *Nature*, Recht et al. argued for the negative
+consequences of an away team's eastward travel by analyzing three MLB
+seasons in terms of win percentages, linear regression on the run
+difference between the home and away teams, and logistic regression on
+the probability of a home win.  The Winter et al. study looked at ten
+years of MLB data and did &hellip; well, I don't know because I don't
+have access to the article and couldn't find a PDF online.  Anyway,
+SSA expanded on these previous studies by considering 20 MLB seasons
+and by examining many performance metrics.
+
+[^idunno]: This is entirely based on what I gather from their paper.
+           I know little about sports and even less about research on
+           jet lag.
+
+SSA defined a team's jet lag based on the number of time zones a team
+crossed, adjusted by the number of days off.  If the Mariners traveled
+from the west coast to play the Yankees without a day of rest, they
+would play the first game with a lag of three.  This lag value is
+assumed to decay by one unit per day.
+
+From these lag values, SSA constructed binary predictors, classifying
+a team with a value of two or more as having jet lag.  In total there
+were four lag predictors based on two dimensions: (1) home or away and
+(2) direction of travel, eastward or westward.  For each
+aggregate[^agg] measure of interest, such as winning percentage or
+batting average, SSA ran a linear regression with these lag predictors
+as well as categorical predictors indicating the home team and away
+team.
+
+[^agg]: I'm not clear on what the grouping was.  My guess is by team,
+        year, home or away, and lag type (none or one of their four
+        categories).
+
+## Jet lag calculations
+
+I've calculated jet lag values from [Retrosheet's game logs][rgl] for
+1992 through 2011, the same year range that SSA considered.  My lag
+values largely match SSA's values, but there are [some
+differences][lag-checks].
+
+```{r clean_team_name}
+clean_team_name <- function(x){
+    case_when(x %in% c("ANA", "CAL") ~ "CAL/ANA",
+              x %in% c("MON", "WAS") ~ "MON/WAS",
+              x == "FLO" ~ "FLO/MIA",
+              TRUE ~ x)
+}
+```
+
+```{r glog, dependson = "clean_team_name", cache.extra = tools::md5sum("../lag/log-with-lags-cleaned.csv")}
+glog <- read_csv("../lag/log-with-lags-cleaned.csv") %>%
+    mutate(yr = year(date),
+           home_team = clean_team_name(home_team),
+           away_team = clean_team_name(away_team)) %>%
+    filter(between(yr, 1992, 2011))
+```
+
+```{r lags_wide, dependson = "glog"}
+lags_wide <- select(glog,
+                    date, game_tz, home_team, away_team, park,
+                    game_id, lag_home, lag_away, yr) %>%
+    filter(between(yr, 1992, 2011)) %>%
+    mutate(game_tz = factor(game_tz,
+                            levels = c("PT", "MT", "CT", "ET", "other")))
+```
+
+```{r, lags, dependson = "lags_wide"}
+lags <- lags_wide %>%
+    gather(lag_type, lag, lag_home, lag_away) %>%
+    mutate(team = ifelse(lag_type == "lag_home", home_team, away_team)) %>%
+    select(-lag_type, -home_team, -away_team)
+```
+
+To visualize these lag values, let's focus on Seattle's 2001 season.
+(Click through for a larger image where you can more clearly make out
+the vertical lines for each day.)
+
+```{r lag-plot, dependson = "lags", include = TRUE, out.width = "97%", fig.width = 8.31, fig.asp = 0.32}
+lags %>%
+    filter(yr == 2001, team == "SEA") %>%
+    ggplot(aes(date, lag)) +
+    geom_hline(yintercept = 0, color = tc$background_light, size = 0.3) +
+    geom_line(alpha = 0.6, color = tc$background) +
+    geom_point(aes(color = game_tz), size = 0.7) +
+    scale_x_date(date_breaks = "1 month",
+                 date_minor_breaks = "1 day",
+                 date_labels = "%b") +
+    scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
+    scale_color_manual(values = c(tc$background_dark, "#a67326",
+                                  tc$primary, tc$secondary)) +
+    labs(title = "Mariners' jet lag in 2001",
+         x = NULL,
+         color = "time zone") +
+    theme_grid("x", minor = TRUE) +
+    theme(legend.position = c(0.8, 0.98),
+          panel.grid.minor.x = element_line(size = 0.2),
+          panel.grid.major.x = element_line(size = 0.3),
+          legend.direction = "horizontal")
+```
+
+They opened the season with a three-game series at home and then
+traveled for a series against Texas, with one day off between series.
+For the first game against the Rangers, their lag was 1: +2 for
+PT&#8594;CT, -1 for the day off between series.  The rest of that
+series, they are back at a lag of 0.  Note that they never reached +3
+for PT&#8594;ET trips because they always had a travel day.  For some
+of their trips back to the west coast, however, they reached -3
+because they didn't have an off day.
+
+To construct the binary jet lag predictor for eastward travel, any
+game at +2 or above is coded as 1 and all other games are 0.
+Likewise, any game at or below -2 is coded as 1 for the westward
+predictor.  Here's how these predictors are distributed across teams
+and seasons.
+
+```{r lag_counts, dependson = "lags"}
+lag_counts <- lags %>%
+    mutate(westward = lag < -1,
+           eastward = lag > 1) %>%
+    group_by(team, yr) %>%
+    summarise_at(c("westward", "eastward"), sum) %>%
+    gather(type, count, westward, eastward) %>%
+    mutate(type = factor(type, levels = c("westward", "eastward")))
+```
+
+```{r lag_counts_plot, dependson = "lag_counts", include = TRUE, out.width = "90%", fig.width = 7.71, fig.asp = 0.9}
+ggplot(lag_counts, aes(yr, count, fill = type)) +
+    geom_col() +
+    scale_y_continuous(breaks = c(5, 15, 25)) +
+    scale_fill_manual(values = c(tc$primary_light, tc$secondary_light)) +
+    labs(x = "season", y = "games", fill = "lag") +
+    guides(fill = guide_legend(keyheight = 0.75, keywidth = 0.4)) +
+    theme(legend.position = "top",
+          axis.text.x = element_text(angle = 45, hjust = 1)) +
+    facet_wrap(~ team, ncol = 5)
+```
+
+Unsurprisingly, teams' records in the small subset of lag games they
+played are all over the place compared to their records in the non-lag
+games (thick gray lines below).
+
+```{r wperc, dependson = "glog"}
+wperc <- glog %>%
+    gather(lag_type, lag, lag_home, lag_away) %>%
+    mutate(lag_type = factor(str_replace(lag_type, "lag_", ""),
+                             levels = c("home", "away")),
+           lag = factor(case_when(lag > 1 ~ "eastward",
+                                  lag < -1 ~ "westward",
+                                  TRUE ~ "no lag"),
+                        levels = c("no lag", "westward", "eastward")),
+           home_win = home_runs_scored > away_runs_scored,
+           win = ifelse(lag_type == "home", home_win, !home_win),
+           team = ifelse(lag_type == "home", home_team, away_team)) %>%
+    group_by(yr, team, lag) %>%
+    summarise(win_percent = mean(win),
+              ngames = n())
+```
+
+```{r wperc_plot, dependson = "wperc", include = TRUE, out.width = "95%", fig.width = 8.14, fig.asp = 0.8}
+ggplot(filter(wperc, lag != "no lag"),
+       aes(yr, win_percent)) +
+    geom_line(color = tc$background, size = 0.8,
+              data = filter(wperc, lag == "no lag") %>% select(-lag)) +
+    geom_line(aes(color = lag), alpha = 0.5) +
+    geom_point(aes(color = lag, size = ngames)) +
+    scale_y_continuous(breaks = c(0, 0.5, 1), expand = c(0.1, 0),
+                       labels = scales::percent) +
+    labs(x = "season", y = "win percentage", size = "number of games") +
+    scale_color_manual(values = c(tc$primary, tc$secondary)) +
+    scale_size(range = c(0.3, 2)) +
+    guides(color = guide_legend(order = 1),
+           size = guide_legend(order = 2)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "top") +
+    theme_grid("y") +
+    facet_wrap(~ team, ncol = 5)
+```
+
+## Model of baseball run differentials
+
+Gelman has [a][ags1] [few][ags2] [posts][ags3] about estimating the
+abilities of soccer teams using goal differentials.  I wanted to take
+a similar approach to estimate the association of jet lag with run
+differentials.  Here's what I've come up with.  (This was built up
+from simpler models.  See the Stan files in the ["models"
+directory][mdir], as well as [these][osm] [descriptions][ssm].)
+
+There are $K$ teams, and the total number of games played by a team is
+split into $J$ periods.  For the $i$th game, the home team is denoted
+as $k[i]$ and its period as $j[i]$, and the away team is denoted as
+$k^*[i]$ and its period as $j^*[i]$.  Each team corresponds to a team
+in a given year[^teamyr], and periods are formed by splitting the
+season into $J$ parts.  As an example, across two seasons with 30
+teams and six periods, there would be 60 teams and a total of 360
+periods.  Finally, these games are played in $M$ parks.
+
+[^teamyr]: The model doesn't specify that a team label corresponds to
+           a team within a single season, but this is how I'm
+           structuring the data.
+
+$y_i$, the difference between the runs scored by the home and away
+teams in the $i$th game, is modeled as
+
+$$
+y_i \sim t_{\nu}(\mu^{\text{home}}_{j[i],k[i]} -
+\mu^{\text{away}}_{j^*[i],k^*[i]},
+\sigma^y_{m[i]}).
+$$
+
+$\nu$ is the t-distribution's degrees of freedom and is estimated from
+the data.  I've assigned $\nu$ a prior of $\text{Gamma}(2, 0.1)$
+following what Milad Kharratzadeh did in [his][ags3] [analysis][mka]
+of the English Premier League, who in turn was following the
+[recommendation of Juarez and Steel][js].
+
+The scale parameter $\sigma^y_m$ is a little more interesting because
+it varies across parks:
+
+$$
+\begin{aligned}
+\sigma^y_m &\sim \text{N}^{+}(\mu^y, \tau),\; m \in \{1,\ldots,M\},\\
+\mu^y &\sim \text{N}(0, 5),\\
+\tau &\sim \text{N}^{+}(0, 3).
+\end{aligned}
+$$
+
+This should allow, for example, hitter-friendly parks to have more
+lopsided run differentials.  With these priors (and the rest of the
+priors I'll introduce), I'm aiming to be weakly informative.  I don't
+expect $\sigma^y_m$ to reach, say, ten because that would make
+unrealistically high run differentials likely.
+
+The t-distribution's location parameter is the most interesting part
+of the model.  If $\mu^{\text{home}}$ is greater than
+$\mu^{\text{away}}$, the outcome favors the home team.  The home
+team's parameter is defined as
+
+$$
+\mu^{\text{home}}_{j[i],k[i]} = \alpha_{j[i],k[i]} +
+\gamma_{l[i]} +
+x_{i,1} \beta^{\text{west}} +
+x_{i,2} \beta^{\text{east}} +
+\delta
+$$
+
+where
+
+  * $\alpha_{jk}$ is the "ability" of a the $k$th team in the $j$th
+    period.
+
+  * $\gamma_l$ the ability of the $l$th starting pitcher.
+
+  * the $\beta$ coefficients are for the westward and eastward jet lag
+    predictors.  The binary predictor $x_{i,1}$ is 1 if the home team
+    had a westward jet lag value of at least two for the $i$th game.
+
+  * $\delta$ is the home-field effect.
+
+The away team's location parameter follows a similar pattern, dropping
+$\delta$:
+
+$$
+\mu^{\text{away}}_{j^*[i],k^*[i]} =
+\alpha_{j^*[i],k^*[i]} +
+\gamma_{l^*[i]} +
+x_{i,3} \beta^{\text{west}} +
+x_{i,4} \beta^{\text{east}}.
+$$
+
+Note that the home and away teams share the same lag coefficients.
+Both Recht et al. and SSA split by home and away here (for four
+coefficients total), but I don't understand the motivation for this.
+Why should there be a distinction between a west coast team traveling
+to the east coast and an east coast team returning to the east coast?
+Perhaps the idea is that sleeping in your own bed or home cooking or
+something like that could lessen the severity of jet lag, in which
+case an interaction could be added.
+
+The abilities of team $k$ share a common mean and standard deviation
+across $J$ periods:
+
+$$
+\begin{aligned}
+\alpha_{j,k} &\sim \text{N}(\theta_k, \sigma^{\alpha}),\\
+\sigma^{\alpha} &\sim \text{N}^{+}(0, 2).
+\end{aligned}
+$$
+
+$\theta$ is based on a prior score $z_k$ for each team:
+
+$$
+\begin{align}
+\theta_k &\sim \text{N}(z_k \omega, \sigma^{\theta}),\;
+k \in \{1,\ldots,K\},\\
+\omega &\sim \text{N}(0, 2),\\
+\sigma^{\theta} &\sim \text{N}^{+}(0, 2).
+\end{align}
+$$
+
+For these scores, I'm using the win tallies for each team in the
+previous season, scaled to range from -1 to 1.  Given that $\theta_k$
+is estimated across an entire season, the prior scores may not have
+have much of an influence on $\theta_k$, in which case $z_k \omega$
+could be replaced with zero.
+
+The contribution of the starting pitchers is modeled as
+
+$$
+\begin{aligned}
+\gamma_l &\sim \text{N}(0, \sigma^{\gamma}),\;
+l \in \{1,\ldots,L\},\\
+\sigma^{\gamma} &\sim \text{N}^{+}(0, 2).
+\end{aligned}
+$$
+
+Unlike teams, where each season spawns a new set of teams, pitcher $l$
+spans seasons and isn't tied to any one team.
+
+Finally, the home-field and lag parameters are assigned a prior of
+$\text{N}(0, 2)$.
+
+Conceptually, I think there are some things to like about this model.
+
+  * Modeling run differentials rather than win probability should make
+    better use of the data.
+
+  * The scale for the run differentials is allowed to vary among
+    parks, which seems like a valuable feature given the [variation in
+    park dimensions][pdim].
+
+  * The abilities of the starting pitchers aren't diluted by the
+    team's overall ability.
+
+And a few things bother me (and probably many other things should).
+
+  * Teams aren't modeled hierarchically across seasons.  The Astros in
+    2011 are treated as a different team than the Astros in 2010.
+    There is some connection from year to year in that the records
+    from the previous season are used to calculate the prior scores
+    for the current season.  Also, the starting pitcher parameters are
+    shared across seasons.
+
+  * This isn't a generative model.  A discrete response is modeled as
+    continuous.  [One of Gelman's post][ags1] discusses this a bit.
+
+## Run differentials
+
+```{r info, cache.extra = tools::md5sum("../models/rundiff-lagwe_1992-2011.info.R")}
+info <- read_rdump("../models/rundiff-lagwe_1992-2011.info.R")
+```
+
+```{r dat, cache.extra = tools::md5sum("../models/rundiff-lagwe_1992-2011.data.R")}
+dat <- read_rdump("../models/rundiff-lagwe_1992-2011.data.R")
+```
+
+```{r rundiff_obs, dependson = c("dat", "info")}
+rundiff_obs <- tibble(rundiff = dat$rundiff,
+                      team_home = info$team_names[dat$team_home]) %>%
+    separate(team_home, c("team", "year")) %>%
+    mutate(year = factor(as.integer(year)))
+```
+
+```{r nteams, dependson = "info"}
+nteams <- count(info$wins, yr) %>%
+    ungroup() %>%
+    rename(year = yr) %>%
+    mutate(year = factor(year))
+```
+
+```{r rundiff_sum, dependson = "rundiff_obs"}
+rundiff_sum <- rundiff_obs %>%
+    arrange(year, rundiff) %>%
+    count(year, rundiff) %>%
+    group_by(year) %>%
+    mutate(csum = cumsum(n)) %>%
+    ungroup()
+```
+
+Run differentials look fairly consistent across the 20 season span.
+
+```{r rundiff_obs_hist, dependson = c("rundiff_sum", "nteams"), include = TRUE, out.width = "80%", fig.width = 6.85, fig.asp = 0.9}
+ggplot(rundiff_sum, aes(x = rundiff, y = csum)) +
+    geom_hline(aes(yintercept = n * 162 / 2), color = tc$background_light,
+               data = nteams) +
+    geom_line(color = tc$primary_light, size = 0.4) +
+    geom_point(size = 0.4, alpha = 0.7) +
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 3)) +
+    labs(x = "run differential",
+         y = "games (cumulative) ") +
+    facet_wrap(~ year, ncol = 4) +
+    theme_grid("x")
+```
+
+The bulk of the games have scores within the -10 to 10 range, and as
+expected the tails show much more variation between seasons.  The
+largest magnitude for a score differential in this set is 27 in 2007.
+
+The horizontal guide lines mark the expected number of games given the
+number of teams that were in the league that season.  1994 and 1995
+fall short due to the strike.  The curve of some seasons have a blip
+in their underside as they cross zero (e.g., 2001, 2002, &hellip;),
+which is caused by ties.  Another, more subtle pattern is the that the
+lines are longer from 0 to 1 than they are from -1 to 0.  I'll come
+back to this in the home-field advantage section below.
+
+## Parameter estimates for 1992 through 2011
+
+```{r fit, cache.extra = tools::md5sum("../models/rundiff-lagwe_1992-2011-fit.rds")}
+fit <- readRDS("../models/rundiff-lagwe_1992-2011-fit.rds")
+```
+
+```{r samps, dependson = "fit"}
+samps <- rstan::extract(fit)
+```
+
+```{r n_iter, dependson = "samps"}
+n_iter <- length(samps["lp__"][[1]])
+```
+
+I've fit the above model ([Stan file][model]) using games from 1992
+through 2011.  When preparing the data, I've chosen to split the
+season into six periods (27 games per period for a 162 game season).
+I haven't taken the time to compare different period sizes, but I hope
+that's a good window size for catching the variability in a team's
+ability across a season.
+
+Clicking through ShinyStan's interface, most diagnostic plots and
+metrics look OK.  In terms of MCMC effective sample size,
+$\sigma^{\alpha}$ and the log posterior are both on the low end, with
+with &#8764;200--300 effective samples out of four thousand draws.  I
+originally wanted to add an additional level with each team having a
+$\sigma^{\alpha}$, but the hyperparameter for these also had a
+similarly low number of effective samples.  I might be overlooking
+obvious changes to the model that would improve these measures.
+
+```{r, dependson = "fit", eval = FALSE}
+print(fit, pars = c("sigma_a", "lp__"))
+```
+
+### A league of clones
+
+Before looking at the posterior predictive intervals or parameter
+estimates, let's get a sense for how uncertain the model thinks the
+outcome of a game is when we assume that we know all the parameters.
+To generate the plot below, I've set the t-distribution's location to
+zero (i.e., identical teams in terms of ability, lag, home-field
+advantage, and pitchers) and fixed $\nu$ and $\sigma^y$ at their mean
+values.  Each of the 50 lines corresponds to a group of 162 games.
+
+```{r sim_fixed, dependson = "samps"}
+sigma_y_fixed <- mean(samps$sigma_y)
+nu_fixed <- mean(samps$nu)
+
+n_games <- 162
+n_seasons <- 50
+
+set.seed(73364)
+sim_fixed <- rt(n_games * n_seasons, nu_fixed) * sigma_y_fixed
+sim_fixed <- apply(array(sim_fixed, c(n_games, n_seasons)), 2, sort)
+sim_fixed <- as_tibble(reshape2::melt(sim_fixed, c("game", "season"),
+                                      value.name = "rundiff"))
+```
+
+```{r sim_fixed_hist, dependson = "sim_fixed", include = TRUE, out.width = "40%", fig.width = 3.42}
+ggplot(sim_fixed, aes(x = rundiff, group = season)) +
+    geom_freqpoly(alpha = 0.2, size = 0.4, center = 0, binwidth = 2) +
+    labs(x = "run differential", y = "games")
+```
+
+The peak around zero deviates from the pattern of real score
+differentials.  Only rarely are baseball games recorded as a tie,
+while the model will happily produce score differentials near zero for
+equally matched teams.  I'm deciding a win or loss by taking the sign
+of the score differential, so that will always declare a winner, but
+it also doesn't allow for the rare tie.
+
+Translating run differentials for each "season" into wins gives the
+following distribution.
+
+```{r sim_fixed_wins_hist, dependson = "sim_fixed", include = TRUE, out.width = "35%", fig.width = 3, fig.asp = 0.45}
+mutate(sim_fixed, win = rundiff > 0) %>%
+    count(season, win) %>%
+    ggplot(aes(x = n)) +
+    geom_dotplot() +
+    theme_remove_axis("y") +
+    labs(x = "wins")
+```
+
+### Posterior predictive intervals
+
+```{r sim_rgames, cache.extra = tools::md5sum("../models/rundiff-lagwe_1992-2011-sim-rgames.rds")}
+sim_rgames <- readRDS("../models/rundiff-lagwe_1992-2011-sim-rgames.rds") %>%
+    group_by(year) %>%
+    mutate(id = 1:n()) %>%
+    ungroup()
+```
+
+Next let's see how the observed data look compared to the posterior
+predictive intervals.  The data set consists of over 40,000 games.
+The below plot selects 40 random games from six seasons.  The bounds
+of the intervals are rounded so that they extend to the nearest
+integer.
+
+```{r sim_rgames_plot, dependson = "sim_rgames", include = TRUE, out.width = "50%", fig.width = 4.28, fig.asp = 1.45}
+sim_rgames %>%
+    mutate_at(c("p2.5", "p97.5"), round) %>%
+    ggplot(aes(x = id)) +
+    geom_line(aes(y = p2.5), size = 0.3, color = tc$primary_lighter) +
+    geom_line(aes(y = p97.5), size = 0.3, color = tc$primary_lighter) +
+    geom_linerange(aes(ymin = p2.5, ymax = p97.5), color = tc$primary_dark) +
+    geom_point(aes(y = obs), shape = 21, fill = NA) +
+    scale_y_continuous(limits = c(-20, 20)) +
+    facet_grid(year ~ .) +
+    labs(title = "Run differentials",
+         subtitle = "compared to 95% predictive intervals",
+         y = NULL) +
+    theme_remove_axis("x")
+```
+
+Those intervals are pretty wide.  I don't think I can expect more
+narrow ones given the variation present in the identical ability
+simulation above.  If I look across all the games in the data set, the
+observed run differentials are within the 95% predicted intervals 95%
+of the time (96% if I round the bounds), so the model at least seems
+calibrated.
+
+<!-- file: ../models/rundiff-lagwe_1992-2011-sim-cov.dat -->
+
+Converting the simulated run differentials into wins, the model
+appears to give reasonable though wide estimates for a team's record.
+
+```{r sim_wins, cache.extra = tools::md5sum("../models/rundiff-lagwe_1992-2011-sim-wins.rds")}
+sim_wins <- readRDS("../models/rundiff-lagwe_1992-2011-sim-wins.rds") %>%
+    mutate(yr = as.integer(as.character(yr)))
+```
+
+```{r pyth, cache.extra = tools::md5sum("../gamelogs/wins-pythagorean.csv")}
+pyth <- read_csv("../gamelogs/wins-pythagorean.csv") %>%
+    mutate(yr = as.integer(as.character(yr)))
+```
+
+```{r sim_wins_plot, dependson = c("sim_wins", "info", "pyth"), include = TRUE, out.width = "80%", fig.width = 6.85, fig.asp = 0.8}
+obs <- ungroup(info$wins) %>%
+    rename(wins = n_wins) %>%
+    mutate(yr = as.integer(as.character(yr))) %>%
+    filter(team %in% sim_wins$team & yr %in% sim_wins$yr)
+
+pyth_obs <- select(pyth, yr, team, wins, n_games) %>%
+    semi_join(sim_wins, by = c("team", "yr")) %>%
+    mutate(kind = "pythagorean") %>%
+    bind_rows(mutate(obs, kind = "observed"))
+
+bounds <- group_by(sim_wins, team, yr) %>%
+    summarise(p2.5 = quantile(wins, 0.025),
+              p97.5 = quantile(wins, 0.975))
+
+ggplot(sim_wins, aes(x = wins)) +
+    geom_freqpoly(center = 0, binwidth = 2) +
+    geom_vline(aes(xintercept = wins, color = kind),
+               size = 0.6,  data = pyth_obs) +
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 3)) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
+    scale_color_manual(values = c(pythagorean=tc$secondary,
+                                  observed=tc$primary)) +
+    guides(colour = guide_legend(keyheight = 0.75)) +
+    labs(title = "Simulated wins",
+         color = NULL,
+         x = NULL) +
+    facet_grid(team ~ yr) +
+    theme_grid("x") +
+    theme_remove_axis("y", title = FALSE) +
+    theme(legend.position = "bottom",
+          legend.margin = margin(t = 0, r = 0, b = 0, l = 0))
+```
+
+In addition to the observed number of wins, I've included a line for
+the [pythagorean wins][pyth], where the pythagorean win percentage is
+calculated solely based on the runs scored (S) and runs allowed (A):
+$\text{S}^{1.83} / (\text{S}^{1.83} + \text{A}^{1.83})$.
+
+While reading about pythagorean wins, I came across [a FanGraphs
+article][fgp] that provides the motivation for their [Base Runs][fbr]
+statistic.  Essentially, just as run differentials give more
+information about a team's ability than their record does, they argue
+that using the underlying offensive metrics gives more information
+than run differentials do.  It might be interesting to explore moving
+this model in that direction.
+
+For now, though, it seems like the model is behaving well enough that
+it's worth examining its parameter estimates, including those for the
+jet lag coefficients.
+
+### Park parameters
+
+The t-distribution's scale parameter varies across parks.  The
+relationship between how offensive friendly a park is and the scale
+parameter isn't that clear cut because the response is run
+differentials rather than total runs.  The increased offense from both
+sides might just cancel out.  But, given that lopsided games are not a
+rare event, I'd expect that parks that are more conducive to run
+scoring would tend to have larger scale parameters.  Let's see.
+
+```{r park_codes, cache.extra = tools::md5sum("../gamelogs/parkcode-cut.csv")}
+park_codes <- read_csv("../gamelogs/parkcode-cut.csv",
+                       col_names = c("park", "name"))
+```
+
+```{r park_eff, dependson = c("samps", "park_codes", "info")}
+park_eff <- trace_intervals(samps$sigma_y, "parknum") %>%
+    mutate(park = info$parks[parknum]) %>%
+    left_join(park_codes, by = "park")
+```
+
+```{r park_eff_2011_plot, dependson = "park_eff", include = TRUE, fig.asp = 1.4}
+teams_2011 <- which(str_detect(info$team_names, "2011"))
+parks_2011 <- unique(dat$park[dat$team_home %in% teams_2011 |
+                              dat$team_away %in% teams_2011])
+
+park_eff %>%
+    arrange(mean) %>%
+    mutate(name = fct_inorder(name),
+           in_2011 = parknum %in% parks_2011) %>%
+    ggplot(aes(x = name)) +
+    geom_pointrange(aes(y = mean, ymin = p10, ymax = p90, color = in_2011),
+                    fatten = 3) +
+    annotate_caption(x = 2.5, y = 4.01,
+                     paste0("Lighter points correspond to stadiums\n",
+                            "that did not host an MLB game in 2011")) +
+    labs(title = "Park-specific scale parameter",
+         subtitle = "for seasons 1992 through 2011",
+         x = NULL,
+         y = expression(sigma[m]^y~'(mean'~with~'80%'~'intervals)')) +
+    scale_color_manual(values = c(tc$background, "black")) +
+    coord_flip() +
+    theme_remove_axis("y", title = FALSE, text = FALSE) +
+    theme(legend.position = "none")
+```
+
+The Colorado parks filling the top two spots fit that expectation.
+Petco being near the bottom also fits.  I thought that Safeco would be
+a bit lower than it is, and I didn't expect to see Dodger Stadium at
+the bottom.  For the most part, I don't know which parks are hitter
+friendly.  I tried getting an idea by flipping through [park factor
+rankings][pf] for different years.  That helped a little, but those
+rankings, which are based on teams' home and away splits in runs
+scored, vary lot from year to year.
+
+### Ability parameters
+
+The t-distribution's location parameter incorporates an ability
+estimate for each team.  Within a season, team $k$'s ability varies
+across periods with a common mean $\theta_k$.
+
+```{r team_eff, dependson = c("samps", "info", "clean_team_name")}
+team_eff <- trace_intervals(samps$theta, "team_idx") %>%
+    mutate(team_yr = info$team_names[team_idx]) %>%
+    separate(team_yr, into = c("team", "yr")) %>%
+    mutate(yr = as.integer(yr),
+           team = clean_team_name(team)) %>%
+    select(team, yr, everything())
+```
+
+```{r win_perc, dependson = c("info", "clean_team_name")}
+win_perc = ungroup(info$wins) %>%
+    mutate(wp = n_wins / n_games,
+           team = clean_team_name(team),
+           yr = as.integer(yr),
+           above_500 = wp > 0.5)
+```
+
+```{r team_eff_plot, dependson = c("team_eff", "win_perc"), include = TRUE, out.width = "95%", fig.width = 8.14, fig.asp = 0.9}
+full_join(team_eff, win_perc, by = c("team", "yr")) %>%
+    ggplot(aes(x = yr, y = mean)) +
+    geom_linerange(aes(ymin = p10, ymax = p90, color = above_500), size = 0.7) +
+    labs(title = "Team ability estimates",
+         x = "year",
+         y = expression(theta[k]~'(80%'~'intervals)'),
+         caption = "Teams with an above .500 record are highlighted") +
+    scale_color_manual(values = c("black", tc$primary)) +
+    theme_grid() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "none") +
+    facet_wrap(~ team, ncol = 5)
+```
+
+In addition to the overall team abilities, we have an estimate of each
+starting pitcher's ability.  Because pitchers don't often pitch
+complete games, the run differential for a good pitching performance
+can be bad if the bullpen screws things up, but a consistently bad
+bullpen should be reflected in the team's ability, so this should
+usually even out in the log run.  Sorting the mean estimates for
+$\gamma$, the top pitchers look good[^bpitch], and the bottom pitchers
+don't look great (at least in the data set's year range; e.g., Greg
+Harris seems to have had a good career, but we're just catching the
+less-than-stellar tail end of it).
+
+[^bpitch]: OK, I don't know enough about baseball to recognize all
+           their names, but their Baseball Reference pages look good.
+
+```{r pids, cache.extra = tools::md5sum("../gamelogs/person-ids.csv")}
+pids <-  read_csv("../gamelogs/person-ids.csv")
+```
+
+```{r pitch_eff, dependson = c("samps", "info", "pids")}
+pitch_eff <- trace_intervals(samps$gamm, "pitcher") %>%
+    mutate(id = info$pitchers$id[pitcher]) %>%
+    left_join(pids, by = "id")
+```
+
+```{r pitch_topbot, dependson = "pitch_eff"}
+pitch_topbot <- bind_rows(top_n(pitch_eff, 15, mean) %>% mutate(end = "best"),
+                          top_n(pitch_eff, -15, mean) %>% mutate(end = "worst")) %>%
+    mutate(end = fct_inorder(end)) %>%
+    arrange(mean)
+```
+
+```{r bw_pitch_plot, dependson = "pitch_topbot", include = TRUE, fig.asp = 0.85}
+pitch_topbot %>%
+    mutate(label = fct_inorder(paste(first, last))) %>%
+    ggplot(aes(x = label)) +
+    geom_pointrange(aes(y = mean, ymin = p10, ymax = p90),
+                    fatten = 3) +
+    labs(title = "Best- and worst-ranked pitchers",
+         subtitle = "for seasons 1992 through 2011",
+         x = NULL,
+         y = expression(gamma[l]~'(mean'~with~'80%'~'intervals)')) +
+    coord_flip() +
+    theme_remove_axis("y", text = FALSE, title = FALSE) +
+    theme(strip.background = element_rect(fill = tc$background_light,
+                                          color = NA)) +
+    facet_grid(end ~ ., scales = "free_y")
+```
+
+
+### Home-field advantage
+
+[This FanGraphs article][fgh] tells me that "the home team has
+historically won only about 54% of the time."  (That "only" is in
+reference to other sports; apparently it's around 60% in the NBA.)  If
+I tally up the home team wins for the 1992--2011 year range, I get a
+similar number.
+
+```{r dependson = "dat", eval = FALSE}
+mean(dat$rundiff > 0)
+```
+
+I was hoping that my estimate of the home-field advantage would agree.
+
+```{r park_wp, dependson = c("samps", "info")}
+park_wp <- function(data, park){
+    function(mu) rundiff_pwin(data$nu, mu, data$sigma_y[,park])
+}
+```
+
+```{r wrigley_wp, dependson = "park_wp"}
+## Wrigley is in the middle of the sigma_y estimates.
+wrigley_wp <- park_wp(samps, which(info$parks == "CHI11"))
+```
+
+```{r, delta_dens, dependson = c("samps", "wrigley_wp"), include = TRUE, out.width = "60%", fig.width = 5.14, fig.asp = 0.3}
+ps <- list()
+
+ps[[1]] <- ggplot(data.frame(estimate = samps$b_home), aes(x = estimate)) +
+    geom_density() +
+    labs(x = expression(delta)) +
+    theme_remove_axis("y")
+
+ps[[2]] <- data.frame(pr = wrigley_wp(samps$b_home)) %>%
+    ggplot(aes(x = pr)) +
+    geom_density() +
+    labs(x = expression(beta^{home})) +
+    labs(x = "win probability") +
+    theme_remove_axis("y")
+
+grid::grid.draw(do.call(gridExtra::gtable_cbind, lapply(ps, ggplotGrob)))
+```
+
+But that's not the case.  The plot on the right shows the win
+probability for identically matched teams (i.e., the t-distribution
+parameter is set to $\beta^{\text{home}}$), using posterior draws for
+Wrigley Field's middle-of-the-pack scale parameter.  The estimate is
+short by more than 2 percentage points.  If I strip the model of all
+location predictors except for $\beta^{\text{home}}$, the estimate
+remains low.
+
+```{r eval = FALSE}
+fit_bhome <- readRDS("../models/rundiff-home_1992-2011-fit.rds")
+print(fit_bhome)
+```
+
+What's happening here, I think, is that the home team wins a
+disproportionate number of close games.  This can be seen in run
+differentials plot above, but it comes out a bit clearer in the below
+plot.
+
+```{r rundiff_freq_poly, dependson = c("rundiff_obs", "nteams"), include = TRUE, out.width = "80%", fig.width = 6.85, fig.asp = 0.9}
+ggplot(rundiff_obs, aes(x = rundiff)) +
+    geom_freqpoly(binwidth = 1, center = 0) +
+    scale_y_continuous(breaks = scales::pretty_breaks(3)) +
+    scale_x_continuous(breaks = scales::pretty_breaks(3)) +
+    labs(title = "The home team's low score inflation",
+         x = "run differential") +
+    facet_wrap(~ year, ncol = 4)
+```
+
+The peak at +1 is consistently taller than the one at -1, but I'm
+modeling the run differentials with a symmetric distribution.
+
+### Jet lag
+
+And finally, the jet lag predictors.  Like before, the win
+probabilities are calculated with the predictor of interest as the
+sole location parameter and with Wrigley Field's scale parameter.
+
+```{r bs_wide, dependson = "samps"}
+bs_wide <- as_tibble(samps[c("b_home", "b_towest", "b_toeast")]) %>%
+    mutate(iter = 1:n())
+```
+
+```{r bs, dependson = "bs_wide"}
+bs <- gather(bs_wide, param, estimate, b_home:b_toeast) %>%
+    mutate(param = fct_inorder(param))
+```
+
+```{r bs_plot, dependson = "bs", include = TRUE, out.width = "40%", fig.width = 3.4}
+p <- mutate(bs,
+            param = fct_recode(param,
+                               "home" = "b_home",
+                               "westward" = "b_towest",
+                               "eastward" = "b_toeast")) %>%
+    ggplot(aes(x = estimate)) +
+    geom_density(aes(group = param, color = param), alpha = 0.9, fill = NA) +
+    scale_y_continuous(limits = c(NA, 24)) +
+    scale_color_manual(values = c(tc$background_dark,
+                                  tc$primary, tc$secondary)) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank())
+direct.label(p, method = list("top.bumptwice", cex = 0.8, dl.trans(y = 1.05 * y)))
+```
+
+```{r bs_probs, dependson = c("wrigley_wp", "bs_wide")}
+bs_probs <- mutate_at(bs_wide, c("b_home", "b_towest", "b_toeast"),
+                      wrigley_wp) %>%
+    gather(param, pr, b_home:b_toeast) %>%
+    mutate(param = fct_inorder(param))
+```
+
+```{r bs_probs_plot, dependson = "bs_probs", include = TRUE, out.width = "40%", fig.width = 3.4}
+p <- mutate(bs_probs,
+            param = fct_recode(param,
+                               "home" = "b_home",
+                               "westward" = "b_towest",
+                               "eastward" = "b_toeast")) %>%
+    ggplot(aes(x = pr)) +
+    geom_density(aes(group = param, color = param), alpha = 0.9, fill = NA) +
+    scale_y_continuous(limits = c(NA, 240)) +
+    scale_color_manual(values = c(tc$background_dark,
+                                  tc$primary, tc$secondary)) +
+    labs(x = "win probability") +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank())
+direct.label(p, method = list("top.bumptwice", cex = 0.8, dl.trans(y = 1.05 * y)))
+```
+
+The home-field effect estimate is much more certain than the estimates
+for either of the lag coefficients, which is unsurprisingly given that
+every game has a home team[^hteam].  The extreme ends of the lag
+estimates extend to a greater magnitude than the home-field estimate
+dos, but, as I discussed above, I think the home-field effect is being
+underestimated.  A value of 0.4 would not be unreasonable given the
+54% empirical rate.  But then again, the lag magnitudes might be
+underestimated for a similar reason (i.e., the non-lagged team wins a
+disproportionate amount of games by a small margin).  I don't know.
+
+[^hteam]: In the sense that a team is labeled as "home" in every game.
+          A small number of games are played outside of either team's
+          regular park or with a team playing as the visitor in their
+          own park.
+
+Around 85% of the posterior draws for the eastward coefficient are
+below -0.1, which maps to around a 49% win rate for a lagged team
+versus an otherwise identical team.  The eastward estimate is shifted
+to the left of the westward estimate in the plot above, but the
+estimate of the shift itself covers a wide range of values.
+
+```{r, dependson = "samps", eval = FALSE}
+mean(samps$b_toeast < -0.1)
+mean(samps$b_towest < -0.1)
+mean((samps$b_toeast - samps$b_towest) < -0.1)
+```
+
+```{r ew_diff_plot, dependson = "bs_wide", include = TRUE, out.width = "40%", fig.width = 3.4, fig.asp = 1.2}
+mutate(bs_wide, diff = b_toeast - b_towest) %>%
+    gather(param, estimate, b_towest, b_toeast, diff) %>%
+    mutate(param = fct_recode(fct_inorder(param),
+                              "eastward - westward" = "diff",
+                              "westward" = "b_towest",
+                              "eastward" = "b_toeast")) %>%
+    ggplot(aes(x = estimate)) +
+    geom_histogram(aes(fill = param), bins = 40) +
+    scale_y_continuous(breaks = scales::pretty_breaks(3)) +
+    scale_fill_manual(values = c(tc$primary_lighter,
+                                 tc$secondary_lighter,
+                                 tc$background_light)) +
+    facet_wrap(~ param, ncol = 1, labeller = label_parsed) +
+    theme_grid("x") +
+    theme(legend.position = "none")
+```
+
+To guess at an upper bound for the effects of jet lag on a team's
+success, let's assume (1) that the model is giving estimates somewhere
+in the right range, (2) that the 1992--2011 range is representative of
+other possible year ranges, (3) that the lag predictor is providing a
+meaningful representation of a team's collective jet lag, and (4) that
+jet lag causes the observed decrease in run differentials and there a
+no other confounders to adjust for.  In that case, I'd guess that at
+most being jet lagged decreases a team's win probability by five
+percentage points.  This is based on the lower tail of the eastward
+coefficient estimate and setting the other t-distribution location
+predictors (team abilities, pitchers, home-field advantage) to zero.
+For any given game, the effect of lag, like home-field advantage,
+would usually be swamped by other factors, but it could add up in the
+long run.  The "long run" is shorter in the case of home-field
+advantage because that it is a part of every game, while a team having
+lag, at least by the definition used here, occurs in fewer than ten
+percent of the games.  The number of lag games and direction is
+unevenly distributed among teams, so if each season some teams are
+losing a couple of more games than others due to lag, that could make
+a difference over many seasons.
+
+```{r, dependson = "glog", eval = FALSE}
+summarise(glog,
+          n_games = n(),
+          n_lag_games = sum(abs(lag_away) > 1 | abs(lag_home) > 1),
+          lag_perc = n_lag_games / n_games)
+```
+
+That's making a lot of assumptions, though.  And again, the estimates
+are wide, and I don't place much confidence in the magnitude of the
+lag predictor coefficients given the underestimation of home-field
+advantage.
+
+[agl]: http://andrewgelman.com/2017/08/04/hadnt-jet-lag-junior-certainly-wouldve-banged-756-hrs-career/
+[ags1]: http://andrewgelman.com/2014/07/13/stan-analyzes-world-cup-data/
+[ags2]: http://andrewgelman.com/2014/07/15/stan-world-cup-update/
+[ags3]: http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/
+[fbr]: http://www.fangraphs.com/library/features/baseruns/
+[fgh]: http://www.fangraphs.com/blogs/home-field-advantage-and-our-new-game-odds/
+[fgp]: http://www.fangraphs.com/library/team-record-pythagorean-record-and-base-runs/
+[js]: http://dx.doi.org/10.1198/jbes.2009.07145
+[lag-checks]: lag-calculation-checks.html
+[mdir]: https://github.com/kyleam/mlb-rundiff/tree/master/models
+[mka]: https://github.com/milkha/EPL
+[model]: https://github.com/kyleam/mlb-rundiff/tree/master/models/rundiff-lagwe.stan
+[osm]: rundiff-oneseason-2011.html
+[pdim]: https://visual.ly/community/infographic/sports/baseballs-many-physical-dimensions
+[pf]: http://www.espn.com/mlb/stats/parkfactor
+[pyth]: https://www.sports-reference.com/blog/baseball-reference-faqs/
+[rgl]: http://www.retrosheet.org/
+[rls]: http://dx.doi.org/10.1038/377583a0
+[ssa]: http://dx.doi.org/10.1073/pnas.1608847114
+[ssm]: rundiff-split-2011.html
+[wls]: https://doi.org/10.1123/ijspp.4.3.394

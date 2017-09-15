@@ -243,11 +243,22 @@ rule models_sim_rgames_rundiff_lagwe_1992_2011:
 ### Rmarkdown
 
 rmd_site_input = [
+    "gamelogs/parkcode-cut.csv",
+    "gamelogs/person-ids.csv",
+    "gamelogs/wins-pythagorean.csv",
     "lag/2011.csv",
     "lag/lag-combined-1990_2016-ht.csv",
     "lag/lag-combined-1990_2016.csv",
     "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
+    "lib/utils.R",
+    "models/rundiff-home_1992-2011-fit.rds",
+    "models/rundiff-lagwe_1992-2011-fit.rds",
+    "models/rundiff-lagwe_1992-2011-sim-cov.dat",
+    "models/rundiff-lagwe_1992-2011-sim-rgames.rds",
+    "models/rundiff-lagwe_1992-2011-sim-wins.rds",
+    "models/rundiff-lagwe_1992-2011.data.R",
+    "models/rundiff-lagwe_1992-2011.info.R",
     "models/rundiff-oneseason.stan",
     "models/rundiff-oneseason_2011-fit.rds",
     "models/rundiff-split_2011-fit.rds",
