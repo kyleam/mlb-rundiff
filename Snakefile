@@ -215,6 +215,15 @@ rule models_sim_wins_rundiff_lagwe_1992_2011:
     shell: "cd $(dirname {input[0]}) && "
            "Rscript --vanilla $(basename {input[0]})"
 
+rule models_sim_rgames_rundiff_lagwe_1992_2011:
+    input: "models/sim-rgames-rundiff-lagwe_1992-2011.R",
+           "models/rundiff-lagwe_1992-2011-sim.rds",
+           "models/rundiff-lagwe_1992-2011.data.R",
+           "models/rundiff-lagwe_1992-2011.info.R"
+    output: "models/rundiff-lagwe_1992-2011-sim-rgames.rds"
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
 
 ### Rmarkdown
 
