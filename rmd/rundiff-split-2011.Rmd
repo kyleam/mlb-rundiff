@@ -174,7 +174,7 @@ And here are the ability estimates for each team and period.
 
 ```{r info, cache.extra = tools::md5sum("../models/rundiff-split_2011.info.R")}
 source("../lib/utils.R")
-info <- source_as_list("../models/rundiff-split_2011.info.R")
+info <- read_rdump("../models/rundiff-split_2011.info.R")
 ```
 
 ```{r avals_plot, dependson = c("samps", "info"), fig.asp = 1}
@@ -212,7 +212,7 @@ a disproportionate number of close games).
 ## Posterior predictive check
 
 ```{r dat, cache.extra = tools::md5sum("../models/rundiff-split_2011.data.R")}
-dat <- source_as_list("../models/rundiff-split_2011.data.R")
+dat <- read_rdump("../models/rundiff-split_2011.data.R")
 ```
 
 ```{r ppc, dependson = "fit"}

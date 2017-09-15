@@ -28,12 +28,6 @@ count_wins <- function(log_df, ...){
         summarise(n_wins = sum(.data$win), n_games = n())
 }
 
-source_as_list <- function(file){
-    source_env <- new.env()
-    source(file, source_env)
-    as.list(source_env)
-}
-
 ## Compute quantiles and mean over the trace iterations
 ##
 ## `arr` is an array of at least two dimensions, with the first
