@@ -45,7 +45,8 @@ trace_intervals <- function(arr, varnames, probs = NULL){
         probs <- c(0.025, 0.1, 0.25, 0.75, 0.9, 0.975)
 
     result <- apply(arr, 2:length(dim(arr)),
-                    function(x) c(mean = mean(x), quantile(x, probs)))
+                    function(x) c(mean = mean(x),
+                                  quantile(x, probs, names = FALSE)))
     rownames(result)[2:nrow(result)] <- paste0("p", probs * 100)
 
     as_tibble(spread(reshape2::melt(result, varnames = c("measure", varnames)),
