@@ -1,7 +1,21 @@
 
 source("utils.R")
 
-test_that("trace_intervals", {
+test_that("trace_intervals, vector and 1d", {
+    x <- 1:11
+    result_x <- trace_intervals(x, probs = 0.1)
+
+    expect_equal(length(result_x), 2)
+    expect_equal(names(result_x), c("mean", "p10"))
+    expect_equal(result_x[["p10"]], 2.)
+
+    a1 <- array(1:11)
+    result_a1 <- trace_intervals(a1, probs = 0.1)
+    expect_equal(result_x, result_a1)
+})
+
+
+test_that("trace_intervals, > 1d", {
     a2 <- array(1:33, c(11, 3))
     a3 <- array(1:66, c(11, 3, 2))
 
