@@ -14,6 +14,7 @@
             "r-devtools"
             "r-dplyr"
             "r-forcats"
+            "r-directlabels"
             "r-ggplot2"
             "r-hexbin"
             "r-knitr"

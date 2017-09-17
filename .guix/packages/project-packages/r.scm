@@ -7,6 +7,7 @@
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages haskell)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages maths)
   #:use-module (gnu packages statistics)
   #:use-module (guix packages)
   #:use-module (guix download)
@@ -160,3 +161,28 @@ that can be easily used by developers working on a variety of R
 packages for Bayesian modeling, particularly (but not exclusively)
 packages interfacing with 'Stan'.")
     (license license:gpl3+)))
+
+(define-public r-directlabels
+  (package
+   (name "r-directlabels")
+   (version "2017.03.31")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (cran-uri "directlabels" version))
+     (sha256
+      (base32
+       "01ahw0c56mnzwl611s8hnghicww4c4dgf5v2wv6bl1s1pramw9pr"))))
+   (build-system r-build-system)
+   (propagated-inputs `(("r-quadprog" ,r-quadprog)))
+   (home-page
+    "http://directlabels.r-forge.r-project.org/")
+   (synopsis "Direct Labels for Multicolor Plots")
+   (description
+    "An extensible framework for automatically placing direct labels
+onto multicolor 'lattice' or 'ggplot2' plots.  Label positions are
+described using Positioning Methods which can be re-used across
+several different plots.  There are heuristics for examining
+\"trellis\" and \"ggplot\" objects and inferring an appropriate
+Positioning Method.")
+   (license license:gpl3)))
