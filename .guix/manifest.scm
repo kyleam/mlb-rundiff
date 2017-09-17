@@ -21,6 +21,7 @@
             "r-readr"
             "r-rmarkdown"
             "r-rstan"
+            "r-testthat"
             "r-tidyr"
             "sed"
             "snakemake"
