@@ -2,6 +2,8 @@
 
 ./guix-cmd py.test
 
+./guix-cmd Rscript --vanilla -e "'require(testthat); test_dir(\"./lib\")'"
+
 ## Check for runaway lag values.
 ./guix-snakemake -j3 --quiet lag/lag-combined-1990_2016.csv
 lag_max=$(sed 1d lag/lag-combined-1992_2011.csv |
