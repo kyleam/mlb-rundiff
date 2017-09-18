@@ -15,7 +15,6 @@ library(tidyr)
 
 source("plot-utils.R")
 
-theme_set(theme_minimal())
 theme_setup()
 ```
 
