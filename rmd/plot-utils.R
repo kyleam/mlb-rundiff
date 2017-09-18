@@ -40,11 +40,6 @@ theme_setup <- function(){
     tc
 }
 
-theme_histogram <- function(){
-    theme(axis.text.y = element_blank(),
-          axis.title.y = element_blank())
-}
-
 theme_grid <- function(axis = c("x", "y"), minor = FALSE){
     el <- element_line(colour = "grey92")
     el_minor <- element_line(colour = "grey92", size = 0.25)

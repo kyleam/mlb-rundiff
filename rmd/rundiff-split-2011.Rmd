@@ -80,7 +80,7 @@ data.frame(nu = samps$nu) %>%
     geom_histogram(bins = 40) +
     scale_x_continuous(limits = c(5, NA)) +
     labs(x = expression(nu)) +
-    theme_histogram()
+    theme_remove_axis("y")
 ```
 
 With a median $\nu$ near 11, it probably makes sense to stick with a
@@ -136,7 +136,7 @@ data.frame(b_home = samps$b_home) %>%
     geom_histogram(bins = 40, size = 0.3) +
     expand_limits(x = c(-0.3, 0.3)) +
     labs(x = expression(beta[home])) +
-    theme_histogram()
+    theme_remove_axis("y")
 ```
 
 Perhaps this parameter should be estimated for each team in order to
