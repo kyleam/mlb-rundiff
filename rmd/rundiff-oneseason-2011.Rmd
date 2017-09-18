@@ -74,13 +74,13 @@ selpars <- c("sigma_a", "sigma_y", grep("^a", names(fit), value = TRUE))
 
 ```{r nr_plot, dependson = c("fit", "selpars"), out.width = "50%", fig.width = 4.28, fig.align = "default"}
 mcmc_neff(neff_ratio(fit, pars = selpars)) +
-    theme(panel.grid = element_blank(),
-          legend.position = "left")
+    theme_remove_axis("y") +
+    theme(legend.position = "left")
 
 mcmc_rhat(rhat(fit, pars = selpars)) +
     legend_text(hjust = 0) +
-    theme(panel.grid = element_blank(),
-          legend.text.align = 0)
+    theme_remove_axis("y") +
+    theme(legend.text.align = 0)
 ```
 
 ```{r samps_flat, dependson = "fit"}
@@ -96,13 +96,11 @@ color_scheme_set("darkgray")
 ```
 
 ```{r acf_plot_sigma, dependson = "samps_flat"}
-mcmc_acf(samps_flat, regex_pars = "sigma") +
-    theme(panel.grid = element_blank())
+mcmc_acf(samps_flat, regex_pars = "sigma")
 ```
 
 ```{r acf_plot_a, dependson = "samps_flat", out.width = "95%", fig.width = 8.14}
-mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]")) +
-    theme(panel.grid = element_blank())
+mcmc_acf(samps_flat, pars = paste0("a[", 1:6, "]"))
 ```
 
 The traces look OK.
@@ -115,7 +113,8 @@ mcmc_trace(samps_flat, regex_pars = "sigma")
 ```{r sigma_a_plots, dependson = "samps_flat", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
 mcmc_trace(samps_flat, regex_pars = "^a\\[", facet_args = list(ncol = 5)) +
     theme(legend.position = "none",
-          axis.text.x = element_blank())
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
 ```
 
 ## Ability estimates
@@ -160,7 +159,7 @@ ggplot(avals, aes(x = fct_rev(team))) +
          title = "Team ability estimates for 2011 season",
          subtitle = "sorted by regular season standings") +
     coord_flip() +
-    theme(panel.grid = element_blank())
+    theme_remove_axis("y", text = FALSE)
 ```
 
 The intervals are wide and largely overlapping, but the ability
@@ -247,11 +246,10 @@ result %>%
                        minor_breaks = -13:13) +
     coord_flip() +
     labs(title = "Run differential",
-         subtitle = "compared to the match-up's 95% predictive interval") +
-    theme(axis.title.y = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid.major.y = element_blank(),
-          axis.text.y = element_text(hjust = 0))
+         subtitle = "compared to the match-up's 95% predictive interval",
+         x = NULL, y = NULL) +
+    theme_remove_axis("y", text = FALSE) +
+    theme(axis.text.y = element_text(hjust = 0))
 ```
 
 Well, that seems OK in the sense that 115 of the 122 points (close to

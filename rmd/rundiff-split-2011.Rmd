@@ -56,7 +56,7 @@ selpars <- model_pars[!grepl("^eta", model_pars) &
 nrats <- neff_ratio(fit, pars = selpars)
 nrats[nrats < 0.5]
 
-mcmc_neff_hist(nrats) + theme(panel.grid = element_blank())
+mcmc_neff_hist(nrats) + theme_remove_axis("y")
 ```
 
 ## Parameter estimates
@@ -190,11 +190,7 @@ mutate(avals, team = factor(team, levels = teams_ranked)) %>%
     facet_wrap(~ team) +
     labs(y = "mean ability (with 80% intervals)",
          title = "Team ability estimates for 2011 season",
-         subtitle = "sorted by regular season standings") +
-    theme(panel.grid.minor.y = element_blank(),
-          panel.grid.major.x = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          axis.text.x = element_blank())
+         subtitle = "sorted by regular season standings")
 ```
 
 It seems like the periods are capturing some variation, though many
@@ -268,10 +264,8 @@ ggplot(ppc, aes(x = home_period)) +
     coord_flip() +
     facet_wrap(~ matchup, ncol = 1, scales = "free_y",
                strip.position = "left") +
-    theme(panel.grid.major.y = element_blank(),
-          panel.grid.minor.y = element_blank(),
-          strip.text.y = element_text(angle = 180),
-          axis.text.y = element_blank())
+    theme_remove_axis("y") +
+    theme(strip.text.y = element_text(angle = 180))
 ```
 
 The interavls are still unimpressively large.  My next attempt to

@@ -58,7 +58,7 @@ lag %>%
     ylab(NULL) +
     scale_size(range = c(1, 3.5)) +
     scale_color_manual(values = c("black", "gray60"), guide = FALSE) +
-    theme(panel.grid = element_blank())
+    theme_remove_axis("y", text = FALSE)
 ```
 
 Nothing looks off here after accounting for a few historical events.
@@ -96,9 +96,7 @@ lag2011 %>%
     geom_point(size = 0.7) +
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
-    theme(panel.grid.minor.y = element_blank(),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank()) +
+    theme_grid("x") +
     facet_wrap(~ team, ncol = 1)
 ```
 
@@ -136,8 +134,8 @@ lag2011 %>%
                  date_labels = "%b") +
     scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
     scale_color_manual(values = colors) +
-    theme(panel.grid.minor.y = element_blank(),
-          legend.position = "none") +
+    theme_grid("x", minor = TRUE) +
+    theme(legend.position = "none") +
     facet_wrap(~ team, ncol = 1)
 ```
 
