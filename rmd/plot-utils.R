@@ -1,4 +1,6 @@
 
+require(ggplot2)
+
 theme_colors <- function(){
     list(background_light = "gray92",
          background = "gray60",
