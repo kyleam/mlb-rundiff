@@ -78,7 +78,6 @@ quantile(samps$nu, probs = c(0.025, 0.5, 0.975))
 data.frame(nu = samps$nu) %>%
     ggplot(aes(nu)) +
     geom_histogram(bins = 40) +
-    scale_x_continuous(limits = c(5, NA)) +
     labs(x = expression(nu)) +
     theme_remove_axis("y")
 ```
