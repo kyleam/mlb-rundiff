@@ -14,13 +14,16 @@ theme_colors <- function(){
 }
 
 theme_setup <- function(){
-    tc <<- theme_colors()
+    tc <- theme_colors()
 
     theme_set(theme_minimal())
     update_geom_defaults("bar",
                          list(fill = tc$background_light,
                               colour = tc$background_dark,
                               size = 0.3))
+
+    tc
+}
 }
 
 theme_axis_line <- function(){

@@ -18,7 +18,7 @@ library(bayesplot)
 source("plot-utils.R")
 
 color_scheme_set(c("green"))
-theme_setup()
+tc <- theme_setup()
 
 source("../lib/utils.R")
 ```

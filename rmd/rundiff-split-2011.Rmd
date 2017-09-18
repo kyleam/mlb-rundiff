@@ -15,7 +15,7 @@ library(bayesplot)
 color_scheme_set(c("green"))
 
 source("plot-utils.R")
-theme_setup()
+tc <- theme_setup()
 ```
 
 I've now [extended] the previous [single-season, single ability model]

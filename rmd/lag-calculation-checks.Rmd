@@ -15,7 +15,7 @@ library(tidyr)
 
 source("plot-utils.R")
 
-theme_setup()
+tc <- theme_setup()
 ```
 
 Song, Severini, and Allada ("SSA") [estimated the jet lag] of teams
