@@ -57,3 +57,14 @@ theme_grid <- function(axis = c("x", "y"), minor = FALSE){
     }
     do.call(theme, args)
 }
+
+theme_remove_axis <- function(axis = c("x", "y"), text = TRUE, title = TRUE){
+    args <- list()
+    args[[paste0("axis.line.", axis[1])]] <- element_blank()
+    args[[paste0("axis.ticks.", axis[1])]] <- element_blank()
+    if (text)
+        args[[paste0("axis.text.", axis[1])]] <- element_blank()
+    if (title)
+        args[[paste0("axis.title.", axis[1])]] <- element_blank()
+    do.call(theme, args)
+}
