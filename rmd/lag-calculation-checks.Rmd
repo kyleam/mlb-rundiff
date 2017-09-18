@@ -353,11 +353,12 @@ seem right, so that probably indicates that I'm missing a few edge
 cases of the lag calculation rules.  One edge case that I think
 explains the first three of these is calculating the lag for a trip
 when the team starts off with a lag.  For example, for the April 18,
-2007, entry above, San Diego had a +1 lag when it [traveled][sdn] from
-Chicago back to San Diego, so they ended up at -1 in my calculations
-instead of -2.  I'm not sure what makes the most sense here, but these
-events are pretty rare because a team usually stays around for at last
-three days, which is enough to drop their lag back to zero.
+2007, entry above, San Diego had a +1 lag when they [traveled][sdn]
+from Chicago back to San Diego, so they ended up at -1 in my
+calculations instead of -2.  I'm not sure what makes the most sense
+here, but these events are pretty rare because a team usually stays
+around for at last three days, which is enough to drop their lag back
+to zero.
 
 For most of the entries, though, I'm not spotting any obvious
 explanations.

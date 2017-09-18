@@ -267,7 +267,7 @@ ggplot(ppc, aes(x = home_period)) +
     theme(strip.text.y = element_text(angle = 180))
 ```
 
-The interavls are still unimpressively large.  My next attempt to
+The intervals are still unimpressively large.  My next attempt to
 shrink them will be to incorporate information about the starting
 pitcher for each team.
 
