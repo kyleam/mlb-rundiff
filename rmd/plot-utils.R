@@ -15,10 +15,23 @@ theme_colors <- function(){
          secondary_lighter = "#c2bae2")
 }
 
+theme_rd <- function(base_size = 11, base_family = ""){
+    theme_grey(base_size = base_size, base_family = base_family) %+replace%
+        theme(panel.background = element_rect(fill = "white", colour = NA),
+              panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              axis.line = element_line(color = "gray30", size = 0.4),
+              axis.ticks = element_line(colour = "grey30"),
+              strip.background = element_rect(fill = "white", colour = NA),
+              legend.key = element_rect(fill = "white", colour = NA),
+              complete = TRUE)
+}
+
 theme_setup <- function(){
     tc <- theme_colors()
 
-    theme_set(theme_minimal())
+    theme_set(theme_rd())
     update_geom_defaults("bar",
                          list(fill = tc$background_light,
                               colour = tc$background_dark,
@@ -26,16 +39,8 @@ theme_setup <- function(){
 
     tc
 }
-}
-
-theme_axis_line <- function(){
-    theme(panel.grid = element_blank(),
-          axis.line = element_line(color = theme_colors()$background_dark,
-                                   size = 0.4))
-}
 
 theme_histogram <- function(){
     theme(axis.text.y = element_blank(),
-          axis.title.y = element_blank(),
-          panel.grid = element_blank())
+          axis.title.y = element_blank())
 }

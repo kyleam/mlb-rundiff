@@ -109,15 +109,13 @@ The traces look OK.
 
 ```{r sigma_trace_plots, dependson = "samps_flat", fig.asp = 0.35}
 color_scheme_set("mix-darkgray-green")
-mcmc_trace(samps_flat, regex_pars = "sigma") +
-    theme_axis_line()
+mcmc_trace(samps_flat, regex_pars = "sigma")
 ```
 
 ```{r sigma_a_plots, dependson = "samps_flat", out.width = "95%", fig.width = 8.14, fig.asp = 0.75}
 mcmc_trace(samps_flat, regex_pars = "^a\\[", facet_args = list(ncol = 5)) +
     theme(legend.position = "none",
-          axis.text.x = element_blank()) +
-    theme_axis_line()
+          axis.text.x = element_blank())
 ```
 
 ## Ability estimates

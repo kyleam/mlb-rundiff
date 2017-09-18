@@ -118,8 +118,7 @@ data.frame(nu = samps$nu,
     ggplot(aes(nu, sigma_y)) +
     labs(x = expression(nu),
          y = expression(sigma[y])) +
-    geom_point(alpha = 0.2, shape = 16) +
-    theme_axis_line()
+    geom_point(alpha = 0.2, shape = 16)
 ```
 
 ### Home-field advantage
