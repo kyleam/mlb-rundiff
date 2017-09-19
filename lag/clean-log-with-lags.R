@@ -18,7 +18,8 @@ glog <- read_csv("log-with-lags.csv")
 ## counted as a day off.  The lag calculation should at least account
 ## for the latter issue.  Drop them for now.
 ##
-## filter(glog, !is.na(CompletionInfo))
+## filter(glog, !is.na(completion_info) &
+##              between(lubridate::year(date), 1992, 2011))
 
 glog %>%
     filter(is.na(completion_info)) %>%
