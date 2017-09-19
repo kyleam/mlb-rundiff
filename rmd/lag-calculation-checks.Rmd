@@ -202,12 +202,13 @@ calculations are entirely off base.  If I generate the lag values
 using the time zone of the home team rather the time zone of the park,
 I can get closer to the Table S1 tallies.
 
-```{r lag_ht, cache.extra = tools::md5sum("../lag/lag-combined-1992_2011-ht.csv")}
-lag_ht <- read_csv("../lag/lag-combined-1992_2011-ht.csv") %>%
+```{r lag_ht, cache.extra = tools::md5sum("../lag/lag-combined-1990_2016-ht.csv")}
+lag_ht <- read_csv("../lag/lag-combined-1990_2016-ht.csv") %>%
     mutate(date = ymd(date),
            year = year(date),
            game_tz = factor(game_tz,
-                            levels = c("ET", "CT", "MT", "PT", "other")))
+                            levels = c("ET", "CT", "MT", "PT", "other"))) %>%
+    filter(between(year, 1992, 2011))
 ```
 
 ```{r lag_ht_tally, dependson = c("lag_tally", "lag_ht")}

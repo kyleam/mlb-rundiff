@@ -237,8 +237,8 @@ rule models_sim_rgames_rundiff_lagwe_1992_2011:
 
 rmd_site_input = [
     "lag/2011.csv",
+    "lag/lag-combined-1990_2016-ht.csv",
     "lag/lag-combined-1990_2016.csv",
-    "lag/lag-combined-1992_2011-ht.csv",
     "lag/log-with-lags-cleaned.csv",
     "lag/song2017how-table-s2.csv",
     "models/rundiff-oneseason.stan",
