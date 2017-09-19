@@ -15,10 +15,9 @@ lag_wide <- lag %>%
     spread(lag_type, lag)
 
 cnames <- scan("../gamelogs/game-log-header.txt", character(), quiet = TRUE)
-glog <- read_csv("../gamelogs/1990_2016.csv", col_names = cnames) %>%
+glog <- read_csv("../gamelogs/1990_2016.csv", col_names = cnames,
+                 col_types = list(game_id = col_character())) %>%
     mutate(date = ymd(date))
-
-stopifnot(nrow(glog) == nrow(lag_wide))
 
 full_join(lag_wide, glog,
           by = c("date", "away_team", "home_team", "game_id")) %>%

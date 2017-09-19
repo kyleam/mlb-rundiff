@@ -11,18 +11,15 @@ library(readr)
 
 glog <- read_csv("log-with-lags.csv")
 
-## There are 25 games that were completed at a later date.  I'm not
-## sure how to treat the lags in these cases because the game is split
-## across days.  Another issue is that these could affect the lags of
-## other entries if a make-up game happened on a day that is being
-## counted as a day off.  The lag calculation should at least account
-## for the latter issue.  Drop them for now.
+## There are 25 games that were completed at a later date.  Drop them
+## since play is split across multiple days.  These games are still
+## acounted for in the lag calculations through spread_incomplete.py.
 ##
 ## filter(glog, !is.na(completion_info) &
 ##              between(lubridate::year(date), 1992, 2011))
 
 glog %>%
-    filter(is.na(completion_info)) %>%
+    filter(is.na(completion_info) & game_id != "I") %>%
     select(-starts_with("umpire"),
            -contains("batting"),
            -ends_with("name"),

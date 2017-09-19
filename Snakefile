@@ -30,7 +30,7 @@ rule gamelogs_unzip_gl2010_16:
 
 rule gamelogs_convert_and_rename_:
     input: "gamelogs/GL{year}.TXT"
-    output: "gamelogs/{year}.csv"
+    output: "gamelogs/{year,[0-9]+}.csv"
     shell: "dos2unix -n {input} {output}"
 
 rule gamelogs_combine_years:
@@ -41,13 +41,18 @@ rule gamelogs_combine_years:
 
 ### Calculation of lag
 
+rule lag_spread_incomplete:
+    input: "lag/spread_incomplete.py", "gamelogs/{year}.csv"
+    output: "gamelogs/{year}-spread.csv"
+    shell: "python {input[0]} {input[1]} | sort -t, -k1,1 > {output}"
+
 rule lag_calculate:
-    input: "lag/lag.py", "gamelogs/{year}.csv"
+    input: "lag/lag.py", "gamelogs/{year}-spread.csv"
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"
 
 rule lag_calculate_with_ht:
-    input: "lag/lag.py", "gamelogs/{year}.csv"
+    input: "lag/lag.py", "gamelogs/{year}-spread.csv"
     output: "lag/{year}-ht.csv"
     shell: "python {input[0]} --with-ht {input[1]} > {output}"
 
