@@ -308,7 +308,7 @@ day.)
 
 ```{r lag_cmp, dependson = "lag"}
 prepare_cmp <- function(data){
-    filter(data, .data$dbl_header < 2) %>%
+    filter(data, .data$game_id < 2) %>%
         mutate(team = case_when(.data$team == "CAL" ~ "ANA",
                                 .data$team == "MON" ~ "WAS",
                                 TRUE ~ .data$team),
@@ -348,7 +348,7 @@ values.
 
 ```{r, dependson = "full"}
 filter(full_ht, lag != lag.s2) %>%
-    select(-dbl_header, -year)
+    select(-game_id, -year)
 ```
 
 Looking at the game logs as well as baseball-reference.com, my values
@@ -372,7 +372,7 @@ additional discrepancies.
 
 ```{r, dependson = "full"}
 filter(full, lag != lag.s2) %>%
-    select(-dbl_header, -year) %>%
+    select(-game_id, -year) %>%
     as.data.frame()
 ```
 
@@ -383,10 +383,10 @@ if I use the home-team-based values.
 ```{r, dependson = "full"}
 full_ht %>%
     filter(is.na(lag.s2)) %>%
-    group_by(date, matchup, dbl_header) %>%
+    group_by(date, matchup, game_id) %>%
     filter(max(abs(lag)) > 1) %>%
     ungroup() %>%
-    select(-lag.s2, -dbl_header) %>%
+    select(-lag.s2, -game_id) %>%
     as.data.frame()
 ```
 
@@ -400,10 +400,10 @@ Here are the parked-based values that aren't in Table S2:
 ```{r, dependson = "full"}
 full %>%
     filter(is.na(lag.s2)) %>%
-    group_by(date, matchup, dbl_header) %>%
+    group_by(date, matchup, game_id) %>%
     filter(max(abs(lag)) > 1) %>%
     ungroup() %>%
-    select(-lag.s2, -dbl_header) %>%
+    select(-lag.s2, -game_id) %>%
     as.data.frame()
 ```
 

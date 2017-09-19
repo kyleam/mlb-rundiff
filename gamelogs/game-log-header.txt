@@ -1,5 +1,5 @@
 date
-dbl_header
+game_id
 day_of_week
 away_team
 away_team_league

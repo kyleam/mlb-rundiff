@@ -23,7 +23,7 @@ from collections import namedtuple
 from datetime import datetime
 
 Game = namedtuple("Game",
-                  ["date", "dbl_header",
+                  ["date", "game_id",
                    "visiting_team", "visiting_gamenum",
                    "home_team", "home_gamenum",
                    "park"])
@@ -34,7 +34,7 @@ def parse_log(rows):
     """
     for row in rows:
         yield Game(date=datetime.strptime(row[0], "%Y%m%d"),
-                   dbl_header=row[1],
+                   game_id=row[1],
                    visiting_team=row[3], visiting_gamenum=int(row[5]),
                    home_team=row[6], home_gamenum=int(row[8]),
                    park=row[16])
@@ -98,7 +98,7 @@ _TEAM_ZONES = {"ANA": 3, "ARI": 3, "ATL": 0, "BAL": 0, "BOS": 0, "CAL": 3,
 TZ_LABEL = {0: "ET", 1: "CT", 2: "MT", 3: "PT", 6: "other"}
 
 _HEADERS = ["date", "team", "game_tz", "lag", "matchup", "tz_shift",
-            "days_delta", "dbl_header", "park"]
+            "days_delta", "game_id", "park"]
 
 
 def park_to_zone(game):
@@ -157,7 +157,7 @@ def game_lags(games, zonefn = None):
                       # useful for debugging.
                       "{}@{}".format(game.visiting_team, game.home_team),
                       "{}->{}".format(tz_prev, tz),
-                      days_delta, game.dbl_header, game.park]
+                      days_delta, game.game_id, game.park]
 
             yield dict(zip(_HEADERS, fields))
 
@@ -174,7 +174,7 @@ def _format_output(fields):
                      fields["matchup"],
                      fields["tz_shift"],
                      str(fields["days_delta"]),
-                     fields["dbl_header"],
+                     fields["game_id"],
                      fields["park"]])
 
 if __name__ == '__main__':
