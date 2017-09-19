@@ -22,4 +22,5 @@ stopifnot(nrow(glog) == nrow(lag_wide))
 
 full_join(lag_wide, glog,
           by = c("date", "away_team", "home_team", "game_id")) %>%
+    arrange(date, home_team, away_team, game_id) %>%
     write_csv("log-with-lags.csv")
