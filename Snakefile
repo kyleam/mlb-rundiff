@@ -188,6 +188,13 @@ rule models_dump_rundiff_year_range_data_:
            "Rscript --vanilla $(basename {input[0]}) "
            "{wildcards.year1} {wildcards.year2}"
 
+rule models_dump_rundiff_home_1992_2011_data:
+    input: "models/dump-rundiff-home_1992-2011-data.R",
+           "lag/log-with-lags-cleaned.csv"
+    output: "models/rundiff-home_1992-2011.data.R",
+    shell: "cd $(dirname {input[0]}) && "
+           "Rscript --vanilla $(basename {input[0]})"
+
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
            "models/{model}.stan",
