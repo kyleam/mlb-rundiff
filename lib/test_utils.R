@@ -36,3 +36,28 @@ test_that("trace_intervals, > 1d", {
     expect_equal(result_a2,
                  filter(result_a3, var2 == 1) %>% select(-var2))
 })
+
+test_that("rundiff_pwin", {
+    expect_equal(rundiff_pwin(15, 0, 3), 0.5)
+    expect_equal(rundiff_pwin(15, 0, 3),
+                 rundiff_pwin(15, 0, 3, home = FALSE))
+
+    ## This should be true for probabilities that aren't extreme.
+    expect_equal(1 - rundiff_pwin(15, 1, 3),
+                 rundiff_pwin(15, 1, 3, home = FALSE))
+
+
+    ## Sledge hammer approach that's susceptible to random failures.
+
+    ## expect_rand_near <- function(nu, mu, sigma){
+    ##     eval(bquote(expect_equal(rundiff_pwin(.(nu), .(mu), .(sigma)),
+    ##                              mean((.(mu) + rt(1e5, .(nu)) * .(sigma)) > 0),
+    ##                              tolerance = 0.005)))
+    ## }
+
+    ## expect_rand_near(5, 0.2, 3)
+    ## expect_rand_near(15, 0.2, 3)
+    ## expect_rand_near(15, 0.2, 6)
+    ## expect_rand_near(15, 2, 3)
+
+})

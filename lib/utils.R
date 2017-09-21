@@ -63,3 +63,15 @@ trace_intervals <- function(arr, varnames, probs = NULL){
     as_tibble(spread(reshape2::melt(result, varnames = c("measure", varnames)),
                      measure, value))
 }
+
+## Calculate the probability of a home team win using a scaled
+## t-distribution.
+##
+## A run differential above zero is considered a win for the home
+## team.
+##
+## The parameters match Stan's `student_t` function.  If `home` is
+## FALSE, report the probability of an away team win instead.
+rundiff_pwin <- function(nu, mu, sigma, home = TRUE){
+    pt(-mu / sigma, nu, lower.tail = !home)
+}
