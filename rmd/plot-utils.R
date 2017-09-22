@@ -16,6 +16,7 @@ theme_colors <- function(){
 }
 
 theme_rd <- function(base_size = 11, base_family = ""){
+    half_line <- base_size/2
     theme_grey(base_size = base_size, base_family = base_family) %+replace%
         theme(panel.background = element_rect(fill = "white", colour = NA),
               panel.border = element_blank(),
@@ -25,6 +26,9 @@ theme_rd <- function(base_size = 11, base_family = ""){
               axis.ticks = element_line(colour = "grey30"),
               strip.background = element_rect(fill = "white", colour = NA),
               legend.key = element_rect(fill = "white", colour = NA),
+              plot.caption = element_text(size = rel(0.8), color = "gray40",
+                                          hjust = 1, vjust = 1,
+                                          margin = margin(t = half_line * 0.9)),
               complete = TRUE)
 }
 
