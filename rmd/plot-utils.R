@@ -67,3 +67,44 @@ theme_remove_axis <- function(axis = c("x", "y"), text = TRUE, title = TRUE){
         args[[paste0("axis.title.", axis[1])]] <- element_blank()
     do.call(theme, args)
 }
+
+## Wrapper around annotate("text", ...) that sets `size` to the
+## theme's default text size.
+##
+## Arguments:
+##
+##   x, y, text: passed to `ggplot2::annotate`.
+##
+##   font.size: A font size to use instead of the theme's font size or
+##              a `rel` object to specify the size relative to the
+##              theme's text size.
+##
+##         ...: arguments to `ggplot2::annotate`.  `geom`, `x`, `y`,
+##              `label` and `size` are already set and should not be
+##              passed by the caller.
+annotate_text <- function(x, y, text, fontsize = NULL, ...){
+    th <- theme_get()
+
+    if (is.null(fontsize))
+        fontsize = th$text$size
+    else if (inherits(fontsize, "rel"))
+        fontsize = th$text$size * unclass(fontsize)
+    size = fontsize / 2.845276  # ggplot2:::.pt
+
+    annotate("text", x = x, y = y, label = text,
+             size = size, ...)
+}
+
+## Wrapper around annotate("text", ...) that sets some aesthetics
+## based on the value of the theme's plot.caption.
+##
+## Arguments:
+##
+##   x, y, text: passed to `ggplot2::annotate`.
+annotate_caption <- function(x, y, text){
+    th <- theme_get()
+    annotate_text(x, y, text,
+                  fontsize = th$plot.caption$size,
+                  colour = th$plot.caption$colour,
+                  hjust = 0)
+}
