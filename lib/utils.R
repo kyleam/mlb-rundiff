@@ -4,11 +4,13 @@ require(tidyr)
 
 ## Return win totals for each team.
 ##
-## The data frame log_df should have the columns "home_team",
-## "away_team", "home_runs_scored", and "away_runs_scored".
+## Arguments:
 ##
-## The remaing arguments are variables to group by.  If not specified,
-## `team' will be used.
+##   log_df: data frame that includes the columns "home_team",
+##           "away_team", "home_runs_scored", and "away_runs_scored".
+##
+##      ...: arguments passed to `dplyr::group_by`.  If not specified,
+##           `team` will be used.
 count_wins <- function(log_df, ...){
     groups <- quos(...)
     if (length(groups) == 0){
@@ -30,15 +32,18 @@ count_wins <- function(log_df, ...){
 
 ## Compute quantiles and mean over the trace iterations
 ##
-## The first dimension of `arr` should correspond to the iterations.
-## If `arr` is a vector, it will be treated as a one dimensional
-## array.
+## Arguments:
 ##
-## `varnames` is a vector of names for each dimension of `arr` except
-## for the first.
+##        arr: an array with the first dimension of corresponding to
+##             iterations or a vector, which will be treated as a one
+##             dimensional array.
 ##
-## `probs` is passed to `quantile` and, if unspecified, is set to
-## values that can be used to define the 50%, 80%, and 95% bounds.
+##   varnames: a vector of names for each dimension of `arr` except
+##             for the first.
+##
+##      probs: passed to `quantile` and, if unspecified, is set to
+##             values that can be used to define the 50%, 80%, and 95%
+##             bounds.
 trace_intervals <- function(arr, varnames, probs = NULL){
     dims <- dim(arr)
     nd <- length(dims)
@@ -70,8 +75,12 @@ trace_intervals <- function(arr, varnames, probs = NULL){
 ## A run differential above zero is considered a win for the home
 ## team.
 ##
-## The parameters match Stan's `student_t` function.  If `home` is
-## FALSE, report the probability of an away team win instead.
+## Arguments:
+##
+##   nu, mu, sigma: parameters matching Stan's `student_t` function.
+##
+##     home: if FALSE, report the probability of an away team win
+##           instead.
 rundiff_pwin <- function(nu, mu, sigma, home = TRUE){
     pt(-mu / sigma, nu, lower.tail = !home)
 }
