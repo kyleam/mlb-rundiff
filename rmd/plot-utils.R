@@ -25,7 +25,7 @@ theme_rd <- function(base_size = 11, base_family = ""){
               axis.line = element_line(color = "gray30", size = 0.4),
               axis.ticks = element_line(colour = "grey30"),
               strip.background = element_rect(fill = "white", colour = NA),
-              legend.key = element_rect(fill = "white", colour = NA),
+              legend.key = element_rect(fill = NA, colour = NA),
               plot.title = element_text(size = rel(1.1),
                                         hjust = 0, vjust = 1,
                                         margin = margin(b = half_line * 1.2)),
