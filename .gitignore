@@ -8,11 +8,17 @@ __pycache__
 .Rhistory
 
 *.dat
+*.docx
 *.csv
 *.data.R
 *.params.R
 *.info.R
 *.rds
+*.zip
+
+/gamelogs/glfields.txt
+/gamelogs/parkcode.txt
+/gamelogs/retroID.htm
 
 /rmd/_song2017how-table-s1.md
 /rmd/*-session-info.txt
