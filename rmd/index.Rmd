@@ -816,11 +816,10 @@ grid::grid.draw(do.call(gridExtra::gtable_cbind, lapply(ps, ggplotGrob)))
 
 But that's not the case.  The plot on the right shows the win
 probability for identically matched teams (i.e., the t-distribution
-parameter is set to $\beta^{\text{home}}$), using posterior draws for
-Wrigley Field's middle-of-the-pack scale parameter.  The estimate is
-short by more than 2 percentage points.  If I strip the model of all
-location predictors except for $\beta^{\text{home}}$, the estimate
-remains low.
+parameter is set to $\delta$), using posterior draws for Wrigley
+Field's middle-of-the-pack scale parameter.  The estimate is short by
+more than 2 percentage points.  If I strip the model of all location
+predictors except for $\delta$, the estimate remains low.
 
 ```{r eval = FALSE}
 fit_bhome <- readRDS("../models/rundiff-home_1992-2011-fit.rds")
