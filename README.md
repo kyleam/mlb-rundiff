@@ -39,7 +39,6 @@ _            | _
 **Python**   | 3.5.3
 docopt       | 0.6.2
 pytest       | 3.0.7
-             |
 **R**        | 3.4.1
 bayesplot    | 1.3.0
 devtools     | 1.13.3
@@ -55,7 +54,6 @@ rmarkdown    | 1.6
 rstan        | 2.16.2
 testthat     | 1.0.2
 tidyr        | 0.7.1
-             |
 **Other**    |
 coreutils    | 8.27
 dos2unix     | 7.3.4
