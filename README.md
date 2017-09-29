@@ -73,7 +73,7 @@ subdirectory and the "guix-*" files.
 If you do happen to use Guix, you can use the manifest file in the
 ".guix" subdirectory to install all the above dependencies.  The
 repository contains various wrappers around Guix commands
-(guix-update, guix-snakemake, ...) to make it easier run these
+(guix-update, guix-snakemake, ...) to make it easier to run these
 analyses with an isolated profile.
 
 
