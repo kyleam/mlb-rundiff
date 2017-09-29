@@ -71,22 +71,22 @@ rule gamelogs_pythagorean:
 
 ### Calculation of lag
 
-rule lag_spread_incomplete:
+rule lag_spread_incomplete_:
     input: "lag/spread_incomplete.py", "gamelogs/{year}.csv"
     output: "gamelogs/{year}-spread.csv"
     shell: "python {input[0]} {input[1]} | sort -t, -k1,1 > {output}"
 
-rule lag_calculate:
+rule lag_calculate_:
     input: "lag/lag.py", "gamelogs/{year}-spread.csv"
     output: "lag/{year}.csv"
     shell: "python {input[0]} {input[1]} > {output}"
 
-rule lag_calculate_with_ht:
+rule lag_calculate_with_ht_:
     input: "lag/lag.py", "gamelogs/{year}-spread.csv"
     output: "lag/{year}-ht.csv"
     shell: "python {input[0]} --with-ht {input[1]} > {output}"
 
-rule lag_combine:
+rule lag_combine_:
     input: expand("lag/{year}{{kind}}.csv", year=range(1990, 2016))
     output: "lag/lag-combined-1990_2016{kind,(|-ht)}.csv"
     shell: "head -n1  {input[0]} > {output} &&"
