@@ -1,5 +1,7 @@
 /*
- * Like rundiff-park.stan, but add lag information.
+ * Model of MLB run differentials
+ *
+ * https://kyleam.github.io/mlb-rundiff/
  */
 
 data {
