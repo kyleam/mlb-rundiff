@@ -808,7 +808,6 @@ ps[[1]] <- ggplot(data.frame(estimate = samps$b_home), aes(x = estimate)) +
 ps[[2]] <- data.frame(pr = wrigley_wp(samps$b_home)) %>%
     ggplot(aes(x = pr)) +
     geom_density() +
-    labs(x = expression(beta^{home})) +
     labs(x = "win probability") +
     theme_remove_axis("y")
 
