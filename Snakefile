@@ -264,10 +264,13 @@ rmd_site_input = [
     "models/rundiff-split_2011-fit.rds",
     "models/rundiff-split_2011.data.R",
     "models/rundiff-split_2011.info.R",
+    "rmd/_site.yml",
     "rmd/_song2017how-table-s1.md",
     "rmd/footer.html",
     "rmd/plot-utils.R",
     "rmd/rundiff-split.stan",
+    "rmd/setup.R",
+    "rmd/styles.css",
 ]
 
 rule rmd_copy_rundiff_split_model:
@@ -276,8 +279,7 @@ rule rmd_copy_rundiff_split_model:
     shell: "cp {input} {output}"
 
 rule rmd_render_site:
-    input: "rmd/_site.yml", "rmd/styles.css", "rmd/setup.R",
-           rmd_site_input, glob("rmd/*.Rmd"), glob("rmd/*.md")
+    input: rmd_site_input, glob("rmd/*.Rmd"), glob("rmd/*.md")
     output: "site/index.html"
     shell: "cd rmd && "
            "Rscript --vanilla --slave -e "
