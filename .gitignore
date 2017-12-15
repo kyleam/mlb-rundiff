@@ -1,5 +1,4 @@
 /.snakemake
-/.guix/profile*
 /.cache
 /site
 /rmd/*_files

@@ -45,7 +45,7 @@ list of all available rules.
 
 from glob import glob
 
-RSCRIPT="Rscript --vanilla "
+RSCRIPT="Rscript --no-save --no-restore --no-site-file --no-init-file "
 
 
 rule help:

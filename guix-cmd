@@ -1,9 +1,0 @@
-#!/bin/sh
-
-cmd=". ./.guix/profile/etc/profile && $@"
-
-env -i \
-    HOME=$HOME USER=$USER LOGNAME=$LOGNAME \
-    DISPLAY=$DISPLAY TERM=$TERM TZ=$TZ PAGER=$PAGER \
-    PATH= \
-    /usr/bin/sh -c "$cmd"

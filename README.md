@@ -63,19 +63,6 @@ snakemake    | 4.0.0
 unzip        | 6.0
 wget         | 1.19.1
 
-### Guix
-
-[Guix] is not a dependency.  You can safely ignore the ".guix"
-subdirectory and the "guix-*" files.
-
-If you do happen to use Guix, you can use the manifest file in the
-".guix" subdirectory to install all the above dependencies.  The
-repository contains various wrappers around Guix commands
-(guix-update, guix-snakemake, ...) to make it easier to run these
-analyses with an isolated profile.
-
-
-[Guix]: https://www.gnu.org/software/guix/
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
 [gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/gamelogs
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
