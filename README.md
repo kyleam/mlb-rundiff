@@ -77,7 +77,7 @@ analyses with an isolated profile.
 
 [Guix]: https://www.gnu.org/software/guix/
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
-[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/lag
+[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/gamelogs
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
 [lag]: https://github.com/kyleam/mlb-rundiff/tree/master/lag
 [models]: https://github.com/kyleam/mlb-rundiff/tree/master/models
