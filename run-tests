@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 ./guix-cmd py.test
 

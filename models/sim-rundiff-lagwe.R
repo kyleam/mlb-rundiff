@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 ## Simulate run differentials for rundiff-lagwe model.
 ##

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """Add a second entry for incomplete games in a Retrosheet log
 
 The new entry mirrors the original one except that the date and park

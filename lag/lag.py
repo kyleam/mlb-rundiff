@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 """Calculate time zone lag for each team in a game log
 
 usage: calculate_lag.py [--with-ht] [FILE ...]

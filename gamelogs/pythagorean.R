@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 ## https://www.sports-reference.com/blog/baseball-reference-faqs/
 ##

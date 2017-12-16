@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 ## Run "guix package" with project-specific values for
 ## $GUIX_PACKAGE_PATH and --profile.
