@@ -20,7 +20,7 @@ source("plot-utils.R")
 color_scheme_set(c("green"))
 tc <- theme_setup()
 
-source("../lib/utils.R")
+source("../code/lib/utils.R")
 ```
 
 ## Single-year estimation of team ability
@@ -39,8 +39,8 @@ for discrete data, but it may be good enough for my purposes.
 
 Below is a model that closely follows the World Cup model.
 
-```{r, cache.extra = tools::md5sum("../models/rundiff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
-writeLines(readLines("../models/rundiff-oneseason.stan"))
+```{r, cache.extra = tools::md5sum("../code/models/rundiff-oneseason.stan"), echo = FALSE, comment = NA, collapse = FALSE}
+writeLines(readLines("../code/models/rundiff-oneseason.stan"))
 ```
 
 There are two main differences from the World Cup model:
@@ -61,8 +61,8 @@ few diagnostic plots using the [bayesplot] package.
 
 [bayesplot]: http://mc-stan.org/users/interfaces/bayesplot.html
 
-```{r fit, cache.extra = tools::md5sum("../models/rundiff-oneseason_2011-fit.rds")}
-fit <- readRDS("../models/rundiff-oneseason_2011-fit.rds")
+```{r fit, cache.extra = tools::md5sum("../output/models/rundiff-oneseason_2011-fit.rds")}
+fit <- readRDS("../output/models/rundiff-oneseason_2011-fit.rds")
 ```
 
 The R-hats and effective sample sizes look OK, though the effective
@@ -123,7 +123,7 @@ The order of team ability estimates should largely follow the final
 rankings for the 2011 season.
 
 ```{r glog, cache.extra = tools::md5sum("lag/log-with-lags-cleaned.csv")}
-glog <- read_csv("../lag/log-with-lags-cleaned.csv")
+glog <- read_csv("../output/lag/log-with-lags-cleaned.csv")
 ```
 
 ```{r team_rank, dependson = "glog"}

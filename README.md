@@ -3,26 +3,26 @@ This repository contains
 
   * Stan code for modeling baseball run differentials
 
-    See the [models] subdirectory and the [description][site] of the
-    main model.
+    See the [code/models] subdirectory and the [description][site] of
+    the main model.
 
   * Python and R code for calculating a team's "jet lag" from
     Retrosheet game logs
 
     These scripts (try to) use the definition of jet lag from [this
-    study][ssa].  See the [gamelogs] and [lag] subdirectories, as well
-    as [this page][lag-checks].
+    study][ssa].  See the [input/gamelogs] and [code/lag]
+    subdirectories, as well as [this page][lag-checks].
 
   * Source files for https://kyleam.github.io/mlb-rundiff
 
-    See the [rmd] subdirectory.
+    See the [docs] subdirectory.
 
 
 ## Building output files
 
 All output files can be built with [Snakemake].  For example,
 
-    $ snakemake lag/log-with-lags-cleaned.csv
+    $ snakemake code/lag/log-with-lags-cleaned.csv
 
 will execute all the necessary steps, including the download of game
 logs from retrosheet.org, to generate the lag data files.
@@ -64,10 +64,10 @@ unzip        | 6.0
 wget         | 1.19.1
 
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
-[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/gamelogs
+[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
-[lag]: https://github.com/kyleam/mlb-rundiff/tree/master/lag
-[models]: https://github.com/kyleam/mlb-rundiff/tree/master/models
-[rmd]: https://github.com/kyleam/mlb-rundiff/tree/master/rmd
+[lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
+[code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
+[docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
 [site]: https://kyleam.github.io/mlb-rundiff
 [ssa]: http://dx.doi.org/10.1073/pnas.1608847114

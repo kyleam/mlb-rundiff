@@ -2,7 +2,7 @@
 library(dplyr)
 library(readr)
 
-glog <- read_csv("../lag/log-with-lags-cleaned.csv")
+glog <- read_csv("../../output/lag/log-with-lags-cleaned.csv")
 
 season <- glog %>%
     filter(lubridate::year(date) == 2011) %>%
@@ -21,8 +21,8 @@ dat$df <- 7
 
 rstan::stan_rdump(names(dat),
                   envir = list2env(dat),
-                  file = "rundiff-oneseason_2011.data.R")
+                  file = "../../output/models/rundiff-oneseason_2011.data.R")
 
 team_names <- levels(season$home_team)
 dump(c("team_names"),
-     file = "rundiff-oneseason_2011.info.R")
+     file = "../../output/models/rundiff-oneseason_2011.info.R")

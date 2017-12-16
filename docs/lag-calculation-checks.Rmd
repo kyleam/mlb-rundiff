@@ -37,8 +37,8 @@ The file "lag-combined-1990_2016.csv" should represent every game
 between 1990 and 2016 with two lines, one for each team.  I'll filter
 to 1992 through 2011 to match the year range used by SSA.
 
-```{r lag, cache.extra = tools::md5sum("../lag/lag-combined-1990_2016.csv")}
-(lag <- read_csv("../lag/lag-combined-1990_2016.csv") %>%
+```{r lag, cache.extra = tools::md5sum("../output/lag/lag-combined-1990_2016.csv")}
+(lag <- read_csv("../output/lag/lag-combined-1990_2016.csv") %>%
      mutate(date = ymd(date),
             year = year(date)) %>%
      filter(between(year, 1992, 2011)) %>%
@@ -202,8 +202,8 @@ calculations are entirely off base.  If I generate the lag values
 using the time zone of the home team rather the time zone of the park,
 I can get closer to the Table S1 tallies.
 
-```{r lag_ht, cache.extra = tools::md5sum("../lag/lag-combined-1990_2016-ht.csv")}
-lag_ht <- read_csv("../lag/lag-combined-1990_2016-ht.csv") %>%
+```{r lag_ht, cache.extra = tools::md5sum("../output/lag/lag-combined-1990_2016-ht.csv")}
+lag_ht <- read_csv("../output/lag/lag-combined-1990_2016-ht.csv") %>%
     mutate(date = ymd(date),
            year = year(date),
            game_tz = factor(game_tz,
@@ -269,8 +269,8 @@ I'll need to do a little more work to compare my lag data set with
 SSA's Table S2. With the help of pandoc, I've converted their docx
 table into a more useful format.
 
-```{r s2_wide, cache.extra = tools::md5sum("../lag/song2017how-table-s2.csv")}
-(s2_wide <- read_csv("../lag/song2017how-table-s2.csv") %>%
+```{r s2_wide, cache.extra = tools::md5sum("../output/lag/song2017how-table-s2.csv")}
+(s2_wide <- read_csv("../output/lag/song2017how-table-s2.csv") %>%
     mutate(date = ymd(date)))
 ```
 

@@ -6,8 +6,8 @@ Rscript --no-save --no-restore --no-site-file --no-init-file \
         -e "'require(testthat); test_dir(\"./lib\")'"
 
 ## Check for runaway lag values.
-snakemake -j3 --quiet lag/lag-combined-1990_2016.csv
-lag_max=$(sed 1d lag/lag-combined-1990_2016.csv |
+snakemake -j3 --quiet output/lag/lag-combined-1990_2016.csv
+lag_max=$(sed 1d output/lag/lag-combined-1990_2016.csv |
               cut -d, -f4 |
               sed "s/-//" |
               sort -rn |
