@@ -1,0 +1,3 @@
+[submodule "input/gamelogs"]
+        path = input/gamelogs
+        url = https://github.com/kyleam/retrosheet-gamelogs.git
