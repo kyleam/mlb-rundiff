@@ -1,5 +1,7 @@
 from glob import glob
 
+RSCRIPT="Rscript --vanilla "
+
 
 ### Data download
 
@@ -65,8 +67,8 @@ rule gamelogs_pythagorean:
            "gamelogs/1990_2016.csv",
            "gamelogs/game-log-header.txt"
     output: "gamelogs/wins-pythagorean.csv"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla ./$(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "./$(basename {input[0]})"
 
 
 ### Calculation of lag
@@ -95,8 +97,8 @@ rule lag_combine_:
 rule lag_sort_combined:
     input: "lag/sort-combined.R", "lag/lag-combined-1990_2016.csv"
     output: "lag/lag-combined-sorted-1990_2016.csv"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla ./$(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "./$(basename {input[0]})"
 
 rule lag_join_log_and_lag:
     input: "lag/join-log-and-lag.R",
@@ -104,15 +106,15 @@ rule lag_join_log_and_lag:
            "gamelogs/game-log-header.txt",
            "gamelogs/1990_2016.csv"
     output: "lag/log-with-lags.csv"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla ./$(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "./$(basename {input[0]})"
 
 rule lag_clean_log_with_lags:
     input: "lag/clean-log-with-lags.R",
            "lag/log-with-lags.csv"
     output: "lag/log-with-lags-cleaned.csv"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla ./$(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "./$(basename {input[0]})"
 
 rule lag_download_song2017how_supp_table_:
     output: "lag/pnas.1608847114.st{id,(01|02)}.docx"
@@ -148,8 +150,8 @@ rule models_dump_rundiff_oneseason_2011_data:
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-oneseason_2011.data.R",
             "models/rundiff-oneseason_2011.info.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_dump_rundiff_split_2011_data:
     input: "models/dump-rundiff-split_2011-data.R",
@@ -157,8 +159,8 @@ rule models_dump_rundiff_split_2011_data:
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-split_2011.data.R",
             "models/rundiff-split_2011.info.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_dump_rundiff_pitch_2011_data:
     input: "models/dump-rundiff-pitch_2011-data.R",
@@ -166,8 +168,8 @@ rule models_dump_rundiff_pitch_2011_data:
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-pitch_2011.data.R",
             "models/rundiff-pitch_2011.info.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_dump_rundiff_park_2011_data:
     input: "models/dump-rundiff-park_2011-data.R",
@@ -175,8 +177,8 @@ rule models_dump_rundiff_park_2011_data:
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-park_2011.data.R",
             "models/rundiff-park_2011.info.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_dump_rundiff_year_range_data_:
     input: "models/dump-rundiff-{name}-data-year-range.R",
@@ -184,24 +186,24 @@ rule models_dump_rundiff_year_range_data_:
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-{name}_{year1}-{year2}.data.R",
             "models/rundiff-{name}_{year1}-{year2}.info.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]}) "
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]}) "
            "{wildcards.year1} {wildcards.year2}"
 
 rule models_dump_rundiff_home_1992_2011_data:
     input: "models/dump-rundiff-home_1992-2011-data.R",
            "lag/log-with-lags-cleaned.csv"
     output: "models/rundiff-home_1992-2011.data.R",
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_sample_:
     input: "models/sample-{model}_{data}.R",
            "models/{model}.stan",
            "models/{model}_{data}.data.R"
     output: protected("models/{model}_{data}-fit.rds")
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_sim_rundiff_lagwe_1992_2011:
     input: "models/sim-rundiff-lagwe_1992-2011.R",
@@ -211,15 +213,15 @@ rule models_sim_rundiff_lagwe_1992_2011:
            "models/rundiff-lagwe_1992-2011.data.R"
     output: protected("models/rundiff-lagwe_1992-2011-sim.rds")
     shell: "cd $(dirname {input[0]}) && "
-           "time Rscript --vanilla $(basename {input[0]})"
+           "time " + RSCRIPT + "$(basename {input[0]})"
 
 rule models_sim_cov_rundiff_lagwe_1992_2011:
     input: "models/sim-cov-rundiff-lagwe_1992-2011.R",
            "models/rundiff-lagwe_1992-2011-sim.rds",
            "models/rundiff-lagwe_1992-2011.data.R"
     output: "models/rundiff-lagwe_1992-2011-sim-cov.dat"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]}) > $(basename {output})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]}) > $(basename {output})"
 
 rule models_sim_wins_rundiff_lagwe_1992_2011:
     input: "models/sim-wins-rundiff-lagwe_1992-2011.R",
@@ -227,8 +229,8 @@ rule models_sim_wins_rundiff_lagwe_1992_2011:
            "models/rundiff-lagwe_1992-2011.data.R",
            "models/rundiff-lagwe_1992-2011.info.R"
     output: "models/rundiff-lagwe_1992-2011-sim-wins.rds"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_sim_rgames_rundiff_lagwe_1992_2011:
     input: "models/sim-rgames-rundiff-lagwe_1992-2011.R",
@@ -236,14 +238,14 @@ rule models_sim_rgames_rundiff_lagwe_1992_2011:
            "models/rundiff-lagwe_1992-2011.data.R",
            "models/rundiff-lagwe_1992-2011.info.R"
     output: "models/rundiff-lagwe_1992-2011-sim-rgames.rds"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_sim_rundiff_home_1992_2011_data:
     input: "models/sim-rundiff-home_1992-2011-data.R",
     output: "models/rundiff-home_1992-2011-sim.data.R"
-    shell: "cd $(dirname {input[0]}) && "
-           "Rscript --vanilla $(basename {input[0]})"
+    shell: "cd $(dirname {input[0]}) && " +
+           RSCRIPT + "$(basename {input[0]})"
 
 
 ### Rmarkdown
@@ -287,6 +289,5 @@ rule rmd_copy_rundiff_split_model:
 rule rmd_render_site:
     input: rmd_site_input, glob("rmd/*.Rmd"), glob("rmd/*.md")
     output: "site/index.html"
-    shell: "cd rmd && "
-           "Rscript --vanilla --slave -e "
+    shell: "cd rmd && " + RSCRIPT + "--slave -e "
            "'require(rmarkdown); rmarkdown::render_site()'"
