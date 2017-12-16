@@ -266,15 +266,19 @@ rule models_sim_rundiff_home_1992_2011_data:
 ### Rmarkdown
 
 docs_site_input = [
-    "output/parkcode-cut.csv",
-    "output/person-ids.csv",
-    "output/wins-pythagorean.csv",
+    "code/lib/utils.R",
+    "docs/_site.yml",
+    "docs/_song2017how-table-s1.md",
+    "docs/footer.html",
+    "docs/plot-utils.R",
+    "docs/rundiff-split.stan",
+    "docs/setup.R",
+    "docs/styles.css",
     "output/lag/2011.csv",
     "output/lag/lag-combined-1990_2016-ht.csv",
     "output/lag/lag-combined-1990_2016.csv",
     "output/lag/log-with-lags-cleaned.csv",
     "output/lag/song2017how-table-s2.csv",
-    "code/lib/utils.R",
     "output/models/rundiff-home_1992-2011-fit.rds",
     "output/models/rundiff-lagwe_1992-2011-fit.rds",
     "output/models/rundiff-lagwe_1992-2011-sim-cov.dat",
@@ -287,13 +291,9 @@ docs_site_input = [
     "output/models/rundiff-split_2011-fit.rds",
     "output/models/rundiff-split_2011.data.R",
     "output/models/rundiff-split_2011.info.R",
-    "docs/_site.yml",
-    "docs/_song2017how-table-s1.md",
-    "docs/footer.html",
-    "docs/plot-utils.R",
-    "docs/rundiff-split.stan",
-    "docs/setup.R",
-    "docs/styles.css",
+    "output/parkcode-cut.csv",
+    "output/person-ids.csv",
+    "output/wins-pythagorean.csv",
 ]
 
 rule docs_copy_rundiff_split_model:
