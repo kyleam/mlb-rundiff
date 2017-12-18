@@ -21,8 +21,8 @@ library(lubridate)
 library(readr)
 library(tidyr)
 
-cnames <- scan("../input/game-log-header.txt", character(), quiet = TRUE)
-glog <- read_csv("../output/gamelogs-1990_2016.csv", col_names = cnames) %>%
+cnames <- scan("../inputs/game-log-header.txt", character(), quiet = TRUE)
+glog <- read_csv("../outputs/gamelogs-1990_2016.csv", col_names = cnames) %>%
     mutate(date = ymd(date))
 
 runs <- glog %>%
@@ -43,4 +43,4 @@ runs <- glog %>%
     mutate(pyth = scored^1.83 / (scored^1.83 + allowed^1.83),
            wins = round(162 * pyth))
 
-write_csv(runs, "../output/wins-pythagorean.csv")
+write_csv(runs, "../outputs/wins-pythagorean.csv")

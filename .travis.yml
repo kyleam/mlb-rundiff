@@ -13,10 +13,10 @@ before_install:
   - docker build -t kyleam/mlb-rundiff .
 
 script:
-  - docker run -it --rm -v $HOME/output:/opt/mlb-rundiff/output --entrypoint '/bin/sh' kyleam/mlb-rundiff run-tests > tests-output
+  - docker run -it --rm -v $HOME/outputs:/opt/mlb-rundiff/outputs --entrypoint '/bin/sh' kyleam/mlb-rundiff run-tests > tests-output
   - cat tests-output
   - if grep -q "impossible" tests-output; then false; else true; fi
-  - docker run -it --rm -v $HOME/output:/opt/mlb-rundiff/output kyleam/mlb-rundiff output/models/rundiff-oneseason_2011-fit.rds
+  - docker run -it --rm -v $HOME/outputs:/opt/mlb-rundiff/outputs kyleam/mlb-rundiff outputs/models/rundiff-oneseason_2011-fit.rds
 
 notifications:
   email:

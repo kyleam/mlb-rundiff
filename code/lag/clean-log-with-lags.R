@@ -9,7 +9,7 @@
 library(dplyr)
 library(readr)
 
-glog <- read_csv("../../output/lag/log-with-lags.csv")
+glog <- read_csv("../../outputs/lag/log-with-lags.csv")
 
 ## There are 25 games that were completed at a later date.  Drop them
 ## since play is split across multiple days.  These games are still
@@ -36,4 +36,4 @@ glog %>%
                   case_when(team == "CAL" ~ "ANA",
                             team == "MON" ~ "WAS",
                             TRUE ~ team)) %>%
-    write_csv("../../output/lag/log-with-lags-cleaned.csv")
+    write_csv("../../outputs/lag/log-with-lags-cleaned.csv")

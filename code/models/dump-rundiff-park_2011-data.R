@@ -6,7 +6,7 @@ library(tidyr)
 
 source("../lib/utils.R")
 
-glog <- read_csv("../../output/lag/log-with-lags-cleaned.csv")
+glog <- read_csv("../../outputs/lag/log-with-lags-cleaned.csv")
 
 prior_score <- glog %>%
     filter(year(date) == 2010) %>%
@@ -57,7 +57,7 @@ dat$n_pitchers <- nrow(pitchers)
 dat$prior_score <- prior_score$score
 
 rstan::stan_rdump(names(dat), envir = list2env(dat),
-                  file = "../../output/models/rundiff-park_2011.data.R")
+                  file = "../../outputs/models/rundiff-park_2011.data.R")
 
 info <- list(team_names = levels(season$home_team),
              pitchers = pitchers,
@@ -65,4 +65,4 @@ info <- list(team_names = levels(season$home_team),
              wins_2011 = count_wins(filter(glog, year(date) == 2011)))
 
 dump(names(info), envir = list2env(info),
-     file = "../../output/models/rundiff-park_2011.info.R")
+     file = "../../outputs/models/rundiff-park_2011.info.R")

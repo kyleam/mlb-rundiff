@@ -2,7 +2,7 @@
 
 library(dplyr)
 
-glog <- readr::read_csv("../../output/lag/log-with-lags-cleaned.csv") %>%
+glog <- readr::read_csv("../../outputs/lag/log-with-lags-cleaned.csv") %>%
     mutate(yr = lubridate::year(date))
 
 dat <- glog %>%
@@ -12,4 +12,4 @@ dat <- glog %>%
 dat$n_games <- length(dat$rundiff)
 
 rstan::stan_rdump(names(dat), envir = list2env(dat),
-                  file = "../../output/models/rundiff-home_1992-2011.data.R")
+                  file = "../../outputs/models/rundiff-home_1992-2011.data.R")

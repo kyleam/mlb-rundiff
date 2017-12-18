@@ -87,8 +87,8 @@ clean_team_name <- function(x){
 }
 ```
 
-```{r glog, dependson = "clean_team_name", cache.extra = tools::md5sum("../output/lag/log-with-lags-cleaned.csv")}
-glog <- read_csv("../output/lag/log-with-lags-cleaned.csv") %>%
+```{r glog, dependson = "clean_team_name", cache.extra = tools::md5sum("../outputs/lag/log-with-lags-cleaned.csv")}
+glog <- read_csv("../outputs/lag/log-with-lags-cleaned.csv") %>%
     mutate(yr = year(date),
            home_team = clean_team_name(home_team),
            away_team = clean_team_name(away_team)) %>%
@@ -385,12 +385,12 @@ And a few things bother me (and probably many other things should).
 
 ## Run differentials
 
-```{r info, cache.extra = tools::md5sum("../output/models/rundiff-lagwe_1992-2011.info.R")}
-info <- read_rdump("../output/models/rundiff-lagwe_1992-2011.info.R")
+```{r info, cache.extra = tools::md5sum("../outputs/models/rundiff-lagwe_1992-2011.info.R")}
+info <- read_rdump("../outputs/models/rundiff-lagwe_1992-2011.info.R")
 ```
 
-```{r dat, cache.extra = tools::md5sum("../output/models/rundiff-lagwe_1992-2011.data.R")}
-dat <- read_rdump("../output/models/rundiff-lagwe_1992-2011.data.R")
+```{r dat, cache.extra = tools::md5sum("../outputs/models/rundiff-lagwe_1992-2011.data.R")}
+dat <- read_rdump("../outputs/models/rundiff-lagwe_1992-2011.data.R")
 ```
 
 ```{r rundiff_obs, dependson = c("dat", "info")}
@@ -445,8 +445,8 @@ back to this in the home-field advantage section below.
 
 ## Parameter estimates for 1992 through 2011
 
-```{r fit, cache.extra = tools::md5sum("../output/models/rundiff-lagwe_1992-2011-fit.rds")}
-fit <- readRDS("../output/models/rundiff-lagwe_1992-2011-fit.rds")
+```{r fit, cache.extra = tools::md5sum("../outputs/models/rundiff-lagwe_1992-2011-fit.rds")}
+fit <- readRDS("../outputs/models/rundiff-lagwe_1992-2011-fit.rds")
 ```
 
 ```{r samps, dependson = "fit"}
@@ -528,8 +528,8 @@ mutate(sim_fixed, win = rundiff > 0) %>%
 
 ### Posterior predictive intervals
 
-```{r sim_rgames, cache.extra = tools::md5sum("../output/models/rundiff-lagwe_1992-2011-sim-rgames.rds")}
-sim_rgames <- readRDS("../output/models/rundiff-lagwe_1992-2011-sim-rgames.rds") %>%
+```{r sim_rgames, cache.extra = tools::md5sum("../outputs/models/rundiff-lagwe_1992-2011-sim-rgames.rds")}
+sim_rgames <- readRDS("../outputs/models/rundiff-lagwe_1992-2011-sim-rgames.rds") %>%
     group_by(year) %>%
     mutate(id = 1:n()) %>%
     ungroup()
@@ -564,18 +564,18 @@ observed run differentials are within the 95% predicted intervals 95%
 of the time (96% if I round the bounds), so the model at least seems
 calibrated.
 
-<!-- file: ../output/models/rundiff-lagwe_1992-2011-sim-cov.dat -->
+<!-- file: ../outputs/models/rundiff-lagwe_1992-2011-sim-cov.dat -->
 
 Converting the simulated run differentials into wins, the model
 appears to give reasonable though wide estimates for a team's record.
 
-```{r sim_wins, cache.extra = tools::md5sum("../output/models/rundiff-lagwe_1992-2011-sim-wins.rds")}
-sim_wins <- readRDS("../output/models/rundiff-lagwe_1992-2011-sim-wins.rds") %>%
+```{r sim_wins, cache.extra = tools::md5sum("../outputs/models/rundiff-lagwe_1992-2011-sim-wins.rds")}
+sim_wins <- readRDS("../outputs/models/rundiff-lagwe_1992-2011-sim-wins.rds") %>%
     mutate(yr = as.integer(as.character(yr)))
 ```
 
-```{r pyth, cache.extra = tools::md5sum("../output/wins-pythagorean.csv")}
-pyth <- read_csv("../output/wins-pythagorean.csv") %>%
+```{r pyth, cache.extra = tools::md5sum("../outputs/wins-pythagorean.csv")}
+pyth <- read_csv("../outputs/wins-pythagorean.csv") %>%
     mutate(yr = as.integer(as.character(yr)))
 j```
 
@@ -640,8 +640,8 @@ sides might just cancel out.  But, given that lopsided games are not a
 rare event, I'd expect that parks that are more conducive to run
 scoring would tend to have larger scale parameters.  Let's see.
 
-```{r park_codes, cache.extra = tools::md5sum("../output/parkcode-cut.csv")}
-park_codes <- read_csv("../output/parkcode-cut.csv",
+```{r park_codes, cache.extra = tools::md5sum("../outputs/parkcode-cut.csv")}
+park_codes <- read_csv("../outputs/parkcode-cut.csv",
                        col_names = c("park", "name"))
 ```
 
@@ -737,8 +737,8 @@ less-than-stellar tail end of it).
 [^bpitch]: OK, I don't know enough about baseball to recognize all
            their names, but their Baseball Reference pages look good.
 
-```{r pids, cache.extra = tools::md5sum("../output/person-ids.csv")}
-pids <-  read_csv("../output/person-ids.csv")
+```{r pids, cache.extra = tools::md5sum("../outputs/person-ids.csv")}
+pids <-  read_csv("../outputs/person-ids.csv")
 ```
 
 ```{r pitch_eff, dependson = c("samps", "info", "pids")}
@@ -822,7 +822,7 @@ more than 2 percentage points.  If I strip the model of all location
 predictors except for $\delta$, the estimate remains low.
 
 ```{r eval = FALSE}
-fit_bhome <- readRDS("../output/models/rundiff-home_1992-2011-fit.rds")
+fit_bhome <- readRDS("../outputs/models/rundiff-home_1992-2011-fit.rds")
 print(fit_bhome)
 ```
 

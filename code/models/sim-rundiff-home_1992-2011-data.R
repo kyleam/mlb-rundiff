@@ -9,4 +9,4 @@ dat$n_games <- 46510
 dat$rundiff <- b_home + rt(dat$n_games, nu) * sigma_y
 
 rstan::stan_rdump(names(dat), envir = list2env(dat),
-                  file = "../../output/models/rundiff-home_1992-2011-sim.data.R")
+                  file = "../../outputs/models/rundiff-home_1992-2011-sim.data.R")

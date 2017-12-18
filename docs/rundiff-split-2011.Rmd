@@ -40,8 +40,8 @@ with any other splits yet.
 
 ## Model diagnostics
 
-```{r fit, cache.extra = tools::md5sum("../output/models/rundiff-split_2011-fit.rds")}
-fit <- readRDS("../output/models/rundiff-split_2011-fit.rds")
+```{r fit, cache.extra = tools::md5sum("../outputs/models/rundiff-split_2011-fit.rds")}
+fit <- readRDS("../outputs/models/rundiff-split_2011-fit.rds")
 ```
 
 Clicking around in ShinyStan UI (`launch_shinystan(fit)`), the
@@ -170,9 +170,9 @@ theme_set(prev_theme)
 
 And here are the ability estimates for each team and period.
 
-```{r info, cache.extra = tools::md5sum("../output/models/rundiff-split_2011.info.R")}
+```{r info, cache.extra = tools::md5sum("../outputs/models/rundiff-split_2011.info.R")}
 source("../code/lib/utils.R")
-info <- read_rdump("../output/models/rundiff-split_2011.info.R")
+info <- read_rdump("../outputs/models/rundiff-split_2011.info.R")
 ```
 
 ```{r avals_plot, dependson = c("samps", "info"), fig.asp = 1}
@@ -205,8 +205,8 @@ a disproportionate number of close games).
 
 ## Posterior predictive check
 
-```{r dat, cache.extra = tools::md5sum("../output/models/rundiff-split_2011.data.R")}
-dat <- read_rdump("../output/models/rundiff-split_2011.data.R")
+```{r dat, cache.extra = tools::md5sum("../outputs/models/rundiff-split_2011.data.R")}
+dat <- read_rdump("../outputs/models/rundiff-split_2011.data.R")
 ```
 
 ```{r ppc, dependson = "fit"}

@@ -14,7 +14,7 @@ library(tidyr)
 
 source("../lib/utils.R")
 
-glog <- read_csv("../../output/lag/log-with-lags-cleaned.csv") %>%
+glog <- read_csv("../../outputs/lag/log-with-lags-cleaned.csv") %>%
     mutate(yr = year(date))
 
 cut_periods <- function(x){
@@ -94,7 +94,7 @@ dat$n_pitchers <- nrow(pitchers)
 dat$prior_score <- prior_score$score
 
 rstan::stan_rdump(names(dat), envir = list2env(dat),
-                  file = paste0("../../output/models/rundiff-lagwe-flat_",
+                  file = paste0("../../outputs/models/rundiff-lagwe-flat_",
                                 year_beg, "-", year_end, ".data.R"))
 
 info <- list(team_names = levels(seasons$home_team_yr),
@@ -103,5 +103,5 @@ info <- list(team_names = levels(seasons$home_team_yr),
              wins = count_wins(seasons, yr, team))
 
 dump(names(info), envir = list2env(info),
-     file = paste0("../../output/models/rundiff-lagwe-flat_",
+     file = paste0("../../outputs/models/rundiff-lagwe-flat_",
                    year_beg, "-", year_end, ".info.R"))

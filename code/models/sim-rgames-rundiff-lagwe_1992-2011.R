@@ -2,10 +2,10 @@
 library(dplyr)
 library(stringr)
 
-sim <- readRDS("../../output/models/rundiff-lagwe_1992-2011-sim.rds")
+sim <- readRDS("../../outputs/models/rundiff-lagwe_1992-2011-sim.rds")
 
-dat <- rstan::read_rdump("../../output/models/rundiff-lagwe_1992-2011.data.R")
-info <- rstan::read_rdump("../../output/models/rundiff-lagwe_1992-2011.info.R")
+dat <- rstan::read_rdump("../../outputs/models/rundiff-lagwe_1992-2011.data.R")
+info <- rstan::read_rdump("../../outputs/models/rundiff-lagwe_1992-2011.info.R")
 
 years <- c(1992, 1996, 2000, 2003, 2007, 2011)
 
@@ -30,4 +30,4 @@ apply(sim[, rand_games], 2,
            team_home = info$team_names[dat$team_home[game]],
            team_away = info$team_names[dat$team_away[game]]) %>%
     arrange(game) %>%
-    saveRDS("../../output/models/rundiff-lagwe_1992-2011-sim-rgames.rds")
+    saveRDS("../../outputs/models/rundiff-lagwe_1992-2011-sim-rgames.rds")

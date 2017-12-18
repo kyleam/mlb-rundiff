@@ -11,7 +11,7 @@ This repository contains
     Retrosheet game logs
 
     These scripts (try to) use the definition of jet lag from [this
-    study][ssa].  See the [input/gamelogs] submodule and [code/lag]
+    study][ssa].  See the [inputs/gamelogs] submodule and [code/lag]
     subdirectory, as well as [this page][lag-checks].
 
   * Source files for https://kyleam.github.io/mlb-rundiff
@@ -35,8 +35,8 @@ $ docker build --tag mlb-rundiff .
 Then, you can build any output file with [Snakemake].  For example,
 
 ```bash
-$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff \
-      output/lag/log-with-lags-cleaned.csv
+$ docker run -it --rm -v $PWD/outputs:/opt/mlb-rundiff/outputs mlb-rundiff \
+      outputs/lag/log-with-lags-cleaned.csv
 ```
 
 will execute all the necessary steps to generate the lag dataset.
@@ -45,14 +45,14 @@ If you run the above command without a target, you will see a help
 message that lists some possible targets of interest.
 
 ```bash
-$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff
+$ docker run -it --rm -v $PWD/outputs:/opt/mlb-rundiff/outputs mlb-rundiff
 ```
 
 [Dockerfile]: https://github.com/kyleam/mlb-rundiff/tree/master/Dockerfile
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
 [code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
-[input/gamelogs]: https://github.com/kyleam/retrosheet-gamelogs
+[inputs/gamelogs]: https://github.com/kyleam/retrosheet-gamelogs
 [jrnold/rstan]: https://hub.docker.com/r/jrnold/rstan
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
 [code/lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
