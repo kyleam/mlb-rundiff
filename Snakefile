@@ -66,8 +66,8 @@ rule gamelogs_cut_park_codes:
 rule gamelogs_extract_person_id:
     input: "inputs/gamelogs/retroID.htm",
     output: "outputs/person-ids.csv"
-    shell:  "echo 'last,first,id,debut' > {output} &&"
-            "awk 'f;/LAST,FIRST/{{f=1}}' {input} | "
+    shell:  "echo 'id,last,first,debut,debut_m,debut_c,debut_u' > {output} &&"
+            "awk 'f;/ID,Last/{{f=1}}' {input} | "
             "awk '/^$/ {{exit}} {{print}}' >> {output}"
 
 rule gamelogs_convert_and_rename_:
