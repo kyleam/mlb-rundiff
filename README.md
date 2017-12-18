@@ -65,10 +65,10 @@ unzip        | 6.0
 wget         | 1.19.1
 
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
+[code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
+[docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
 [gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
 [lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
-[code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
-[docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
 [site]: https://kyleam.github.io/mlb-rundiff
 [ssa]: http://dx.doi.org/10.1073/pnas.1608847114
