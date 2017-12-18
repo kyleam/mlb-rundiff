@@ -19,55 +19,41 @@ This repository contains
     See the [docs] subdirectory.
 
 
-## Building output files
+## Running the analyses
 
-All output files can be built with [Snakemake].  For example,
+These analyses are intended to be run in a GNU/Linux environment.
+This repository includes a [Dockerfile] that can be used to generate a
+Docker container that builds on [jrnold/rstan] and includes all the
+dependencies.
 
-    $ snakemake output/lag/log-with-lags-cleaned.csv
+To build the container, run
 
-will execute all the necessary steps, including the download of game
-logs from retrosheet.org, to generate the lag data files.
+```bash
+$ docker build --tag mlb-rundiff .
+```
 
+Then, you can build any output file with [Snakemake].  For example,
 
-## Dependencies
+```bash
+$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff \
+      output/lag/log-with-lags-cleaned.csv
+```
 
-These analyses depend on the following software.  The version numbers
-indicate the versions used.  In most cases, other versions should
-work.
+will execute all the necessary steps to generate the lag dataset.
 
-_            | _
-:---         | :---
-**Python**   | 3.5.3
-docopt       | 0.6.2
-pytest       | 3.0.7
-**R**        | 3.4.1
-bayesplot    | 1.3.0
-devtools     | 1.13.3
-directlabels | 2017.03.31
-dplyr        | 0.7.3
-forcats      | 0.2.0
-ggplot2      | 2.2.1
-hexbin       | 1.27.1-1
-knitr        | 1.17
-lubridate    | 1.6.0
-readr        | 1.1.1
-rmarkdown    | 1.6
-rstan        | 2.16.2
-testthat     | 1.0.2
-tidyr        | 0.7.1
-**Other**    |
-coreutils    | 8.27
-dos2unix     | 7.3.4
-gawk         | 4.1.4
-sed          | 4.4
-snakemake    | 4.0.0
-unzip        | 6.0
-wget         | 1.19.1
+If you run the above command without a target, you will see a help
+message that lists some possible targets of interest.
 
+```bash
+$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff
+```
+
+[Dockerfile]: https://github.com/kyleam/mlb-rundiff/tree/master/Dockerfile
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
 [code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
 [gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
+[jrnold/rstan]: https://hub.docker.com/r/jrnold/rstan
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
 [lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
 [site]: https://kyleam.github.io/mlb-rundiff
