@@ -52,9 +52,9 @@ $ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
 [code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
-[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
+[input/gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
 [jrnold/rstan]: https://hub.docker.com/r/jrnold/rstan
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
-[lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
+[code/lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
 [site]: https://kyleam.github.io/mlb-rundiff
 [ssa]: http://dx.doi.org/10.1073/pnas.1608847114
