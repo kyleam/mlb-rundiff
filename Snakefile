@@ -267,6 +267,7 @@ rule models_sim_rundiff_home_1992_2011_data:
 
 docs_site_input = [
     "code/lib/utils.R",
+    "code/models/rundiff-oneseason.stan",
     "docs/_site.yml",
     "docs/_song2017how-table-s1.md",
     "docs/footer.html",
@@ -286,7 +287,6 @@ docs_site_input = [
     "output/models/rundiff-lagwe_1992-2011-sim-wins.rds",
     "output/models/rundiff-lagwe_1992-2011.data.R",
     "output/models/rundiff-lagwe_1992-2011.info.R",
-    "output/models/rundiff-oneseason.stan",
     "output/models/rundiff-oneseason_2011-fit.rds",
     "output/models/rundiff-split_2011-fit.rds",
     "output/models/rundiff-split_2011.data.R",
