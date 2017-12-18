@@ -1,9 +1,8 @@
 /.snakemake
-/.guix/profile*
 /.cache
 /site
-/rmd/*_files
-/rmd/*_cache
+/docs/*_files
+/docs/*_cache
 __pycache__
 .Rhistory
 
@@ -14,12 +13,7 @@ __pycache__
 *.params.R
 *.info.R
 *.rds
-*.zip
 
-/gamelogs/glfields.txt
-/gamelogs/parkcode.txt
-/gamelogs/retroID.htm
-
-/rmd/_song2017how-table-s1.md
-/rmd/*-session-info.txt
-/rmd/*.stan
+/docs/_song2017how-table-s1.md
+/docs/*-session-info.txt
+/docs/*.stan

@@ -1,86 +1,60 @@
+[![Build Status](https://travis-ci.org/kyleam/mlb-rundiff.svg?branch=master)](https://travis-ci.org/kyleam/mlb-rundiff)
 
 This repository contains
 
   * Stan code for modeling baseball run differentials
 
-    See the [models] subdirectory and the [description][site] of the
-    main model.
+    See the [code/models] subdirectory and the [description][site] of
+    the main model.
 
   * Python and R code for calculating a team's "jet lag" from
     Retrosheet game logs
 
     These scripts (try to) use the definition of jet lag from [this
-    study][ssa].  See the [gamelogs] and [lag] subdirectories, as well
-    as [this page][lag-checks].
+    study][ssa].  See the [input/gamelogs] and [code/lag]
+    subdirectories, as well as [this page][lag-checks].
 
   * Source files for https://kyleam.github.io/mlb-rundiff
 
-    See the [rmd] subdirectory.
+    See the [docs] subdirectory.
 
 
-## Building output files
+## Running the analyses
 
-All output files can be built with [Snakemake].  For example,
+These analyses are intended to be run in a GNU/Linux environment.
+This repository includes a [Dockerfile] that can be used to generate a
+Docker container that builds on [jrnold/rstan] and includes all the
+dependencies.
 
-    $ snakemake lag/log-with-lags-cleaned.csv
+To build the container, run
 
-will execute all the necessary steps, including the download of game
-logs from retrosheet.org, to generate the lag data files.
+```bash
+$ docker build --tag mlb-rundiff .
+```
 
+Then, you can build any output file with [Snakemake].  For example,
 
-## Dependencies
+```bash
+$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff \
+      output/lag/log-with-lags-cleaned.csv
+```
 
-These analyses depend on the following software.  The version numbers
-indicate the versions used.  In most cases, other versions should
-work.
+will execute all the necessary steps to generate the lag dataset.
 
-_            | _
-:---         | :---
-**Python**   | 3.5.3
-docopt       | 0.6.2
-pytest       | 3.0.7
-**R**        | 3.4.1
-bayesplot    | 1.3.0
-devtools     | 1.13.3
-directlabels | 2017.03.31
-dplyr        | 0.7.3
-forcats      | 0.2.0
-ggplot2      | 2.2.1
-hexbin       | 1.27.1-1
-knitr        | 1.17
-lubridate    | 1.6.0
-readr        | 1.1.1
-rmarkdown    | 1.6
-rstan        | 2.16.2
-testthat     | 1.0.2
-tidyr        | 0.7.1
-**Other**    |
-coreutils    | 8.27
-dos2unix     | 7.3.4
-gawk         | 4.1.4
-sed          | 4.4
-snakemake    | 4.0.0
-unzip        | 6.0
-wget         | 1.19.1
+If you run the above command without a target, you will see a help
+message that lists some possible targets of interest.
 
-### Guix
+```bash
+$ docker run -it --rm -v $PWD/output:/opt/mlb-rundiff/output mlb-rundiff
+```
 
-[Guix] is not a dependency.  You can safely ignore the ".guix"
-subdirectory and the "guix-*" files.
-
-If you do happen to use Guix, you can use the manifest file in the
-".guix" subdirectory to install all the above dependencies.  The
-repository contains various wrappers around Guix commands
-(guix-update, guix-snakemake, ...) to make it easier to run these
-analyses with an isolated profile.
-
-
-[Guix]: https://www.gnu.org/software/guix/
+[Dockerfile]: https://github.com/kyleam/mlb-rundiff/tree/master/Dockerfile
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
-[gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/gamelogs
+[code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
+[docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
+[input/gamelogs]: https://github.com/kyleam/mlb-rundiff/tree/master/input/gamelogs
+[jrnold/rstan]: https://hub.docker.com/r/jrnold/rstan
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
-[lag]: https://github.com/kyleam/mlb-rundiff/tree/master/lag
-[models]: https://github.com/kyleam/mlb-rundiff/tree/master/models
-[rmd]: https://github.com/kyleam/mlb-rundiff/tree/master/rmd
+[code/lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
 [site]: https://kyleam.github.io/mlb-rundiff
 [ssa]: http://dx.doi.org/10.1073/pnas.1608847114
