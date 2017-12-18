@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/kyleam/mlb-rundiff.svg?branch=master)](https://travis-ci.org/kyleam/mlb-rundiff)
 
 This repository contains
 
