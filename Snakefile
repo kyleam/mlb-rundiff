@@ -239,7 +239,7 @@ rule models_sim_cov_rundiff_lagwe_1992_2011:
            "outputs/models/rundiff-lagwe_1992-2011.data.R"
     output: "outputs/models/rundiff-lagwe_1992-2011-sim-cov.dat"
     shell: "cd $(dirname {input[0]}) && " +
-           RSCRIPT + "$(basename {input[0]}) > $(basename {output})"
+           RSCRIPT + "$(basename {input[0]})"
 
 rule models_sim_wins_rundiff_lagwe_1992_2011:
     input: "code/models/sim-wins-rundiff-lagwe_1992-2011.R",
