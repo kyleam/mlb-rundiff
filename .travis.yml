@@ -6,6 +6,9 @@ services:
 
 language: generic
 
+git:
+  submodules: false
+
 before_install:
   - docker build -t kyleam/mlb-rundiff .
 
