@@ -22,7 +22,7 @@ This repository contains
 
 All output files can be built with [Snakemake].  For example,
 
-    $ snakemake code/lag/log-with-lags-cleaned.csv
+    $ snakemake output/lag/log-with-lags-cleaned.csv
 
 will execute all the necessary steps, including the download of game
 logs from retrosheet.org, to generate the lag data files.
