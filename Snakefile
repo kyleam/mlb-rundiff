@@ -1,6 +1,56 @@
+"""Snakemake build rules.
+
+Here are some targets that might be of interest:
+
+  * output/lag/log-with-lags-cleaned.csv
+
+    Retrosheet game logs from 1990 through 2016 combined with the
+    calculated lag values.
+
+    See https://kyleam.github.io/mlb-rundiff/ and
+    https://kyleam.github.io/mlb-rundiff/lag-calculation-checks.html
+    for more information on these lag values.
+
+    This should build quickly.
+
+  * output/models/rundiff-oneseason_2011-fit.rds
+
+    The Stan fit object for the code/models/rundiff-oneseason.stan ran
+    on the 2011 season.
+
+    See https://kyleam.github.io/mlb-rundiff/rundiff-oneseason-2011.html
+    for a description of this simple "test" model.
+
+    This shouldn't take more than a few minutes to run.
+
+  * output/models/rundiff-lagwe_1992-2011-fit.rds
+
+    The Stan fit object for the code/models/rundiff-lagwe.stan model
+    ran on the 1992 through 2011 data set.
+
+    See https://kyleam.github.io/mlb-rundiff/ for a description of the
+    model.
+
+    This could take a while -- think overnight.
+
+  * site/index.html
+
+    Build the https://kyleam.github.io/mlb-rundiff/ site locally.
+
+    This could take a while -- think overnight.
+
+Run `snakemake --list` or `snakemake --list-target-rules` to see a
+list of all available rules.
+"""
+
 from glob import glob
 
 RSCRIPT="Rscript --vanilla "
+
+
+rule help:
+    run:
+        print(__doc__)
 
 
 ### Data download
