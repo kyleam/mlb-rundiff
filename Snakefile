@@ -44,6 +44,9 @@ list of all available rules.
 """
 
 from glob import glob
+from snakemake.shell import shell
+
+shell.executable("bash")
 
 RSCRIPT="Rscript --no-save --no-restore --no-site-file --no-init-file "
 
