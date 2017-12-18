@@ -577,7 +577,7 @@ sim_wins <- readRDS("../outputs/models/rundiff-lagwe_1992-2011-sim-wins.rds") %>
 ```{r pyth, cache.extra = tools::md5sum("../outputs/wins-pythagorean.csv")}
 pyth <- read_csv("../outputs/wins-pythagorean.csv") %>%
     mutate(yr = as.integer(as.character(yr)))
-j```
+```
 
 ```{r sim_wins_plot, dependson = c("sim_wins", "info", "pyth"), include = TRUE, out.width = "80%", fig.width = 6.85, fig.asp = 0.8}
 obs <- ungroup(info$wins) %>%
