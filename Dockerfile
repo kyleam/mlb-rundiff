@@ -15,7 +15,7 @@ RUN rm -rf /tmp/* /var/tmp/* /boot /media /mnt /srv
 
 RUN mkdir -p /opt/
 WORKDIR /opt
-RUN git clone --recursive --branch yoda https://github.com/kyleam/mlb-rundiff.git
+RUN git clone --recursive https://github.com/kyleam/mlb-rundiff.git
 WORKDIR /opt/mlb-rundiff
 
 ENTRYPOINT ["/usr/bin/snakemake"]
