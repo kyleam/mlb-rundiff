@@ -17,3 +17,8 @@ script:
   - cat tests-output
   - if grep -q "impossible" tests-output; then false; else true; fi
   - docker run -it --rm -v $HOME/output:/opt/mlb-rundiff/output kyleam/mlb-rundiff output/models/rundiff-oneseason_2011-fit.rds
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
