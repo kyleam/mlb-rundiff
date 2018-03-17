@@ -30,38 +30,25 @@ a:active {
     color: #14572F;
 }
 
-pre .operator {
-    color: #000;
-    font-weight: bold;
-}
-
-pre .keyword {
+.hljs-keyword {
     color: #000;
     font-weight: normal;
 }
 
-pre .identifier {
-    color: #333;
-}
-
-pre .paren {
-    color: rgb(104, 118, 135)
-}
-
-pre .literal {
+.hljs-literal {
     color: #219451;
 }
 
-pre .number {
+.hljs-number {
     color: #219451;
 
 }
 
-pre .comment {
+.hljs-comment {
     color: #998;
     font-style: normal;
 }
 
-pre .string {
+.hljs-string {
     color: #14572F;
 }
