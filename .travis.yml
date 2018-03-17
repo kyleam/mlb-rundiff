@@ -1,22 +1,33 @@
 
 sudo: required
 
-services:
-  - docker
-
 language: generic
 
 git:
   submodules: false
 
 before_install:
-  - docker build -t kyleam/mlb-rundiff .
+  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+  - travis_retry sudo apt-get update -qq
+
+install:
+  - travis_retry sudo eatmydata apt-get install singularity-container
+  - singularity --version
+  - singularity pull --name garps.simg shub://kyleam/garps
+  - md5sum garps.simg
+
+before_script:
+  - git config --global user.name "A U Thor"
+  - git config --global user.email a.u.thor@example.com
+  - git submodule update --init -- inputs/gamelogs
 
 script:
-  - docker run -it --rm -v $HOME/outputs:/opt/mlb-rundiff/outputs --entrypoint '/bin/sh' kyleam/mlb-rundiff run-tests > tests-output
+  # ATM singularity is at 2.4.2, which contains a bug that prevents
+  # --pwd working with -c, so drop -c for now.
+  - singularity exec garps.simg ./run-tests >tests-output
   - cat tests-output
   - if grep -q "impossible" tests-output; then false; else true; fi
-  - docker run -it --rm -v $HOME/outputs:/opt/mlb-rundiff/outputs kyleam/mlb-rundiff outputs/models/rundiff-oneseason_2011-fit.rds
+  - singularity run garps.simg outputs/models/rundiff-oneseason_2011-fit.rds
 
 notifications:
   email:

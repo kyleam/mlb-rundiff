@@ -21,39 +21,66 @@ This repository contains
 
 ## Running the analyses
 
-These analyses are intended to be run in a GNU/Linux environment.
-This repository includes a [Dockerfile] that can be used to generate a
-Docker container that builds on [jrnold/rstan] and includes all the
-dependencies.
+### Input data
 
-To build the container, run
+The lag values are calculated using Retrosheet's game logs.  These are
+available in the [inputs/gamelogs] submodule, which you can download
+with
 
 ```bash
-$ docker build --tag mlb-rundiff .
+git submodule update --init inputs/gamelogs
 ```
 
-Then, you can build any output file with [Snakemake].  For example,
+### Singularity container
+
+All the dependencies for running these analyses are available in the
+[Singularity] container defined [here][garps].  If you have
+Singularity installed on your system, you can pull the image with the
+following command:
 
 ```bash
-$ docker run -it --rm -v $PWD/outputs:/opt/mlb-rundiff/outputs mlb-rundiff \
-      outputs/lag/log-with-lags-cleaned.csv
+$ singularity pull --name snakemake.simg shub://kyleam/garps
+```
+
+The name "snakemake.simg" is chosen because the Singularity
+container's runscript is set to `snakemake`, but you can of course use
+whatever naming scheme you'd like.
+
+### Building output files with Snakemake
+
+All output files can be built with [Snakemake], and, as mentioned
+above, the container runs `snakemake` by default.  To generate an
+output file, pass it as an argument to the image.
+
+As an example,
+
+```bash
+$ ./snakemake.simg outputs/lag/log-with-lags-cleaned.csv
 ```
 
 will execute all the necessary steps to generate the lag dataset.
 
-If you run the above command without a target, you will see a help
-message that lists some possible targets of interest.
+If you want to execute this in a more isolated environment, you can
+instead use something like
 
 ```bash
-$ docker run -it --rm -v $PWD/outputs:/opt/mlb-rundiff/outputs mlb-rundiff
+$ singularity run -c -e -B $PWD:/mnt/scratch --pwd /mnt/scratch \
+  snakemake.simg outputs/lag/log-with-lags-cleaned.csv
 ```
 
-[Dockerfile]: https://github.com/kyleam/mlb-rundiff/tree/master/Dockerfile
+If you run the container without a target, you will see a help message
+that lists some possible targets of interest.
+
+```bash
+$ ./snakemake.simg
+```
+
+[Singularity]: http://singularity.lbl.gov/
 [Snakemake]: http://snakemake.readthedocs.io/en/stable/
 [code/models]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [docs]: https://github.com/kyleam/mlb-rundiff/tree/master/docs
+[garps]: https://github.com/kyleam/garps/tree/master/Singularity
 [inputs/gamelogs]: https://github.com/kyleam/retrosheet-gamelogs
-[jrnold/rstan]: https://hub.docker.com/r/jrnold/rstan
 [lag-checks]: https://kyleam.github.io/mlb-rundiff/lag-calculation-checks
 [code/lag]: https://github.com/kyleam/mlb-rundiff/tree/master/code/lag
 [site]: https://kyleam.github.io/mlb-rundiff
