@@ -42,7 +42,7 @@ following command:
 $ singularity pull --name snakemake.simg shub://kyleam/garps
 ```
 
-The name "snakemake.simg" is chosen because the Singularity
+The name "snakemake.simg" was chosen because the Singularity
 container's runscript is set to `snakemake`, but you can of course use
 whatever naming scheme you'd like.
 
