@@ -1,3 +1,6 @@
 [submodule "inputs/gamelogs"]
 	path = inputs/gamelogs
 	url = https://github.com/kyleam/retrosheet-gamelogs.git
+[submodule "envs"]
+	path = envs
+	url = https://github.com/kyleam/garps.git

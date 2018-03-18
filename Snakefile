@@ -136,9 +136,7 @@ rule lag_clean_log_with_lags:
 
 rule lag_download_song2017how_supp_table_:
     output: "inputs/lag/pnas.1608847114.st{id,(01|02)}.docx"
-    shell: "cd inputs/lag && "
-           "wget http://www.pnas.org/content/suppl/2017/01/18/"
-           "1608847114.DCSupplemental/pnas.1608847114.st{wildcards.id}.docx"
+    shell: "git annex get {input}"
 
 rule lag_convert_song2017how_table_s1_to_md:
     input: "inputs/lag/pnas.1608847114.st01.docx"
