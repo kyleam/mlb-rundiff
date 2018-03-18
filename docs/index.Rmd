@@ -904,7 +904,7 @@ The home-field effect estimate is much more certain than the estimates
 for either of the lag coefficients, which is unsurprisingly given that
 every game has a home team[^hteam].  The extreme ends of the lag
 estimates extend to a greater magnitude than the home-field estimate
-dos, but, as I discussed above, I think the home-field effect is being
+does, but, as I discussed above, I think the home-field effect is being
 underestimated.  A value of 0.4 would not be unreasonable given the
 54% empirical rate.  But then again, the lag magnitudes might be
 underestimated for a similar reason (i.e., the non-lagged team wins a
