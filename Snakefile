@@ -39,6 +39,11 @@ Here are some targets that might be of interest:
 
     This could take a while -- think overnight.
 
+    Note that, before running this command, the SSA supplemental
+    tables must be present.  You can download them with
+
+        $ git annex get inputs/lag/pnas.1608847114.st0{1,2}.docx
+
 Run `snakemake --list` or `snakemake --list-target-rules` to see a
 list of all available rules.
 """
@@ -133,10 +138,6 @@ rule lag_clean_log_with_lags:
     output: "outputs/lag/log-with-lags-cleaned.csv"
     shell: "cd $(dirname {input[0]}) && " +
            RSCRIPT + "./$(basename {input[0]})"
-
-rule lag_download_song2017how_supp_table_:
-    output: "inputs/lag/pnas.1608847114.st{id,(01|02)}.docx"
-    shell: "git annex get {input}"
 
 rule lag_convert_song2017how_table_s1_to_md:
     input: "inputs/lag/pnas.1608847114.st01.docx"
