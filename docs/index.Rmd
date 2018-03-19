@@ -987,7 +987,7 @@ advantage.
 [fgp]: http://www.fangraphs.com/library/team-record-pythagorean-record-and-base-runs/
 [js]: http://dx.doi.org/10.1198/jbes.2009.07145
 [lag-checks]: lag-calculation-checks.html
-[mdir]: https://github.com/kyleam/mlb-rundiff/tree/master/models
+[mdir]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [mka]: https://github.com/milkha/EPL
 [model]: https://github.com/kyleam/mlb-rundiff/tree/master/models/rundiff-lagwe.stan
 [osm]: rundiff-oneseason-2011.html
