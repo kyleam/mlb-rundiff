@@ -358,7 +358,7 @@ when the team starts off with a lag.  For example, for the April 18,
 from Chicago back to San Diego, so they ended up at -1 in my
 calculations instead of -2.  I'm not sure what makes the most sense
 here, but these events are pretty rare because a team usually stays
-around for at last three days, which is enough to drop their lag back
+around for at least three days, which is enough to drop their lag back
 to zero.
 
 For most of the entries, though, I'm not spotting any obvious
