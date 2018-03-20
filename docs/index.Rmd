@@ -989,7 +989,7 @@ advantage.
 [lag-checks]: lag-calculation-checks.html
 [mdir]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [mka]: https://github.com/milkha/EPL
-[model]: https://github.com/kyleam/mlb-rundiff/tree/master/models/rundiff-lagwe.stan
+[model]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models/rundiff-lagwe.stan
 [osm]: rundiff-oneseason-2011.html
 [pdim]: https://visual.ly/community/infographic/sports/baseballs-many-physical-dimensions
 [pf]: http://www.espn.com/mlb/stats/parkfactor
