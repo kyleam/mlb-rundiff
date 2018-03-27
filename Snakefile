@@ -117,12 +117,6 @@ rule lag_combine_:
     shell: "head -n1  {input[0]} > {output} &&"
            "for f in {input}; do sed 1d $f >> {output}; done"
 
-rule lag_sort_combined:
-    input: "code/lag/sort-combined.R", "outputs/lag/lag-combined-1990_2016.csv"
-    output: "outputs/lag/lag-combined-sorted-1990_2016.csv"
-    shell: "cd $(dirname {input[0]}) && " +
-           RSCRIPT + "./$(basename {input[0]})"
-
 rule lag_join_log_and_lag:
     input: "code/lag/join-log-and-lag.R",
            "outputs/lag/lag-combined-1990_2016.csv",
