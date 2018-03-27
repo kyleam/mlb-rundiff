@@ -13,7 +13,7 @@ glog <- read_csv("../../outputs/lag/log-with-lags.csv")
 
 ## There are 25 games that were completed at a later date.  Drop them
 ## since play is split across multiple days.  These games are still
-## acounted for in the lag calculations through spread_incomplete.py.
+## accounted for in the lag calculations through spread_incomplete.py.
 ##
 ## filter(glog, !is.na(completion_info) &
 ##              between(lubridate::year(date), 1992, 2011))
