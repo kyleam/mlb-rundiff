@@ -12,6 +12,10 @@ __pycache__
 *.info.R
 *.rds
 
+!/outputs/lag/lag-combined-1990_2016-ht.csv
+!/outputs/lag/lag-combined-1990_2016.csv
+!/outputs/lag/log-with-lags-cleaned.csv
+
 /docs/_song2017how-table-s1.md
 /docs/*-session-info.txt
 /docs/*.stan
