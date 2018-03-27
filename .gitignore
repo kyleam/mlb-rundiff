@@ -9,7 +9,6 @@ __pycache__
 *.dat
 *.csv
 *.data.R
-*.params.R
 *.info.R
 *.rds
 
