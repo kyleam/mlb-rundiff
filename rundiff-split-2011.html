@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Evaluation of a split season team ability model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Evaluation of a split season team ability model</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#model-diagnostics">Model diagnostics</a></li>
+<li><a href="#parameter-estimates">Parameter estimates</a><ul>
+<li><a href="#t-distribution-degrees-of-freedom">t-distribution degrees of freedom</a></li>
+<li><a href="#home-field-advantage">Home-field advantage</a></li>
+<li><a href="#abilities">Abilities</a></li>
+</ul></li>
+<li><a href="#posterior-predictive-check">Posterior predictive check</a></li>
+</ul>
+</div>
+
+<p>I’ve now <a href="rundiff-split.stan">extended</a> the previous <a href="rundiff-oneseason-2011.html">single-season, single ability model</a> to estimate abilities at different splits in the season. The new model largely follows Milad Kharratzadeh’s English Premier League model, with “weeks” corresponding to “periods”. The most substantial difference between the EPL model and the one here is that a team’s ability is not represented as a random walk where the ability from the previous period serves as the mean for the next period’s ability. Instead, a team’s ability values for all periods are modeled as normally distributed around a common mean.</p>
+<p>I’ve run the model with the 2011 game logs. I split the season into eight periods (~20 games), thinking that it would do an OK job of capturing the ups and downs a team goes through in a season while not introducing an unwieldy number of parameters. I haven’t played around with any other splits yet.</p>
+<div id="model-diagnostics" class="section level2">
+<h2>Model diagnostics</h2>
+<pre class="r"><code>fit &lt;- readRDS(&quot;../outputs/models/rundiff-split_2011-fit.rds&quot;)</code></pre>
+<p>Clicking around in ShinyStan UI (<code>launch_shinystan(fit)</code>), the diagnostic statistics look fine overall. Some parameters have effective sample sizes on the lower end.</p>
+<pre class="r"><code>model_pars &lt;- names(fit)
+selpars &lt;- model_pars[!grepl(&quot;^eta&quot;, model_pars) &amp;
+                      !grepl(&quot;rundiff_new&quot;, model_pars)]
+
+nrats &lt;- neff_ratio(fit, pars = selpars)
+nrats[nrats &lt; 0.5]
+#&gt;     sigma_theta             tau sigma_a_std[28]         a[2,17] 
+#&gt;       0.4868836       0.1566860       0.4995247       0.4499548 
+#&gt;         a[4,17]         a[4,28]      sigma_a[1]      sigma_a[2] 
+#&gt;       0.4974116       0.4475099       0.4427078       0.2808049 
+#&gt;      sigma_a[3]      sigma_a[4]      sigma_a[5]      sigma_a[6] 
+#&gt;       0.3699918       0.4239120       0.3227081       0.3887525 
+#&gt;      sigma_a[7]      sigma_a[8]      sigma_a[9]     sigma_a[10] 
+#&gt;       0.3268086       0.2978791       0.3190327       0.3488612 
+#&gt;     sigma_a[11]     sigma_a[12]     sigma_a[13]     sigma_a[14] 
+#&gt;       0.4663558       0.3572937       0.3760510       0.4014975 
+#&gt;     sigma_a[15]     sigma_a[16]     sigma_a[17]     sigma_a[18] 
+#&gt;       0.2618281       0.2608182       0.2092528       0.4498960 
+#&gt;     sigma_a[19]     sigma_a[21]     sigma_a[22]     sigma_a[23] 
+#&gt;       0.4581744       0.4311620       0.3493293       0.4822168 
+#&gt;     sigma_a[24]     sigma_a[26]     sigma_a[27]     sigma_a[28] 
+#&gt;       0.3304278       0.3737520       0.3571748       0.1975229 
+#&gt;     sigma_a[29]     sigma_a[30]            lp__ 
+#&gt;       0.4310972       0.3323508       0.1956643
+
+mcmc_neff_hist(nrats) + theme_remove_axis(&quot;y&quot;)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/neff_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="parameter-estimates" class="section level2">
+<h2>Parameter estimates</h2>
+<div id="t-distribution-degrees-of-freedom" class="section level3">
+<h3>t-distribution degrees of freedom</h3>
+<p>Following the EPL model, I’ve included a parameter for the degrees of freedom used for the t-distribution. Most of the estimated values are larger than 7, which is the fixed value I used for in the previous model.</p>
+<pre class="r"><code>samps &lt;- rstan::extract(fit)</code></pre>
+<pre class="r"><code>quantile(samps$nu, probs = c(0.025, 0.5, 0.975))
+#&gt;      2.5%       50%     97.5% 
+#&gt;  7.609503 10.963311 18.136507
+
+data.frame(nu = samps$nu) %&gt;%
+    ggplot(aes(nu)) +
+    geom_histogram(bins = 40) +
+    labs(x = expression(nu)) +
+    theme_remove_axis(&quot;y&quot;)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/nu_distr_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>With a median <span class="math inline">\(\nu\)</span> near 11, it probably makes sense to stick with a t-distribution rather than switching to a normal.</p>
+<pre class="r"><code>set.seed(113724)
+nvals &lt;- tibble(x = seq(-6, 6, length.out = 500),
+                y = dnorm(x))
+tvals &lt;- expand.grid(x = nvals$x, df = c(3, 7, 11, 17)) %&gt;%
+    mutate(y = dt(x, df = df),
+           df = factor(df))
+
+ggplot(tvals) +
+    geom_line(aes(x = x, y = y, color = df)) +
+    geom_line(data = mutate(nvals, distr = &quot;normal&quot;),
+              aes(x = x, y = y, linetype = distr)) +
+    labs(color = expression(nu)) +
+    guides(color = guide_legend(order = 0),
+           linetype = guide_legend(order = 1, title = NULL)) +
+    theme_void() +
+    theme(legend.position = c(0.2, 0.5)) +
+    scale_linetype_manual(values = c(&quot;dashed&quot;)) +
+    scale_color_manual(values = c(tc$primary, tc$secondary,
+                                  tc$primary_light, tc$secondary_light))</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/nu_normal_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Both <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\sigma_y\)</span> influence the range of observed score differentials, and, unsurprisingly, iterations with larger values for <span class="math inline">\(\nu\)</span> tend to have larger values for <span class="math inline">\(\sigma_y\)</span>.</p>
+<pre class="r"><code>data.frame(nu = samps$nu,
+           sigma_y = samps$sigma_y) %&gt;%
+    ggplot(aes(nu, sigma_y)) +
+    labs(x = expression(nu),
+         y = expression(sigma[y])) +
+    geom_point(alpha = 0.2, shape = 16)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/nu_sigma_y_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="home-field-advantage" class="section level3">
+<h3>Home-field advantage</h3>
+<p>The model includes a term for home-field avantage. The estimates are uncertain, small in magnitude, and slightly shifted in the direction of the home team. No suprises there.</p>
+<pre class="r"><code>quantile(samps$b_home, probs = c(0.025, 0.5, 0.975))
+#&gt;       2.5%        50%      97.5% 
+#&gt; -0.1235046  0.0405651  0.2009177
+
+data.frame(b_home = samps$b_home) %&gt;%
+    ggplot(aes(b_home)) +
+    geom_vline(xintercept = 0, size = 0.8, color = tc$primary_lighter) +
+    geom_histogram(bins = 40, size = 0.3) +
+    expand_limits(x = c(-0.3, 0.3)) +
+    labs(x = expression(beta[home])) +
+    theme_remove_axis(&quot;y&quot;)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/b_home_distr_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>Perhaps this parameter should be estimated for each team in order to catch park-specific effects. That’s a bit complicated because a hitter’s park can help both teams score more runs, but I suppose it could capture the extent that the home team plays to (or fails to play to) their park’s strengths.</p>
+</div>
+<div id="abilities" class="section level3">
+<h3>Abilities</h3>
+<p>The main difference between this model and its predecessor is that a single-season ability estimate for a team is split into eight periods. First, let’s see if the general pattern for the abilities looks right. A team’s abilities across periods share a common mean, so two ability parameters for the same team should be correlated across iterations, while parameters for different teams shouldn’t show the same coupling. Below are the pairs plots for the seventh and eighth periods for the 29th team and the first and second periods for the 30th team.</p>
+<pre class="r"><code>samps_flat &lt;- as.array(fit)
+
+prev_theme &lt;- theme_update(panel.grid = element_blank(),
+                           axis.text.y = element_blank(),
+                           axis.text.x = element_blank())
+color_scheme_set(&quot;gray&quot;)
+mcmc_pairs(samps_flat,
+           pars = c(&quot;a[7,29]&quot;, &quot;a[8,29]&quot;, &quot;a[1,30]&quot;, &quot;a[2,30]&quot;),
+           off_diag_fun = &quot;hex&quot;)
+theme_set(prev_theme)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/plot_a_flat_pairs-1.png" width="95%" style="display: block; margin: auto;" /></p>
+<p>And here are the ability estimates for each team and period.</p>
+<pre class="r"><code>source(&quot;../code/lib/utils.R&quot;)
+info &lt;- read_rdump(&quot;../outputs/models/rundiff-split_2011.info.R&quot;)</code></pre>
+<pre class="r"><code>avals &lt;- trace_intervals(samps$a, c(&quot;period&quot;, &quot;team_idx&quot;)) %&gt;%
+    mutate(team = info$team_names[team_idx])
+
+teams_ranked &lt;- arrange(info$wins_2011, desc(n_wins))$team
+
+mutate(avals, team = factor(team, levels = teams_ranked)) %&gt;%
+    ggplot(aes(x = period, y = mean)) +
+    geom_hline(yintercept = 0, color = tc$primary_lighter) +
+    geom_linerange(aes(ymin = p10, ymax = p90), size = 0.3) +
+    geom_point() +
+    facet_wrap(~ team) +
+    labs(y = &quot;mean ability (with 80% intervals)&quot;,
+         title = &quot;Team ability estimates for 2011 season&quot;,
+         subtitle = &quot;sorted by regular season standings&quot;)</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/avals_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>It seems like the periods are capturing some variation, though many teams might be sufficiently summarized by a single period ability estimate.</p>
+<p>There are some interesting teams, such as the Brewers, that look out of place based on their season standings. I’m not sure what’s going on here. Assuming it’s not a coding error, I suppose it should come down to some combination of the observed match-ups (e.g., weaker division) and iter-team variation in run differentials (e.g., winning a disproportionate number of close games).</p>
+</div>
+</div>
+<div id="posterior-predictive-check" class="section level2">
+<h2>Posterior predictive check</h2>
+<pre class="r"><code>dat &lt;- read_rdump(&quot;../outputs/models/rundiff-split_2011.data.R&quot;)</code></pre>
+<pre class="r"><code>matchups &lt;- tribble(~home, ~away,
+                    &quot;ARI&quot;, &quot;COL&quot;,
+                    &quot;ATL&quot;, &quot;WAS&quot;,
+                    &quot;CIN&quot;, &quot;HOU&quot;,
+                    &quot;CLE&quot;, &quot;MIN&quot;,
+                    &quot;LAN&quot;, &quot;SFN&quot;,
+                    &quot;NYA&quot;, &quot;BOS&quot;,
+                    &quot;PHI&quot;, &quot;NYN&quot;,
+                    &quot;TEX&quot;, &quot;SEA&quot;) %&gt;%
+    mutate(home_idx = match(home, info$team_names),
+           away_idx = match(away, info$team_names))
+
+observed_idx &lt;- which(paste0(info$team_names[dat$team_home],
+                             info$team_names[dat$team_away])
+                      %in%
+                      paste0(matchups$home, matchups$away))
+
+observed &lt;- tibble(rundiff = dat$rundiff[observed_idx],
+                   home_idx = dat$team_home[observed_idx],
+                   home_name = info$team_names[home_idx],
+                   away_idx = dat$team_away[observed_idx],
+                   away_name = info$team_names[away_idx],
+                   home_period = factor(dat$period_home[observed_idx],
+                                        levels = 1:8),
+                   matchup = factor(paste0(away_name, &quot;@&quot;, home_name)))
+
+ppc &lt;- trace_intervals(samps$rundiff_new[,observed_idx], &quot;game&quot;) %&gt;%
+    mutate(home_name = observed$home_name,
+           away_name = observed$away_name,
+           home_period = factor(observed$home_period,
+                                levels = 1:8),
+           matchup = factor(paste0(away_name, &quot;@&quot;, home_name))) %&gt;%
+    as_tibble() %&gt;%
+    group_by(matchup, home_period) %&gt;%
+    filter(row_number() == 1)</code></pre>
+<pre class="r"><code>ggplot(ppc, aes(x = home_period)) +
+    geom_hline(yintercept = 0, color = tc$primary_lighter) +
+    geom_linerange(aes(ymin = p2.5, ymax = p97.5),
+                   alpha = 0.8) +
+    geom_point(aes(y = rundiff),
+               fill = NA, color = tc$background_dark, shape = 21,
+               data = observed) +
+    scale_y_continuous(limits = c(-11, 11),
+                       minor_breaks = -11:11) +
+    labs(x = NULL, y = NULL,
+         title = &quot;Run differential&quot;,
+         subtitle = &quot;compared to the match-up&#39;s 95% predictive interval&quot;) +
+    coord_flip() +
+    facet_wrap(~ matchup, ncol = 1, scales = &quot;free_y&quot;,
+               strip.position = &quot;left&quot;) +
+    theme_remove_axis(&quot;y&quot;) +
+    theme(strip.text.y = element_text(angle = 180))</code></pre>
+<p><img src="rundiff-split-2011_files/figure-html/ppc_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>The intervals are still unimpressively large. My next attempt to shrink them will be to incorporate information about the starting pitcher for each team.</p>
+<div id="rsession">
+<hr>
+<a href="rundiff-split-2011-session-info.txt"> R session info</a>
+</div>
+</div>
+
+<hr>
+<div id="footer">
+  <p>
+    Text is released under the
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/">
+      CC BY-SA 4.0 </a> license.
+    Code is released under the
+    <a href="https://opensource.org/licenses/BSD-3-Clause">
+      new BSD (3-clause)</a> license.
+  </p>
+  <p>
+    <a href="https://github.com/kyleam/mlb-rundiff/">View source</a>
+  </p>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

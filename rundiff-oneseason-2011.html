@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Evaluation of a simple single-year team ability model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Evaluation of a simple single-year team ability model</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#single-year-estimation-of-team-ability">Single-year estimation of team ability</a></li>
+<li><a href="#mcmc-diagnostics">MCMC diagnostics</a></li>
+<li><a href="#ability-estimates">Ability estimates</a></li>
+<li><a href="#posterior-predictive-check">Posterior predictive check</a></li>
+</ul>
+</div>
+
+<div id="single-year-estimation-of-team-ability" class="section level2">
+<h2>Single-year estimation of team ability</h2>
+<p>Eventually I want to estimate the association between a team having jet lag and some measure of their tendency to win a game. As a starting point, I remembered that Andrew Gelman had <a href="http://andrewgelman.com/2014/07/13/stan-analyzes-world-cup-data/">some</a> <a href="http://andrewgelman.com/2014/07/15/stan-world-cup-update/">posts</a> on estimating the ability of teams in the World Cup teams. The response in that model is the score differential: goals in that case, runs my case. As Gelman discusses, this isn’t a generative model because it makes continuous predictions for discrete data, but it may be good enough for my purposes.</p>
+<p>Below is a model that closely follows the World Cup model.</p>
+<pre><code>
+data {
+  int&lt;lower=1&gt; n_games;
+  int&lt;lower=1&gt; n_teams;
+  int&lt;lower=1,upper=n_teams&gt; team_home[n_games];
+  int&lt;lower=1,upper=n_teams&gt; team_away[n_games];
+
+  vector[n_games] rundiff;
+
+  real df;
+}
+
+parameters {
+  real&lt;lower=0&gt; sigma_a;
+  real&lt;lower=0&gt; sigma_y;
+  vector[n_teams] a_std;
+}
+
+transformed parameters {
+  vector[n_teams] a;
+  a = sigma_a * a_std;
+}
+
+model {
+  a_std ~ normal(0, 1);
+  sigma_y ~ normal(0, 6);
+  sigma_a ~ normal(0, 3);
+
+  for (i in 1:n_games)
+    rundiff[i] ~ student_t(df, a[team_home[i]] - a[team_away[i]], sigma_y);
+}</code></pre>
+<p>There are two main differences from the World Cup model:</p>
+<ul>
+<li><p>I haven’t yet bothered to put the response (difference in runs) on the square-root scale.</p></li>
+<li><p>I don’t include a prior estimate for a team’s ability.</p></li>
+</ul>
+<p>And while I’m labeling one team as “home” and one as “away”, the model isn’t treating them any differently (e.g., I haven’t yet tried to add a parameter for home-field advantage).</p>
+</div>
+<div id="mcmc-diagnostics" class="section level2">
+<h2>MCMC diagnostics</h2>
+<p>I’ve fit this model using data for the 2011 season. I’ll look at a few diagnostic plots using the <a href="http://mc-stan.org/users/interfaces/bayesplot.html">bayesplot</a> package.</p>
+<pre class="r"><code>fit &lt;- readRDS(&quot;../outputs/models/rundiff-oneseason_2011-fit.rds&quot;)</code></pre>
+<p>The R-hats and effective sample sizes look OK, though the effective sample size for <span class="math inline">\(\sigma_a\)</span> is relatively low.</p>
+<pre class="r"><code>selpars &lt;- c(&quot;sigma_a&quot;, &quot;sigma_y&quot;, grep(&quot;^a&quot;, names(fit), value = TRUE))</code></pre>
+<pre class="r"><code>mcmc_neff(neff_ratio(fit, pars = selpars)) +
+    theme_remove_axis(&quot;y&quot;) +
+    theme(legend.position = &quot;left&quot;)
+
+mcmc_rhat(rhat(fit, pars = selpars)) +
+    legend_text(hjust = 0) +
+    theme_remove_axis(&quot;y&quot;) +
+    theme(legend.text.align = 0)</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/nr_plot-1.png" width="50%" /><img src="rundiff-oneseason-2011_files/figure-html/nr_plot-2.png" width="50%" /></p>
+<pre class="r"><code>samps_flat &lt;- as.array(fit)</code></pre>
+<p>The autocorrelation across iterations looks OK. As expected from its lower effective sample size ratio, <span class="math inline">\(\sigma_a\)</span> shows a higher autocorrelation than other parameters do.</p>
+<pre class="r"><code>mcmc_acf(samps_flat, regex_pars = &quot;sigma&quot;)</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/acf_plot_sigma-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mcmc_acf(samps_flat, pars = paste0(&quot;a[&quot;, 1:6, &quot;]&quot;))</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/acf_plot_a-1.png" width="95%" style="display: block; margin: auto;" /></p>
+<p>The traces look OK.</p>
+<pre class="r"><code>color_scheme_set(&quot;mix-darkgray-green&quot;)
+mcmc_trace(samps_flat, regex_pars = &quot;sigma&quot;)</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/sigma_trace_plots-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mcmc_trace(samps_flat, regex_pars = &quot;^a\\[&quot;, facet_args = list(ncol = 5)) +
+    theme(legend.position = &quot;none&quot;,
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/sigma_a_plots-1.png" width="95%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ability-estimates" class="section level2">
+<h2>Ability estimates</h2>
+<p>The order of team ability estimates should largely follow the final rankings for the 2011 season.</p>
+<pre class="r"><code>glog &lt;- read_csv(&quot;../outputs/lag/log-with-lags-cleaned.csv&quot;)</code></pre>
+<pre class="r"><code>(team_rank &lt;- glog %&gt;%
+     filter(lubridate::year(date) == 2011) %&gt;%
+     count_wins() %&gt;%
+     mutate(win_perc = n_wins / n_games) %&gt;%
+     arrange(desc(win_perc)))
+#&gt; # A tibble: 30 x 4
+#&gt;    team  n_wins n_games win_perc
+#&gt;    &lt;chr&gt;  &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;
+#&gt;  1 PHI      102     162    0.630
+#&gt;  2 NYA       97     162    0.599
+#&gt;  3 MIL       96     162    0.593
+#&gt;  4 TEX       96     162    0.593
+#&gt;  5 DET       95     162    0.586
+#&gt;  6 ARI       94     162    0.580
+#&gt;  7 TBA       91     162    0.562
+#&gt;  8 BOS       90     162    0.556
+#&gt;  9 SLN       90     162    0.556
+#&gt; 10 ATL       89     162    0.549
+#&gt; # ... with 20 more rows
+
+team_names &lt;- levels(factor(team_rank$team))</code></pre>
+<p>To get the samples in a more convenient form, I’ll re-extract the samples from the fit as a list rather than an array with flattened variables name.</p>
+<pre class="r"><code>samps &lt;- rstan::extract(fit)</code></pre>
+<pre class="r"><code>avals &lt;- trace_intervals(samps$a, &quot;team_idx&quot;) %&gt;%
+    mutate(team = factor(team_names[team_idx], levels = team_rank$team))</code></pre>
+<pre class="r"><code>ggplot(avals, aes(x = fct_rev(team))) +
+    geom_hline(yintercept = 0, color = tc$background_light, size = 1) +
+    geom_pointrange(aes(y = mean, ymin = p10, ymax = p90)) +
+    geom_linerange(aes(ymin = p25, ymax = p75), size = 0.9) +
+    labs(x = NULL,
+         y = &quot;mean ability (with 50% and 80% intervals)&quot;,
+         title = &quot;Team ability estimates for 2011 season&quot;,
+         subtitle = &quot;sorted by regular season standings&quot;) +
+    coord_flip() +
+    theme_remove_axis(&quot;y&quot;, text = FALSE)</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/avals_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>The intervals are wide and largely overlapping, but the ability estimates seem to approximately track the season standings. I don’t expect a one-to-one mapping here because the overall win percentages don’t account for actual match-ups or run differentials.</p>
+</div>
+<div id="posterior-predictive-check" class="section level2">
+<h2>Posterior predictive check</h2>
+<p>To generate new responses from the estimated parameters, I’ll pick a few teams to form the match-ups. The first three are the teams with the best 2011 records, the last three are the ones with the worst records, and the middle teams are somewhere in between.</p>
+<pre class="r"><code>ppc_team_names &lt;- c(&quot;PHI&quot;, &quot;NYA&quot;, &quot;MIL&quot;, &quot;ARI&quot;, &quot;CIN&quot;, &quot;OAK&quot;, &quot;PIT&quot;,
+                    &quot;SEA&quot;, &quot;MIN&quot;, &quot;HOU&quot;)
+ppc_teams &lt;- match(ppc_team_names, team_names)
+
+matchups &lt;- data.frame(t(utils::combn(ppc_teams, 2)))
+names(matchups) &lt;- c(&quot;home&quot;, &quot;away&quot;)
+matchups$home_name &lt;- team_names[matchups$home]
+matchups$away_name &lt;- team_names[matchups$away]</code></pre>
+<p>For each of these match-ups, I’ll generate a score differential from samples for each iteration and then summarize the response across the iterations by constructing the 95% intervals for each match-up.</p>
+<pre class="r"><code>df &lt;- 7
+
+n_games &lt;- nrow(matchups)
+n_iter &lt;- nrow(samps$sigma_y)
+rundiff_sim &lt;- array(NA, c(n_iter, n_games))
+set.seed(16125)
+for (i in 1:n_iter){
+    rundiff_sim[i,] &lt;- samps$a[i, matchups$home] - samps$a[i, matchups$away] +
+         rt(n_games, df) * samps$sigma_y[i]
+}
+
+result &lt;- cbind(matchups, trace_intervals(rundiff_sim, &quot;game_idx&quot;))  %&gt;%
+    as_tibble() %&gt;%
+    mutate(matchup = paste(home_name, &quot;-&quot;, away_name),
+           matchup = factor(matchup, levels = matchup))</code></pre>
+<p>I also have to pull together the observed run differentials for these match-ups. This requires a little bit of work because the simulations put the team with the better record as the “home” team.</p>
+<pre class="r"><code>observed &lt;- glog %&gt;%
+    filter(lubridate::year(date) == 2011,
+           home_team %in% team_names,
+           away_team %in% team_names) %&gt;%
+    select(home_team, away_team, home_runs_scored, away_runs_scored) %&gt;%
+    mutate(flip = match(home_team, team_names) &gt; match(away_team, team_names),
+           matchup = ifelse(flip,
+                            paste(away_team, &quot;-&quot;, home_team),
+                            paste(home_team, &quot;-&quot;, away_team)),
+           matchup = factor(matchup, levels = levels(result$matchup)),
+           rundiff = ifelse(flip,
+                              away_runs_scored - home_runs_scored,
+                              home_runs_scored - away_runs_scored)) %&gt;%
+    filter(!is.na(matchup))</code></pre>
+<p>Now, we can overlay the observed run differentials over the prediction intervals. The intervals aren’t shown if the match-up didn’t occur during the 2011 season.</p>
+<pre class="r"><code>result %&gt;%
+    filter(matchup %in% observed$matchup) %&gt;%
+    ggplot() +
+    geom_hline(yintercept = 0, color = tc$primary_lighter) +
+    geom_linerange(aes(x = fct_rev(matchup), ymin = p2.5, ymax = p97.5),
+                   alpha = 0.8) +
+    geom_point(aes(x = matchup, y = rundiff),
+               fill = NA, color = tc$background_dark, shape = 21,
+               data = observed) +
+    scale_y_continuous(limits = c(-13, 13),
+                       minor_breaks = -13:13) +
+    coord_flip() +
+    labs(title = &quot;Run differential&quot;,
+         subtitle = &quot;compared to the match-up&#39;s 95% predictive interval&quot;,
+         x = NULL, y = NULL) +
+    theme_remove_axis(&quot;y&quot;, text = FALSE) +
+    theme(axis.text.y = element_text(hjust = 0))</code></pre>
+<p><img src="rundiff-oneseason-2011_files/figure-html/ppc_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Well, that seems OK in the sense that 115 of the 122 points (close to 95%) fall within the intervals.</p>
+<p>Is this model useful going forward? I don’t know. If making predictions from this model were the goal, the intervals are unhelpfully large. (“Oh, that team’s likely to win by 9 or lose by 7? You don’t say.”) And these wide intervals are unsurprising given that the response is based on a single-season ability estimate for each team.</p>
+<p>Instead, my goal is to find a relatively interpretable model that I can extend to estimate the association of jet lag with a team’s success in a game. In that case, the uncertainty of the team-to-team match-up seems like a good thing to build on.</p>
+<p>In order to do that, here are the next steps I’m considering:</p>
+<ul>
+<li><p>Introduce terms for different lag effects.</p></li>
+<li><p>Extend the model to handle multiple years.</p></li>
+<li><p>Add a term for a home-team effect.</p></li>
+<li><p>See how the model looks when run differential is put on the square-root scale.</p></li>
+<li><p>Break up the ability estimates across the season, similar to Milad Kharratzadeh’s model of <a href="http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/">goal</a> <a href="https://github.com/milkha/EPL">differentials</a> in the English Premier League.</p></li>
+</ul>
+<div id="rsession">
+<hr>
+<a href="rundiff-oneseason-2011-session-info.txt"> R session info</a>
+</div>
+</div>
+
+<hr>
+<div id="footer">
+  <p>
+    Text is released under the
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/">
+      CC BY-SA 4.0 </a> license.
+    Code is released under the
+    <a href="https://opensource.org/licenses/BSD-3-Clause">
+      new BSD (3-clause)</a> license.
+  </p>
+  <p>
+    <a href="https://github.com/kyleam/mlb-rundiff/">View source</a>
+  </p>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

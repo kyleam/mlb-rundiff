@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Jet lag calculation checks</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Jet lag calculation checks</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#a-few-sanity-checks">A few sanity checks</a><ul>
+<li><a href="#distribution-of-games-across-teams-each-season">Distribution of games across teams each season</a></li>
+<li><a href="#do-the-lag-values-look-reasonable">Do the lag values look reasonable?</a></li>
+</ul></li>
+<li><a href="#comparison-with-ssas-tables">Comparison with SSA’s tables</a><ul>
+<li><a href="#ssas-table-s1">SSA’s Table S1</a></li>
+<li><a href="#ssas-table-s2">SSA’s Table S2</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>Song, Severini, and Allada (“SSA”) <a href="http://dx.doi.org/10.1073/pnas.1608847114">estimated the jet lag</a> of teams using <a href="http://www.retrosheet.org/gamelogs/index.html">Retrosheet</a> game logs for MLB games from 1992 through 2011. Starting from the game logs and working from their criteria, I’ve attempted to generate the same jet lag data set. To convince myself that I’ve more or less done so, I’ll (1) make a few summary plots to see if things look reasonable and (2) crosscheck my overall numbers with the information available in SSA’s supplemental tables.</p>
+<div id="a-few-sanity-checks" class="section level2">
+<h2>A few sanity checks</h2>
+<div id="distribution-of-games-across-teams-each-season" class="section level3">
+<h3>Distribution of games across teams each season</h3>
+<p>The file “lag-combined-1990_2016.csv” should represent every game between 1990 and 2016 with two lines, one for each team. I’ll filter to 1992 through 2011 to match the year range used by SSA.</p>
+<pre class="r"><code>(lag &lt;- read_csv(&quot;../outputs/lag/lag-combined-1990_2016.csv&quot;) %&gt;%
+     mutate(date = ymd(date),
+            year = year(date)) %&gt;%
+     filter(between(year, 1992, 2011)) %&gt;%
+     mutate(game_tz = factor(game_tz,
+                             levels = c(&quot;ET&quot;, &quot;CT&quot;, &quot;MT&quot;, &quot;PT&quot;, &quot;other&quot;))))
+#&gt; # A tibble: 93,120 x 10
+#&gt;    date       team  game_tz   lag matchup tz_shift days_delta game_id
+#&gt;    &lt;date&gt;     &lt;chr&gt; &lt;fct&gt;   &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;  
+#&gt;  1 1992-04-06 BAL   ET          0 CLE@BAL 0-&gt;0              0 0      
+#&gt;  2 1992-04-06 CLE   ET          0 CLE@BAL 0-&gt;0              0 0      
+#&gt;  3 1992-04-06 OAK   PT          0 KCA@OAK 3-&gt;3              0 0      
+#&gt;  4 1992-04-06 KCA   PT          0 KCA@OAK 3-&gt;3              0 0      
+#&gt;  5 1992-04-06 MIL   CT          0 MIN@MIL 1-&gt;1              0 0      
+#&gt;  6 1992-04-06 MIN   CT          0 MIN@MIL 1-&gt;1              0 0      
+#&gt;  7 1992-04-06 PIT   ET          0 MON@PIT 0-&gt;0              0 0      
+#&gt;  8 1992-04-06 MON   ET          0 MON@PIT 0-&gt;0              0 0      
+#&gt;  9 1992-04-06 SLN   CT          0 NYN@SLN 1-&gt;1              0 0      
+#&gt; 10 1992-04-06 NYN   CT          0 NYN@SLN 1-&gt;1              0 0      
+#&gt; # ... with 93,110 more rows, and 2 more variables: park &lt;chr&gt;, year &lt;dbl&gt;</code></pre>
+<p>Let’s tally the number games per team in each season.</p>
+<pre class="r"><code>lag %&gt;%
+    group_by(year, team) %&gt;%
+    summarise(games = n()) %&gt;%
+    mutate(normal_season = abs(games - 162) &lt; 4) %&gt;%
+    ggplot(aes(year, fct_rev(team))) +
+    geom_point(aes(color = normal_season, size = games), shape = 21) +
+    ylab(NULL) +
+    scale_size(range = c(1, 3.5)) +
+    scale_color_manual(values = c(&quot;black&quot;, &quot;gray60&quot;), guide = FALSE) +
+    theme_remove_axis(&quot;y&quot;, text = FALSE)</code></pre>
+<p><img src="lag-calculation-checks_files/figure-html/game_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>Nothing looks off here after accounting for a few historical events. Most years are within 3 games of 162 (gray), with the exception of the 1994 and 1995 seasons. A <a href="https://en.wikipedia.org/wiki/1994%E2%80%9395_Major_League_Baseball_strike">strike</a> disrupted play during these two years. In addition to the 1994 and 1995 columns, the other thing that stands out in the plot above is the presence of incomplete rows. Some of these represent births (ARI, COL, FLO, TBA), while the remaining ones can be paired together to reveal reincarnations (CAL → ANA, MON → WAS).</p>
+</div>
+<div id="do-the-lag-values-look-reasonable" class="section level3">
+<h3>Do the lag values look reasonable?</h3>
+<p>The values of interest in this data set are the lag values. To make it easier to visualize these, I’m going to look at the lags of four teams—one for each time zone—in a single season.</p>
+<pre class="r"><code>selteams &lt;- c(&quot;NYA&quot;, &quot;SLN&quot;, &quot;COL&quot;, &quot;SEA&quot;)
+
+lag2011 &lt;- lag  %&gt;%
+    filter(year == &quot;2011&quot;, team %in% selteams) %&gt;%
+    mutate(team = factor(team, levels = selteams))</code></pre>
+<p>Here are the lags for these teams across the 2011 season.</p>
+<pre class="r"><code>lag2011 %&gt;%
+    ggplot(aes(date, lag)) +
+    geom_hline(yintercept = 0, color = tc$background_light, size = 1.25) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 0.7) +
+    scale_x_date(date_breaks = &quot;1 month&quot;, date_labels = &quot;%b&quot;) +
+    scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
+    theme_grid(&quot;x&quot;) +
+    facet_wrap(~ team, ncol = 1)</code></pre>
+<p><img src="lag-calculation-checks_files/figure-html/lag-plot-1.png" width="95%" style="display: block; margin: auto;" /></p>
+<p>This looks like I’d expect:</p>
+<ul>
+<li><p>A team spends most of their time at a lag of zero.</p></li>
+<li><p>A lag never goes over a magnitude of three, which is good since that should be impossible because ET is coded as 0 and PT at the other end is coded as 3.</p></li>
+<li><p>Lags decrease by one with consecutive games.</p></li>
+</ul>
+<p>To assess the time zone shifts in more detail, we can color the points by time zone and add a grid to more clearly mark individual days.</p>
+<pre class="r"><code>colors &lt;- c(&quot;#00688b&quot;, &quot;#8b0000&quot;, &quot;#9400d3&quot;, &quot;#2e8b57&quot;)
+
+## Create data frame for labeling facets.
+zones &lt;- tibble(date = rep(ymd(&quot;20110401&quot;), 4),
+                lag = rep(2.3, 4),
+                team = fct_inorder(levels(lag2011$team)),
+                game_tz = levels(droplevels(lag2011$game_tz)),
+                label = game_tz)
+
+lag2011 %&gt;%
+    ggplot(aes(date, lag)) +
+    geom_line(alpha = 0.6) +
+    geom_point(aes(color = game_tz), size = 0.7) +
+    geom_label(data = zones, aes(label = label, color = game_tz),
+               size = 3, hjust = &quot;right&quot;) +
+    scale_x_date(date_breaks = &quot;1 month&quot;,
+                 date_minor_breaks = &quot;1 day&quot;,
+                 date_labels = &quot;%b&quot;) +
+    scale_y_continuous(breaks = -3:3, limits = c(-3, 3)) +
+    scale_color_manual(values = colors) +
+    theme_grid(&quot;x&quot;, minor = TRUE) +
+    theme(legend.position = &quot;none&quot;) +
+    facet_wrap(~ team, ncol = 1)</code></pre>
+<p><img src="lag-calculation-checks_files/figure-html/lag-plot-color-1.png" width="95%" style="display: block; margin: auto;" /></p>
+<p>Again, this looks reasonable. All the time zone shifts seem to match expectations based on the time zone transitions and the number of off days.</p>
+<p>One shift that seems suspicious is the last upward peak in Seattle’s schedule: the +3 peak is caused by a move the eastern time, but then Seattle’s very next game is in central time. But, indeed, it looks like Seattle played <a href="https://www.baseball-reference.com/teams/SEA/2011-schedule-scores.shtml">game number 153</a> against Cleveland and the next day faced off against the Twins in Minnesota.</p>
+</div>
+</div>
+<div id="comparison-with-ssas-tables" class="section level2">
+<h2>Comparison with SSA’s tables</h2>
+<p>As far as I can tell, SSA did not publish their day-by-day lag calculations or the code they used to generate these. Using their two supplemental tables, however, I can gain some idea of whether my generated data set matches up.</p>
+<div id="ssas-table-s1" class="section level3">
+<h3>SSA’s Table S1</h3>
+<p>Here’s their Table S1:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><strong>Circadian Disruption</strong></th>
+<th align="left"><strong>Home</strong></th>
+<th align="left"><strong>Away</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">No jet lag</td>
+<td align="left">41602</td>
+<td align="left">37387</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>West</strong></td>
+<td align="left">2698</td>
+<td align="left">4896</td>
+</tr>
+<tr class="odd">
+<td align="left">1h jet lag</td>
+<td align="left">1588</td>
+<td align="left">3078</td>
+</tr>
+<tr class="even">
+<td align="left">2h jet lag</td>
+<td align="left">790</td>
+<td align="left">1344</td>
+</tr>
+<tr class="odd">
+<td align="left">3h jet lag</td>
+<td align="left">320</td>
+<td align="left">474</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>East</strong></td>
+<td align="left">2235</td>
+<td align="left">4252</td>
+</tr>
+<tr class="odd">
+<td align="left">1h jet lag</td>
+<td align="left">1519</td>
+<td align="left">2977</td>
+</tr>
+<tr class="even">
+<td align="left">2h jet lag</td>
+<td align="left">681</td>
+<td align="left">1203</td>
+</tr>
+<tr class="odd">
+<td align="left">3h jet lag</td>
+<td align="left">35</td>
+<td align="left">72</td>
+</tr>
+</tbody>
+</table>
+<p>To make it easier to produce these tallies, I’ll reformat the <code>lag</code> data frame.</p>
+<pre class="r"><code>reformat_lag &lt;- function(data){
+    separate(data, .data$matchup,
+             sep = &quot;@&quot;, into = c(&quot;away_team&quot;, &quot;home_team&quot;),
+             remove = FALSE) %&gt;%
+        mutate(field = factor(ifelse(.data$team == .data$home_team,
+                                     &quot;home&quot;,
+                                     &quot;away&quot;),
+                              levels = c(&quot;home&quot;, &quot;away&quot;)),
+               direction = factor(case_when(.data$lag &gt; 0 ~ &quot;to_east&quot;,
+                                            .data$lag &lt; 0 ~ &quot;to_west&quot;,
+                                            TRUE ~ &quot;none&quot;),
+                                  levels = c(&quot;none&quot;, &quot;to_west&quot;, &quot;to_east&quot;))) %&gt;%
+        select(date, team, field, direction, everything()) %&gt;%
+        select(-home_team, -away_team)
+}
+
+lag_tally &lt;- reformat_lag(lag)</code></pre>
+<p>First, let’s focus on the “West” and “East” rows of Table S1.</p>
+<pre class="r"><code>lag_tally %&gt;%
+    count(field, direction) %&gt;%
+    spread(field, n)
+#&gt; # A tibble: 3 x 3
+#&gt;   direction  home  away
+#&gt;   &lt;fct&gt;     &lt;int&gt; &lt;int&gt;
+#&gt; 1 none      41620 37405
+#&gt; 2 to_west    2697  4900
+#&gt; 3 to_east    2243  4255</code></pre>
+<p>Those tallies are similar enough that I don’t think my lag calculations are entirely off base. If I generate the lag values using the time zone of the home team rather the time zone of the park, I can get closer to the Table S1 tallies.</p>
+<pre class="r"><code>lag_ht &lt;- read_csv(&quot;../outputs/lag/lag-combined-1990_2016-ht.csv&quot;) %&gt;%
+    mutate(date = ymd(date),
+           year = year(date),
+           game_tz = factor(game_tz,
+                            levels = c(&quot;ET&quot;, &quot;CT&quot;, &quot;MT&quot;, &quot;PT&quot;, &quot;other&quot;))) %&gt;%
+    filter(between(year, 1992, 2011))</code></pre>
+<pre class="r"><code>lag_ht_tally &lt;- reformat_lag(lag_ht)</code></pre>
+<pre class="r"><code>lag_ht_tally %&gt;%
+    count(field, direction) %&gt;%
+    spread(field, n)
+#&gt; # A tibble: 3 x 3
+#&gt;   direction  home  away
+#&gt;   &lt;fct&gt;     &lt;int&gt; &lt;int&gt;
+#&gt; 1 none      41626 37407
+#&gt; 2 to_west    2697  4899
+#&gt; 3 to_east    2237  4254</code></pre>
+<p>Each count from my generated data set is within three of the corresponding reported value. When these lags are split up by their magnitude, the counts for these groups are also close if not identical to what’s reported in Table S1.</p>
+<pre class="r"><code>lag_ht_tally %&gt;%
+    filter(direction != &quot;none&quot;) %&gt;%
+    count(field, direction, abs(lag)) %&gt;%
+    spread(field, n)
+#&gt; # A tibble: 6 x 4
+#&gt;   direction `abs(lag)`  home  away
+#&gt;   &lt;fct&gt;          &lt;int&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1 to_west            1  1589  3080
+#&gt; 2 to_west            2   787  1345
+#&gt; 3 to_west            3   321   474
+#&gt; 4 to_east            1  1521  2978
+#&gt; 5 to_east            2   681  1204
+#&gt; 6 to_east            3    35    72</code></pre>
+<p>So it seems that (1) I’m calculating my lags in a way that’s similar to SSA’s jet lag definition and (2) SSA based their time zone based on the recorded home team rather than the time zone of the park’s location. These usually but not always line up:</p>
+<pre class="r"><code>odd_parks &lt;- filter(lag_tally, field == &quot;home&quot;) %&gt;%
+    ## Group parks for same team (e.g., ARL01, ARL02).
+    mutate(park_prefix = substring(park, 1, 3)) %&gt;%
+    select(team, park_prefix) %&gt;%
+    distinct() %&gt;%
+    count(team) %&gt;%
+    filter(n &gt; 1) %&gt;%
+    .$team
+
+filter(lag_tally, team %in% odd_parks &amp; field == &quot;home&quot;) %&gt;%
+    select(team, park) %&gt;%
+    arrange(team, park) %&gt;%
+    distinct() %&gt;%
+    as.data.frame()
+#&gt;    team  park
+#&gt; 1   CHA BAL12
+#&gt; 2   CHA CHI12
+#&gt; 3   CHN CHI11
+#&gt; 4   CHN TOK01
+#&gt; 5   CLE CLE07
+#&gt; 6   CLE CLE08
+#&gt; 7   CLE MIL06
+#&gt; 8   FLO CHI12
+#&gt; 9   FLO MIA01
+#&gt; 10  FLO SEA03
+#&gt; 11  FLO SJU01
+#&gt; 12  HOU HOU02
+#&gt; 13  HOU HOU03
+#&gt; 14  HOU MIL06
+#&gt; 15  MON MON02
+#&gt; 16  MON SJU01
+#&gt; 17  NYN NYC17
+#&gt; 18  NYN NYC20
+#&gt; 19  NYN TOK01
+#&gt; 20  OAK LAS01
+#&gt; 21  OAK OAK01
+#&gt; 22  OAK TOK01
+#&gt; 23  SDN HON01
+#&gt; 24  SDN MNT01
+#&gt; 25  SDN SAN01
+#&gt; 26  SDN SAN02
+#&gt; 27  TBA LBV01
+#&gt; 28  TBA STP01
+#&gt; 29  TBA TOK01
+#&gt; 30  TOR PHI13
+#&gt; 31  TOR SJU01
+#&gt; 32  TOR TOR02
+#&gt; 33  WAS HOU03
+#&gt; 34  WAS WAS10
+#&gt; 35  WAS WAS11</code></pre>
+<p>Within this list, we can see games played in Disney’s Wide World of Sports Complex, Hawaii, Japan, Puerto Rico, and Mexico. There are also games at a usual MLB park where the home team doesn’t match. For example, the Marlins played as the home team in Seattle <a href="https://www.baseball-reference.com/boxes/SEA/SEA201106260.shtml">because of a U2 concert</a>.</p>
+</div>
+<div id="ssas-table-s2" class="section level3">
+<h3>SSA’s Table S2</h3>
+<p>I’ll need to do a little more work to compare my lag data set with SSA’s Table S2. With the help of pandoc, I’ve converted their docx table into a more useful format.</p>
+<pre class="r"><code>(s2_wide &lt;- read_csv(&quot;../outputs/lag/song2017how-table-s2.csv&quot;) %&gt;%
+    mutate(date = ymd(date)))
+#&gt; # A tibble: 4,175 x 5
+#&gt;    date       away  home  away_lag home_lag
+#&gt;    &lt;date&gt;     &lt;chr&gt; &lt;chr&gt;    &lt;int&gt;    &lt;int&gt;
+#&gt;  1 1992-04-09 LAN   SDN          0       -3
+#&gt;  2 1992-04-09 SFN   ATL          2        1
+#&gt;  3 1992-04-10 MIL   ANA         -2        0
+#&gt;  4 1992-04-10 LAN   SDN          0       -2
+#&gt;  5 1992-04-10 TEX   MIN          2        0
+#&gt;  6 1992-04-13 ANA   TEX          2        0
+#&gt;  7 1992-04-13 LAN   HOU          2        0
+#&gt;  8 1992-04-13 OAK   KCA          2        2
+#&gt;  9 1992-04-13 SEA   CHA          2        2
+#&gt; 10 1992-04-14 SDN   SFN          0       -2
+#&gt; # ... with 4,165 more rows</code></pre>
+<p>Notice that there are many fewer rows in this data frame than in <code>lag</code>, which has 93,120 rows. One reason for this is because now each team of a game is represented on the same line. Another reason is that <code>s2_wide</code> only includes games where at least one team had a lag magnitude at or above two.</p>
+<pre class="r"><code>s2_wide %&gt;%
+    filter(abs(away_lag) &lt; 2 &amp; abs(home_lag) &lt; 2)
+#&gt; # A tibble: 0 x 5
+#&gt; # ... with 5 variables: date &lt;date&gt;, away &lt;chr&gt;, home &lt;chr&gt;,
+#&gt; #   away_lag &lt;int&gt;, home_lag &lt;int&gt;</code></pre>
+<p>I want to compare the two data sets with a join, so I need to bring their representations a bit closer. <code>s2_wide</code> doesn’t include double header information, so we can’t form a unique row key. Instead, I’ll filter out double header rows from both data sets. (This shouldn’t matter because the lags shouldn’t change across two games on the same day.)</p>
+<pre class="r"><code>(s2_cmp &lt;- s2_wide %&gt;%
+    mutate(matchup = paste0(away, &quot;@&quot;, home)) %&gt;%
+    gather(key = &quot;type_team&quot;, value = &quot;team&quot;, away, home) %&gt;%
+    gather(key = &quot;type_lag&quot;, value = &quot;lag&quot;, away_lag, home_lag) %&gt;%
+    arrange(date, matchup) %&gt;%
+    mutate(type_lag = str_replace(type_lag, &quot;_lag&quot;, &quot;&quot;)) %&gt;%
+    filter(type_team == type_lag) %&gt;%
+    select(date, team, lag, matchup))
+#&gt; # A tibble: 8,350 x 4
+#&gt;    date       team    lag matchup
+#&gt;    &lt;date&gt;     &lt;chr&gt; &lt;int&gt; &lt;chr&gt;  
+#&gt;  1 1992-04-09 LAN       0 LAN@SDN
+#&gt;  2 1992-04-09 SDN      -3 LAN@SDN
+#&gt;  3 1992-04-09 SFN       2 SFN@ATL
+#&gt;  4 1992-04-09 ATL       1 SFN@ATL
+#&gt;  5 1992-04-10 LAN       0 LAN@SDN
+#&gt;  6 1992-04-10 SDN      -2 LAN@SDN
+#&gt;  7 1992-04-10 MIL      -2 MIL@ANA
+#&gt;  8 1992-04-10 ANA       0 MIL@ANA
+#&gt;  9 1992-04-10 TEX       2 TEX@MIN
+#&gt; 10 1992-04-10 MIN       0 TEX@MIN
+#&gt; # ... with 8,340 more rows</code></pre>
+<pre class="r"><code>prepare_cmp &lt;- function(data){
+    filter(data, .data$game_id &lt; 2) %&gt;%
+        mutate(team = case_when(.data$team == &quot;CAL&quot; ~ &quot;ANA&quot;,
+                                .data$team == &quot;MON&quot; ~ &quot;WAS&quot;,
+                                TRUE ~ .data$team),
+               matchup = str_replace(.data$matchup, &quot;CAL&quot;, &quot;ANA&quot;),
+               matchup = str_replace(matchup, &quot;MON&quot;, &quot;WAS&quot;))
+}
+
+lag_cmp &lt;- prepare_cmp(lag)
+lag_ht_cmp &lt;- prepare_cmp(lag_ht)</code></pre>
+<p>Now the two tables can be joined (well, three tables because I’m using both the park-based and home-team-based lag values).</p>
+<pre class="r"><code>full &lt;- full_join(lag_cmp, s2_cmp,
+              suffix = c(&quot;&quot;, &quot;.s2&quot;),
+              by = c(&quot;date&quot; = &quot;date&quot;,
+                     &quot;team&quot; = &quot;team&quot;,
+                     &quot;matchup&quot; = &quot;matchup&quot;))
+
+full_ht &lt;- full_join(lag_ht_cmp, s2_cmp,
+                     suffix = c(&quot;&quot;, &quot;.s2&quot;),
+                     by = c(&quot;date&quot; = &quot;date&quot;,
+                            &quot;team&quot; = &quot;team&quot;,
+                            &quot;matchup&quot; = &quot;matchup&quot;))</code></pre>
+<p>All the games in Table S2 appear to be in my generated tables.</p>
+<pre class="r"><code>filter(full, is.na(lag))
+#&gt; # A tibble: 0 x 11
+#&gt; # ... with 11 variables: date &lt;date&gt;, team &lt;chr&gt;, game_tz &lt;fct&gt;,
+#&gt; #   lag &lt;int&gt;, matchup &lt;chr&gt;, tz_shift &lt;chr&gt;, days_delta &lt;int&gt;,
+#&gt; #   game_id &lt;chr&gt;, park &lt;chr&gt;, year &lt;dbl&gt;, lag.s2 &lt;int&gt;
+filter(full_ht, is.na(lag))
+#&gt; # A tibble: 0 x 11
+#&gt; # ... with 11 variables: date &lt;date&gt;, team &lt;chr&gt;, game_tz &lt;fct&gt;,
+#&gt; #   lag &lt;int&gt;, matchup &lt;chr&gt;, tz_shift &lt;chr&gt;, days_delta &lt;int&gt;,
+#&gt; #   game_id &lt;chr&gt;, park &lt;chr&gt;, year &lt;dbl&gt;, lag.s2 &lt;int&gt;</code></pre>
+<p>A few of the lag values don’t match up for the home-team-based lag values.</p>
+<pre class="r"><code>filter(full_ht, lag != lag.s2) %&gt;%
+    select(-game_id, -year)
+#&gt; # A tibble: 12 x 9
+#&gt;    date       team  game_tz   lag matchup tz_shift days_delta park  lag.s2
+#&gt;    &lt;date&gt;     &lt;chr&gt; &lt;fct&gt;   &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;  &lt;int&gt;
+#&gt;  1 2007-04-18 SDN   PT         -1 ARI@SDN 1-&gt;3              1 SAN02     -2
+#&gt;  2 2008-04-16 ANA   PT         -1 KCA@ANA 1-&gt;3              1 ANA01     -2
+#&gt;  3 2008-04-23 SDN   PT         -1 SFN@SDN 1-&gt;3              1 SAN02     -2
+#&gt;  4 2008-05-20 CHA   CT          1 CLE@CHA 3-&gt;1              2 CHI12      2
+#&gt;  5 2010-05-04 CHN   ET          0 CHN@PIT 1-&gt;0              2 PIT08      1
+#&gt;  6 2010-06-25 PHI   ET          0 PHI@TOR 0-&gt;0              1 PHI13     -2
+#&gt;  7 2010-06-25 SDN   ET          0 SDN@FLO 0-&gt;0              1 MIA01      2
+#&gt;  8 2011-06-24 MIN   CT          2 MIN@MIL 3-&gt;1              1 MIL06     -2
+#&gt;  9 2011-06-24 NYN   CT         -1 NYN@TEX 0-&gt;1              1 ARL02      2
+#&gt; 10 2011-06-25 MIL   CT          0 MIN@MIL 1-&gt;1              1 MIL06     -2
+#&gt; 11 2011-06-25 MIN   CT          1 MIN@MIL 1-&gt;1              1 MIL06     -1
+#&gt; 12 2011-06-28 FLO   PT         -2 FLO@OAK 0-&gt;3              2 OAK01      0</code></pre>
+<p>Looking at the game logs as well as baseball-reference.com, my values seem right, so that probably indicates that I’m missing a few edge cases of the lag calculation rules. One edge case that I think explains the first three of these is calculating the lag for a trip when the team starts off with a lag. For example, for the April 18, 2007, entry above, San Diego had a +1 lag when they <a href="https://www.baseball-reference.com/teams/SDP/2007-schedule-scores.shtml">traveled</a> from Chicago back to San Diego, so they ended up at -1 in my calculations instead of -2. I’m not sure what makes the most sense here, but these events are pretty rare because a team usually stays around for at least three days, which is enough to drop their lag back to zero.</p>
+<p>For most of the entries, though, I’m not spotting any obvious explanations.</p>
+<p>When I consider the park-based lags instead, there are of course additional discrepancies.</p>
+<pre class="r"><code>filter(full, lag != lag.s2) %&gt;%
+    select(-game_id, -year) %&gt;%
+    as.data.frame()
+#&gt;          date team game_tz lag matchup tz_shift days_delta  park lag.s2
+#&gt; 1  1996-08-16  SDN      CT  -1 NYN@SDN     0-&gt;1          1 MNT01     -3
+#&gt; 2  1996-08-16  NYN      CT   0 NYN@SDN     0-&gt;1          2 MNT01     -2
+#&gt; 3  1996-08-17  SDN      CT   0 NYN@SDN     1-&gt;1          1 MNT01     -2
+#&gt; 4  1996-08-17  NYN      CT   0 NYN@SDN     1-&gt;1          1 MNT01     -1
+#&gt; 5  1996-08-19  NYN      PT  -2 NYN@SFN     1-&gt;3          1 SFO02      0
+#&gt; 6  1996-08-20  NYN      PT  -1 NYN@SFN     3-&gt;3          1 SFO02      0
+#&gt; 7  1997-04-19  SDN   other  -4 SLN@SDN     0-&gt;6          3 HON01     -1
+#&gt; 8  1997-04-19  SDN   other  -4 SLN@SDN     0-&gt;6          3 HON01     -1
+#&gt; 9  1997-04-19  SLN   other  -5 SLN@SDN     0-&gt;6          2 HON01     -2
+#&gt; 10 1997-04-19  SLN   other  -5 SLN@SDN     0-&gt;6          2 HON01     -2
+#&gt; 11 2007-04-10  ANA      CT   1 ANA@CLE     3-&gt;1          2 MIL06      2
+#&gt; 12 2007-04-13  CLE      ET   1 CHA@CLE     1-&gt;0          1 CLE08      0
+#&gt; 13 2007-04-18  SDN      PT  -1 ARI@SDN     1-&gt;3          1 SAN02     -2
+#&gt; 14 2008-04-16  ANA      PT  -1 KCA@ANA     1-&gt;3          1 ANA01     -2
+#&gt; 15 2008-04-23  SDN      PT  -1 SFN@SDN     1-&gt;3          1 SAN02     -2
+#&gt; 16 2008-05-20  CHA      CT   1 CLE@CHA     3-&gt;1          2 CHI12      2
+#&gt; 17 2010-05-04  CHN      ET   0 CHN@PIT     1-&gt;0          2 PIT08      1
+#&gt; 18 2010-06-25  PHI      ET   0 PHI@TOR     0-&gt;0          1 PHI13     -2
+#&gt; 19 2010-06-25  SDN      ET   0 SDN@FLO     0-&gt;0          1 MIA01      2
+#&gt; 20 2011-06-24  MIN      CT   2 MIN@MIL     3-&gt;1          1 MIL06     -2
+#&gt; 21 2011-06-24  NYN      CT  -1 NYN@TEX     0-&gt;1          1 ARL02      2
+#&gt; 22 2011-06-25  MIL      CT   0 MIN@MIL     1-&gt;1          1 MIL06     -2
+#&gt; 23 2011-06-25  MIN      CT   1 MIN@MIL     1-&gt;1          1 MIL06     -1</code></pre>
+<p>On the other hand, when I subset my generated data set based on Table S2’s criteria, I find eight rows (four games) that aren’t in Table S2 if I use the home-team-based values.</p>
+<pre class="r"><code>full_ht %&gt;%
+    filter(is.na(lag.s2)) %&gt;%
+    group_by(date, matchup, game_id) %&gt;%
+    filter(max(abs(lag)) &gt; 1) %&gt;%
+    ungroup() %&gt;%
+    select(-lag.s2, -game_id) %&gt;%
+    as.data.frame()
+#&gt;         date team game_tz lag matchup tz_shift days_delta  park year
+#&gt; 1 2010-06-25  OAK      PT   0 PIT@OAK     3-&gt;3          2 OAK01 2010
+#&gt; 2 2010-06-25  PIT      PT  -2 PIT@OAK     1-&gt;3          1 OAK01 2010
+#&gt; 3 2010-06-25  MIL      CT   0 SEA@MIL     1-&gt;1          1 MIL06 2010
+#&gt; 4 2010-06-25  SEA      CT   2 SEA@MIL     3-&gt;1          1 MIL06 2010
+#&gt; 5 2011-06-27  SEA      PT  -3 ATL@SEA     0-&gt;3          1 SEA03 2011
+#&gt; 6 2011-06-27  ATL      PT   0 ATL@SEA     3-&gt;3          1 SEA03 2011
+#&gt; 7 2011-06-28  SEA      PT  -2 ATL@SEA     3-&gt;3          1 SEA03 2011
+#&gt; 8 2011-06-28  ATL      PT   0 ATL@SEA     3-&gt;3          1 SEA03 2011</code></pre>
+<p>The two ATL@SEA games are the result of the U2 situation described above (which was the Mariner’s previous series). My guess is that, instead of using the park IDs to get the time zone, SSA are flagging these series as problematic and filtering them out.</p>
+<p>Here are the parked-based values that aren’t in Table S2:</p>
+<pre class="r"><code>full %&gt;%
+    filter(is.na(lag.s2)) %&gt;%
+    group_by(date, matchup, game_id) %&gt;%
+    filter(max(abs(lag)) &gt; 1) %&gt;%
+    ungroup() %&gt;%
+    select(-lag.s2, -game_id) %&gt;%
+    as.data.frame()
+#&gt;          date team game_tz lag matchup tz_shift days_delta  park year
+#&gt; 1  1996-08-19  SDN      PT  -2 WAS@SDN     1-&gt;3          1 SAN01 1996
+#&gt; 2  1996-08-19  WAS      PT   0 WAS@SDN     3-&gt;3          1 SAN01 1996
+#&gt; 3  1997-04-20  SDN   other  -3 SLN@SDN     6-&gt;6          1 HON01 1997
+#&gt; 4  1997-04-20  SLN   other  -4 SLN@SDN     6-&gt;6          1 HON01 1997
+#&gt; 5  2000-04-03  SLN      CT   0 CHN@SLN     1-&gt;1          0 STL09 2000
+#&gt; 6  2000-04-03  CHN      CT   2 CHN@SLN     6-&gt;1          4 STL09 2000
+#&gt; 7  2000-04-03  NYN      ET   3 SDN@NYN     6-&gt;0          4 NYC17 2000
+#&gt; 8  2000-04-03  SDN      ET   0 SDN@NYN     0-&gt;0          0 NYC17 2000
+#&gt; 9  2010-06-25  OAK      PT   0 PIT@OAK     3-&gt;3          2 OAK01 2010
+#&gt; 10 2010-06-25  PIT      PT  -2 PIT@OAK     1-&gt;3          1 OAK01 2010
+#&gt; 11 2010-06-25  MIL      CT   0 SEA@MIL     1-&gt;1          1 MIL06 2010
+#&gt; 12 2010-06-25  SEA      CT   2 SEA@MIL     3-&gt;1          1 MIL06 2010
+#&gt; 13 2011-06-24  FLO      PT  -2 SEA@FLO     0-&gt;3          2 SEA03 2011
+#&gt; 14 2011-06-24  SEA      PT  -3 SEA@FLO     0-&gt;3          1 SEA03 2011
+#&gt; 15 2011-06-25  FLO      PT  -1 SEA@FLO     3-&gt;3          1 SEA03 2011
+#&gt; 16 2011-06-25  SEA      PT  -2 SEA@FLO     3-&gt;3          1 SEA03 2011</code></pre>
+<p>So, based on the comparisons with Table S1 and S2, I think</p>
+<ul>
+<li><p>my lag calculations pretty closely follow SSA’s definition because, using the home-team-based time zones, there is good, though not perfect, agreement between the sets.</p></li>
+<li><p>SSA didn’t use the park ID to determine the time zone.</p></li>
+</ul>
+<p>I will use my park-based lag calculations going forward.</p>
+<div id="rsession">
+<hr>
+<a href="lag-calculation-checks-session-info.txt"> R session info</a>
+</div>
+</div>
+</div>
+
+<hr>
+<div id="footer">
+  <p>
+    Text is released under the
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/">
+      CC BY-SA 4.0 </a> license.
+    Code is released under the
+    <a href="https://opensource.org/licenses/BSD-3-Clause">
+      new BSD (3-clause)</a> license.
+  </p>
+  <p>
+    <a href="https://github.com/kyleam/mlb-rundiff/">View source</a>
+  </p>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

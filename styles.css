@@ -1,0 +1,54 @@
+body {
+    font-size: 18px;
+}
+
+.footnotes {
+    font-size: 16px;
+}
+
+#footer, #rsession {
+    font-size: 14px;
+    text-align: center;
+    color: #696969;
+}
+
+a:link {
+    color: #000;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #333;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #14572F;
+}
+
+a:active {
+    color: #14572F;
+}
+
+.hljs-keyword {
+    color: #000;
+    font-weight: normal;
+}
+
+.hljs-literal {
+    color: #219451;
+}
+
+.hljs-number {
+    color: #219451;
+
+}
+
+.hljs-comment {
+    color: #998;
+    font-style: normal;
+}
+
+.hljs-string {
+    color: #14572F;
+}

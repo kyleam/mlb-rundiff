@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>MLB run differentials and jet lag</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">MLB run differentials and jet lag</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#jet-lag-calculations">Jet lag calculations</a></li>
+<li><a href="#model-of-baseball-run-differentials">Model of baseball run differentials</a></li>
+<li><a href="#run-differentials">Run differentials</a></li>
+<li><a href="#parameter-estimates-for-1992-through-2011">Parameter estimates for 1992 through 2011</a><ul>
+<li><a href="#a-league-of-clones">A league of clones</a></li>
+<li><a href="#posterior-predictive-intervals">Posterior predictive intervals</a></li>
+<li><a href="#park-parameters">Park parameters</a></li>
+<li><a href="#ability-parameters">Ability parameters</a></li>
+<li><a href="#home-field-advantage">Home-field advantage</a></li>
+<li><a href="#jet-lag">Jet lag</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p>Andrew Gelman <a href="http://andrewgelman.com/2017/08/04/hadnt-jet-lag-junior-certainly-wouldve-banged-756-hrs-career/">posted</a> about <a href="http://dx.doi.org/10.1073/pnas.1608847114">an analysis</a> of MLB game logs that looked at the association of jet lag with various performance metrics. My goal here is to focus on a single metric—run differential—and reframe this problem in a way that’s motivated by a <a href="http://andrewgelman.com/2014/07/13/stan-analyzes-world-cup-data/">few</a> <a href="http://andrewgelman.com/2014/07/15/stan-world-cup-update/">earlier</a> <a href="http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/">posts</a> by Gelman.</p>
+<p>First, here’s a brief description of what Song, Severini, and Allada (“SSA”), the authors of the jet lag analysis, did. The association between jet lag and performance metrics has been analyzed using data from various sports<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. In terms of MLB data, there seem to be two relevant previous analyses: <a href="http://dx.doi.org/10.1038/377583a0">one</a> by Recht, Lew, and Schwartz and <a href="https://doi.org/10.1123/ijspp.4.3.394">another</a> by Winter and friends. In their 1995 correspondence with <em>Nature</em>, Recht et al. argued for the negative consequences of an away team’s eastward travel by analyzing three MLB seasons in terms of win percentages, linear regression on the run difference between the home and away teams, and logistic regression on the probability of a home win. The Winter et al. study looked at ten years of MLB data and did … well, I don’t know because I don’t have access to the article and couldn’t find a PDF online. Anyway, SSA expanded on these previous studies by considering 20 MLB seasons and by examining many performance metrics.</p>
+<p>SSA defined a team’s jet lag based on the number of time zones a team crossed, adjusted by the number of days off. If the Mariners traveled from the west coast to play the Yankees without a day of rest, they would play the first game with a lag of three. This lag value is assumed to decay by one unit per day.</p>
+<p>From these lag values, SSA constructed binary predictors, classifying a team with a value of two or more as having jet lag. In total there were four lag predictors based on two dimensions: (1) home or away and (2) direction of travel, eastward or westward. For each aggregate<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> measure of interest, such as winning percentage or batting average, SSA ran a linear regression with these lag predictors as well as categorical predictors indicating the home team and away team.</p>
+<div id="jet-lag-calculations" class="section level2">
+<h2>Jet lag calculations</h2>
+<p>I’ve calculated <a href="log-with-lags-cleaned.csv.gz">jet lag values</a> from <a href="http://www.retrosheet.org/">Retrosheet’s game logs</a> for 1992 through 2011, the same year range that SSA considered. My lag values largely match SSA’s values, but there are <a href="lag-calculation-checks.html">some differences</a>.</p>
+<p>To visualize these lag values, let’s focus on Seattle’s 2001 season. (Click through for a larger image where you can more clearly make out the vertical lines for each day.)</p>
+<p><img src="index_files/figure-html/lag-plot-1.png" width="97%" style="display: block; margin: auto;" /></p>
+<p>They opened the season with a three-game series at home and then traveled for a series against Texas, with one day off between series. For the first game against the Rangers, their lag was 1: +2 for PT→CT, -1 for the day off between series. The rest of that series, they are back at a lag of 0. Note that they never reached +3 for PT→ET trips because they always had a travel day. For some of their trips back to the west coast, however, they reached -3 because they didn’t have an off day.</p>
+<p>To construct the binary jet lag predictor for eastward travel, any game at +2 or above is coded as 1 and all other games are 0. Likewise, any game at or below -2 is coded as 1 for the westward predictor. Here’s how these predictors are distributed across teams and seasons.</p>
+<p><img src="index_files/figure-html/lag_counts_plot-1.png" width="90%" style="display: block; margin: auto;" /></p>
+<p>Unsurprisingly, teams’ records in the small subset of lag games they played are all over the place compared to their records in the non-lag games (thick gray lines below).</p>
+<p><img src="index_files/figure-html/wperc_plot-1.png" width="95%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="model-of-baseball-run-differentials" class="section level2">
+<h2>Model of baseball run differentials</h2>
+<p>Gelman has <a href="http://andrewgelman.com/2014/07/13/stan-analyzes-world-cup-data/">a</a> <a href="http://andrewgelman.com/2014/07/15/stan-world-cup-update/">few</a> <a href="http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/">posts</a> about estimating the abilities of soccer teams using goal differentials. I wanted to take a similar approach to estimate the association of jet lag with run differentials. Here’s what I’ve come up with. (This was built up from simpler models. See the Stan files in the <a href="https://github.com/kyleam/mlb-rundiff/tree/master/code/models">“models” directory</a>, as well as <a href="rundiff-oneseason-2011.html">these</a> <a href="rundiff-split-2011.html">descriptions</a>.)</p>
+<p>There are <span class="math inline">\(K\)</span> teams, and the total number of games played by a team is split into <span class="math inline">\(J\)</span> periods. For the <span class="math inline">\(i\)</span>th game, the home team is denoted as <span class="math inline">\(k[i]\)</span> and its period as <span class="math inline">\(j[i]\)</span>, and the away team is denoted as <span class="math inline">\(k^*[i]\)</span> and its period as <span class="math inline">\(j^*[i]\)</span>. Each team corresponds to a team in a given year<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, and periods are formed by splitting the season into <span class="math inline">\(J\)</span> parts. As an example, across two seasons with 30 teams and six periods, there would be 60 teams and a total of 360 periods. Finally, these games are played in <span class="math inline">\(M\)</span> parks.</p>
+<p><span class="math inline">\(y_i\)</span>, the difference between the runs scored by the home and away teams in the <span class="math inline">\(i\)</span>th game, is modeled as</p>
+<p><span class="math display">\[
+y_i \sim t_{\nu}(\mu^{\text{home}}_{j[i],k[i]} -
+\mu^{\text{away}}_{j^*[i],k^*[i]},
+\sigma^y_{m[i]}).
+\]</span></p>
+<p><span class="math inline">\(\nu\)</span> is the t-distribution’s degrees of freedom and is estimated from the data. I’ve assigned <span class="math inline">\(\nu\)</span> a prior of <span class="math inline">\(\text{Gamma}(2, 0.1)\)</span> following what Milad Kharratzadeh did in <a href="http://andrewgelman.com/2017/05/17/using-stan-week-week-updating-estimated-soccer-team-abilites/">his</a> <a href="https://github.com/milkha/EPL">analysis</a> of the English Premier League, who in turn was following the <a href="http://dx.doi.org/10.1198/jbes.2009.07145">recommendation of Juarez and Steel</a>.</p>
+<p>The scale parameter <span class="math inline">\(\sigma^y_m\)</span> is a little more interesting because it varies across parks:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\sigma^y_m &amp;\sim \text{N}^{+}(\mu^y, \tau),\; m \in \{1,\ldots,M\},\\
+\mu^y &amp;\sim \text{N}(0, 5),\\
+\tau &amp;\sim \text{N}^{+}(0, 3).
+\end{aligned}
+\]</span></p>
+<p>This should allow, for example, hitter-friendly parks to have more lopsided run differentials. With these priors (and the rest of the priors I’ll introduce), I’m aiming to be weakly informative. I don’t expect <span class="math inline">\(\sigma^y_m\)</span> to reach, say, ten because that would make unrealistically high run differentials likely.</p>
+<p>The t-distribution’s location parameter is the most interesting part of the model. If <span class="math inline">\(\mu^{\text{home}}\)</span> is greater than <span class="math inline">\(\mu^{\text{away}}\)</span>, the outcome favors the home team. The home team’s parameter is defined as</p>
+<p><span class="math display">\[
+\mu^{\text{home}}_{j[i],k[i]} = \alpha_{j[i],k[i]} +
+\gamma_{l[i]} +
+x_{i,1} \beta^{\text{west}} +
+x_{i,2} \beta^{\text{east}} +
+\delta
+\]</span></p>
+<p>where</p>
+<ul>
+<li><p><span class="math inline">\(\alpha_{jk}\)</span> is the “ability” of a the <span class="math inline">\(k\)</span>th team in the <span class="math inline">\(j\)</span>th period.</p></li>
+<li><p><span class="math inline">\(\gamma_l\)</span> the ability of the <span class="math inline">\(l\)</span>th starting pitcher.</p></li>
+<li><p>the <span class="math inline">\(\beta\)</span> coefficients are for the westward and eastward jet lag predictors. The binary predictor <span class="math inline">\(x_{i,1}\)</span> is 1 if the home team had a westward jet lag value of at least two for the <span class="math inline">\(i\)</span>th game.</p></li>
+<li><p><span class="math inline">\(\delta\)</span> is the home-field effect.</p></li>
+</ul>
+<p>The away team’s location parameter follows a similar pattern, dropping <span class="math inline">\(\delta\)</span>:</p>
+<p><span class="math display">\[
+\mu^{\text{away}}_{j^*[i],k^*[i]} =
+\alpha_{j^*[i],k^*[i]} +
+\gamma_{l^*[i]} +
+x_{i,3} \beta^{\text{west}} +
+x_{i,4} \beta^{\text{east}}.
+\]</span></p>
+<p>Note that the home and away teams share the same lag coefficients. Both Recht et al. and SSA split by home and away here (for four coefficients total), but I don’t understand the motivation for this. Why should there be a distinction between a west coast team traveling to the east coast and an east coast team returning to the east coast? Perhaps the idea is that sleeping in your own bed or home cooking or something like that could lessen the severity of jet lag, in which case an interaction could be added.</p>
+<p>The abilities of team <span class="math inline">\(k\)</span> share a common mean and standard deviation across <span class="math inline">\(J\)</span> periods:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\alpha_{j,k} &amp;\sim \text{N}(\theta_k, \sigma^{\alpha}),\\
+\sigma^{\alpha} &amp;\sim \text{N}^{+}(0, 2).
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(\theta\)</span> is based on a prior score <span class="math inline">\(z_k\)</span> for each team:</p>
+<p><span class="math display">\[
+\begin{align}
+\theta_k &amp;\sim \text{N}(z_k \omega, \sigma^{\theta}),\;
+k \in \{1,\ldots,K\},\\
+\omega &amp;\sim \text{N}(0, 2),\\
+\sigma^{\theta} &amp;\sim \text{N}^{+}(0, 2).
+\end{align}
+\]</span></p>
+<p>For these scores, I’m using the win tallies for each team in the previous season, scaled to range from -1 to 1. Given that <span class="math inline">\(\theta_k\)</span> is estimated across an entire season, the prior scores may not have have much of an influence on <span class="math inline">\(\theta_k\)</span>, in which case <span class="math inline">\(z_k \omega\)</span> could be replaced with zero.</p>
+<p>The contribution of the starting pitchers is modeled as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\gamma_l &amp;\sim \text{N}(0, \sigma^{\gamma}),\;
+l \in \{1,\ldots,L\},\\
+\sigma^{\gamma} &amp;\sim \text{N}^{+}(0, 2).
+\end{aligned}
+\]</span></p>
+<p>Unlike teams, where each season spawns a new set of teams, pitcher <span class="math inline">\(l\)</span> spans seasons and isn’t tied to any one team.</p>
+<p>Finally, the home-field and lag parameters are assigned a prior of <span class="math inline">\(\text{N}(0, 2)\)</span>.</p>
+<p>Conceptually, I think there are some things to like about this model.</p>
+<ul>
+<li><p>Modeling run differentials rather than win probability should make better use of the data.</p></li>
+<li><p>The scale for the run differentials is allowed to vary among parks, which seems like a valuable feature given the <a href="https://visual.ly/community/infographic/sports/baseballs-many-physical-dimensions">variation in park dimensions</a>.</p></li>
+<li><p>The abilities of the starting pitchers aren’t diluted by the team’s overall ability.</p></li>
+</ul>
+<p>And a few things bother me (and probably many other things should).</p>
+<ul>
+<li><p>Teams aren’t modeled hierarchically across seasons. The Astros in 2011 are treated as a different team than the Astros in 2010. There is some connection from year to year in that the records from the previous season are used to calculate the prior scores for the current season. Also, the starting pitcher parameters are shared across seasons.</p></li>
+<li><p>This isn’t a generative model. A discrete response is modeled as continuous. <a href="http://andrewgelman.com/2014/07/13/stan-analyzes-world-cup-data/">One of Gelman’s post</a> discusses this a bit.</p></li>
+</ul>
+</div>
+<div id="run-differentials" class="section level2">
+<h2>Run differentials</h2>
+<p>Run differentials look fairly consistent across the 20 season span.</p>
+<p><img src="index_files/figure-html/rundiff_obs_hist-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>The bulk of the games have scores within the -10 to 10 range, and as expected the tails show much more variation between seasons. The largest magnitude for a score differential in this set is 27 in 2007.</p>
+<p>The horizontal guide lines mark the expected number of games given the number of teams that were in the league that season. 1994 and 1995 fall short due to the strike. The curve of some seasons have a blip in their underside as they cross zero (e.g., 2001, 2002, …), which is caused by ties. Another, more subtle pattern is the that the lines are longer from 0 to 1 than they are from -1 to 0. I’ll come back to this in the home-field advantage section below.</p>
+</div>
+<div id="parameter-estimates-for-1992-through-2011" class="section level2">
+<h2>Parameter estimates for 1992 through 2011</h2>
+<p>I’ve fit the above model (<a href="https://github.com/kyleam/mlb-rundiff/tree/master/code/models/rundiff-lagwe.stan">Stan file</a>) using games from 1992 through 2011. When preparing the data, I’ve chosen to split the season into six periods (27 games per period for a 162 game season). I haven’t taken the time to compare different period sizes, but I hope that’s a good window size for catching the variability in a team’s ability across a season.</p>
+<p>Clicking through ShinyStan’s interface, most diagnostic plots and metrics look OK. In terms of MCMC effective sample size, <span class="math inline">\(\sigma^{\alpha}\)</span> and the log posterior are both on the low end, with with ∼200–300 effective samples out of four thousand draws. I originally wanted to add an additional level with each team having a <span class="math inline">\(\sigma^{\alpha}\)</span>, but the hyperparameter for these also had a similarly low number of effective samples. I might be overlooking obvious changes to the model that would improve these measures.</p>
+<div id="a-league-of-clones" class="section level3">
+<h3>A league of clones</h3>
+<p>Before looking at the posterior predictive intervals or parameter estimates, let’s get a sense for how uncertain the model thinks the outcome of a game is when we assume that we know all the parameters. To generate the plot below, I’ve set the t-distribution’s location to zero (i.e., identical teams in terms of ability, lag, home-field advantage, and pitchers) and fixed <span class="math inline">\(\nu\)</span> and <span class="math inline">\(\sigma^y\)</span> at their mean values. Each of the 50 lines corresponds to a group of 162 games.</p>
+<p><img src="index_files/figure-html/sim_fixed_hist-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>The peak around zero deviates from the pattern of real score differentials. Only rarely are baseball games recorded as a tie, while the model will happily produce score differentials near zero for equally matched teams. I’m deciding a win or loss by taking the sign of the score differential, so that will always declare a winner, but it also doesn’t allow for the rare tie.</p>
+<p>Translating run differentials for each “season” into wins gives the following distribution.</p>
+<p><img src="index_files/figure-html/sim_fixed_wins_hist-1.png" width="35%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="posterior-predictive-intervals" class="section level3">
+<h3>Posterior predictive intervals</h3>
+<p>Next let’s see how the observed data look compared to the posterior predictive intervals. The data set consists of over 40,000 games. The below plot selects 40 random games from six seasons. The bounds of the intervals are rounded so that they extend to the nearest integer.</p>
+<p><img src="index_files/figure-html/sim_rgames_plot-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>Those intervals are pretty wide. I don’t think I can expect more narrow ones given the variation present in the identical ability simulation above. If I look across all the games in the data set, the observed run differentials are within the 95% predicted intervals 95% of the time (96% if I round the bounds), so the model at least seems calibrated.</p>
+<!-- file: ../outputs/models/rundiff-lagwe_1992-2011-sim-cov.dat -->
+<p>Converting the simulated run differentials into wins, the model appears to give reasonable though wide estimates for a team’s record.</p>
+<p><img src="index_files/figure-html/sim_wins_plot-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>In addition to the observed number of wins, I’ve included a line for the <a href="https://www.sports-reference.com/blog/baseball-reference-faqs/">pythagorean wins</a>, where the pythagorean win percentage is calculated solely based on the runs scored (S) and runs allowed (A): <span class="math inline">\(\text{S}^{1.83} / (\text{S}^{1.83} + \text{A}^{1.83})\)</span>.</p>
+<p>While reading about pythagorean wins, I came across <a href="http://www.fangraphs.com/library/team-record-pythagorean-record-and-base-runs/">a FanGraphs article</a> that provides the motivation for their <a href="http://www.fangraphs.com/library/features/baseruns/">Base Runs</a> statistic. Essentially, just as run differentials give more information about a team’s ability than their record does, they argue that using the underlying offensive metrics gives more information than run differentials do. It might be interesting to explore moving this model in that direction.</p>
+<p>For now, though, it seems like the model is behaving well enough that it’s worth examining its parameter estimates, including those for the jet lag coefficients.</p>
+</div>
+<div id="park-parameters" class="section level3">
+<h3>Park parameters</h3>
+<p>The t-distribution’s scale parameter varies across parks. The relationship between how offensive friendly a park is and the scale parameter isn’t that clear cut because the response is run differentials rather than total runs. The increased offense from both sides might just cancel out. But, given that lopsided games are not a rare event, I’d expect that parks that are more conducive to run scoring would tend to have larger scale parameters. Let’s see.</p>
+<p><img src="index_files/figure-html/park_eff_2011_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+<p>The Colorado parks filling the top two spots fit that expectation. Petco being near the bottom also fits. I thought that Safeco would be a bit lower than it is, and I didn’t expect to see Dodger Stadium at the bottom. For the most part, I don’t know which parks are hitter friendly. I tried getting an idea by flipping through <a href="http://www.espn.com/mlb/stats/parkfactor">park factor rankings</a> for different years. That helped a little, but those rankings, which are based on teams’ home and away splits in runs scored, vary lot from year to year.</p>
+</div>
+<div id="ability-parameters" class="section level3">
+<h3>Ability parameters</h3>
+<p>The t-distribution’s location parameter incorporates an ability estimate for each team. Within a season, team <span class="math inline">\(k\)</span>’s ability varies across periods with a common mean <span class="math inline">\(\theta_k\)</span>.</p>
+<p><img src="index_files/figure-html/team_eff_plot-1.png" width="95%" style="display: block; margin: auto;" /></p>
+<p>In addition to the overall team abilities, we have an estimate of each starting pitcher’s ability. Because pitchers don’t often pitch complete games, the run differential for a good pitching performance can be bad if the bullpen screws things up, but a consistently bad bullpen should be reflected in the team’s ability, so this should usually even out in the log run. Sorting the mean estimates for <span class="math inline">\(\gamma\)</span>, the top pitchers look good<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>, and the bottom pitchers don’t look great (at least in the data set’s year range; e.g., Greg Harris seems to have had a good career, but we’re just catching the less-than-stellar tail end of it).</p>
+<p><img src="index_files/figure-html/bw_pitch_plot-1.png" width="70%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="home-field-advantage" class="section level3">
+<h3>Home-field advantage</h3>
+<p><a href="http://www.fangraphs.com/blogs/home-field-advantage-and-our-new-game-odds/">This FanGraphs article</a> tells me that “the home team has historically won only about 54% of the time.” (That “only” is in reference to other sports; apparently it’s around 60% in the NBA.) If I tally up the home team wins for the 1992–2011 year range, I get a similar number.</p>
+<p>I was hoping that my estimate of the home-field advantage would agree.</p>
+<p><img src="index_files/figure-html/delta_dens-1.png" width="60%" style="display: block; margin: auto;" /></p>
+<p>But that’s not the case. The plot on the right shows the win probability for identically matched teams (i.e., the t-distribution parameter is set to <span class="math inline">\(\delta\)</span>), using posterior draws for Wrigley Field’s middle-of-the-pack scale parameter. The estimate is short by more than 2 percentage points. If I strip the model of all location predictors except for <span class="math inline">\(\delta\)</span>, the estimate remains low.</p>
+<p>What’s happening here, I think, is that the home team wins a disproportionate number of close games. This can be seen in run differentials plot above, but it comes out a bit clearer in the below plot.</p>
+<p><img src="index_files/figure-html/rundiff_freq_poly-1.png" width="80%" style="display: block; margin: auto;" /></p>
+<p>The peak at +1 is consistently taller than the one at -1, but I’m modeling the run differentials with a symmetric distribution.</p>
+</div>
+<div id="jet-lag" class="section level3">
+<h3>Jet lag</h3>
+<p>And finally, the jet lag predictors. Like before, the win probabilities are calculated with the predictor of interest as the sole location parameter and with Wrigley Field’s scale parameter.</p>
+<p><img src="index_files/figure-html/bs_plot-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p><img src="index_files/figure-html/bs_probs_plot-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>The home-field effect estimate is much more certain than the estimates for either of the lag coefficients, which is unsurprisingly given that every game has a home team<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>. The extreme ends of the lag estimates extend to a greater magnitude than the home-field estimate does, but, as I discussed above, I think the home-field effect is being underestimated. A value of 0.4 would not be unreasonable given the 54% empirical rate. But then again, the lag magnitudes might be underestimated for a similar reason (i.e., the non-lagged team wins a disproportionate amount of games by a small margin). I don’t know.</p>
+<p>Around 85% of the posterior draws for the eastward coefficient are below -0.1, which maps to around a 49% win rate for a lagged team versus an otherwise identical team. The eastward estimate is shifted to the left of the westward estimate in the plot above, but the estimate of the shift itself covers a wide range of values.</p>
+<p><img src="index_files/figure-html/ew_diff_plot-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>To guess at an upper bound for the effects of jet lag on a team’s success, let’s assume (1) that the model is giving estimates somewhere in the right range, (2) that the 1992–2011 range is representative of other possible year ranges, (3) that the lag predictor is providing a meaningful representation of a team’s collective jet lag, and (4) that jet lag causes the observed decrease in run differentials and there a no other confounders to adjust for. In that case, I’d guess that at most being jet lagged decreases a team’s win probability by five percentage points. This is based on the lower tail of the eastward coefficient estimate and setting the other t-distribution location predictors (team abilities, pitchers, home-field advantage) to zero. For any given game, the effect of lag, like home-field advantage, would usually be swamped by other factors, but it could add up in the long run. The “long run” is shorter in the case of home-field advantage because that it is a part of every game, while a team having lag, at least by the definition used here, occurs in fewer than ten percent of the games. The number of lag games and direction is unevenly distributed among teams, so if each season some teams are losing a couple of more games than others due to lag, that could make a difference over many seasons.</p>
+<p>That’s making a lot of assumptions, though. And again, the estimates are wide, and I don’t place much confidence in the magnitude of the lag predictor coefficients given the underestimation of home-field advantage.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>This is entirely based on what I gather from their paper. I know little about sports and even less about research on jet lag.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>I’m not clear on what the grouping was. My guess is by team, year, home or away, and lag type (none or one of their four categories).<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>The model doesn’t specify that a team label corresponds to a team within a single season, but this is how I’m structuring the data.<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>OK, I don’t know enough about baseball to recognize all their names, but their Baseball Reference pages look good.<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>In the sense that a team is labeled as “home” in every game. A small number of games are played outside of either team’s regular park or with a team playing as the visitor in their own park.<a href="#fnref5">↩</a></p></li>
+</ol>
+</div>
+
+<hr>
+<div id="footer">
+  <p>
+    Text is released under the
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/">
+      CC BY-SA 4.0 </a> license.
+    Code is released under the
+    <a href="https://opensource.org/licenses/BSD-3-Clause">
+      new BSD (3-clause)</a> license.
+  </p>
+  <p>
+    <a href="https://github.com/kyleam/mlb-rundiff/">View source</a>
+  </p>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
