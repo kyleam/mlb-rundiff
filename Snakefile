@@ -297,6 +297,11 @@ rule docs_copy_rundiff_split_model:
     output: "docs/rundiff-split.stan"
     shell: "cp {input} {output}"
 
+rule docs_copy_lag_data:
+    input: "outputs/lag/log-with-lags-cleaned.csv"
+    output: "docs/log-with-lags-cleaned.csv.gz"
+    shell: "gzip -c {input} > {output}"
+
 rule docs_render_site:
     input: docs_site_input, glob("docs/*.Rmd"), glob("docs/*.md")
     output: "site/index.html"

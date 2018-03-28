@@ -73,10 +73,10 @@ team.
 
 ## Jet lag calculations
 
-I've calculated jet lag values from [Retrosheet's game logs][rgl] for
-1992 through 2011, the same year range that SSA considered.  My lag
-values largely match SSA's values, but there are [some
-differences][lag-checks].
+I've calculated [jet lag values][lag-data] from [Retrosheet's game
+logs][rgl] for 1992 through 2011, the same year range that SSA
+considered.  My lag values largely match SSA's values, but there are
+[some differences][lag-checks].
 
 ```{r clean_team_name}
 clean_team_name <- function(x){
@@ -987,6 +987,7 @@ advantage.
 [fgp]: http://www.fangraphs.com/library/team-record-pythagorean-record-and-base-runs/
 [js]: http://dx.doi.org/10.1198/jbes.2009.07145
 [lag-checks]: lag-calculation-checks.html
+[lag-data]: log-with-lags-cleaned.csv.gz
 [mdir]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models
 [mka]: https://github.com/milkha/EPL
 [model]: https://github.com/kyleam/mlb-rundiff/tree/master/code/models/rundiff-lagwe.stan

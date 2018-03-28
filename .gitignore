@@ -17,5 +17,6 @@ __pycache__
 !/outputs/lag/log-with-lags-cleaned.csv
 
 /docs/_song2017how-table-s1.md
+/docs/*.gz
 /docs/*-session-info.txt
 /docs/*.stan
